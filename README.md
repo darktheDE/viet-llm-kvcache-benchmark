@@ -10,6 +10,9 @@ This project is conducted as the final group research project for the course **B
 
 ---
 
+> [!IMPORTANT]
+> **Developer Quick Start:** Please read the **[Development Guideline](development.md)** before writing code, creating branches, or submitting Pull Requests.
+
 ## Table of Contents
 - [Project Overview](#-project-overview)
 - [Research Questions](#-research-questions)
