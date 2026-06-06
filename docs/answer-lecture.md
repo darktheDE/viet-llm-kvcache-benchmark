@@ -1,10 +1,9 @@
-# ANSWER LECTURE
-
-### 1. Giải quyết vấn đề Phần cứng & Chi phí (Lo ngại lớn nhất của nhóm)
+### 1. Giải quyết vấn đề Phần cứng & Chi phí
 
 *   **Ý kiến của thầy & nhóm:** *"Vấn đề về phần cứng để triển khai training model và áp dụng turboquant... Không biết server của Việt Anh chạy nổi không... Chạy CPU hay GPU?"*
 *   **Định hướng kỹ thuật thực tế:**
-    *   **Lưu ý quan trọng:** **Nhóm không cần phải tiến hành huấn luyện (Training) hay tinh chỉnh (Fine-tuning) lại mô hình.** TurboQuant, HQQ, hay PolarQuant đều là các kỹ thuật **Post-Training Quantization (PTQ)** [2]. Quy trình này chỉ thực hiện nén trực tiếp trên trọng số hoặc KV cache của mô hình đã có sẵn khi chạy suy luận (Inference) [1, 2]. Do đó, **chi phí tính toán gần như bằng 0 so với việc training.**
+    *   **Lưu ý quan trọng:** **Nhóm không cần phải tiến hành huấn luyện (Training) hay tinh chỉnh (Fine-tuning) lại mô hình.** TurboQuant, HQQ, hay PolarQuant đều là các kỹ thuật **Post-Training Quantization (PTQ)**. Quy trình này chỉ thực hiện nén trực tiếp trên KV cache hoặc trọng số của mô hình đã có sẵn khi chạy suy luận (Inference). Do đó, **chi phí tính toán gần như bằng 0 so với việc training.**
+    *   **Tích hợp kernel & Trọng số:** Trọng số của mô hình được giữ nguyên ở định dạng gốc 16-bit (BF16/FP16), trọng tâm nghiên cứu duy nhất là lượng tử hóa và nén KV cache, không nén trọng số. Các thuật toán nén KV cache (FP8, PolarQuant, TurboQuant) được tích hợp trực tiếp vào inference engine thông qua thư viện và nhân (kernels) CUDA/Triton có sẵn, nhóm không cần tự lập trình hay viết lại các kernel này từ đầu.
     *   **Yêu cầu về máy chủ (Server):** Vì vLLM và TurboQuant sử dụng các nhân tính toán (kernels) viết bằng Triton/CUDA tối ưu cho GPU, **hệ thống bắt buộc phải chạy trên GPU NVIDIA** (kiến trúc Ampere hoặc Ada Lovelace trở lên như RTX 30/40 series, A10, L4, A100). Nếu server của Việt Anh chỉ chạy chủ yếu bằng CPU, hệ thống vLLM sẽ không thể khởi chạy hoặc không đạt hiệu năng thực tế.
     *   **Giải pháp tối ưu chi phí:** Nhóm không cần mua phần cứng vật lý hay đầu tư server đắt đỏ. Bạn có thể hướng dẫn team Technical thuê GPU đám mây (Cloud GPU) trên các nền tảng như **Vast.ai, RunPod, hoặc Lambda Labs**.
         *   Thuê 1 GPU RTX 3090 hoặc RTX 4090 (24GB VRAM - hoàn toàn đủ để chạy các mô hình 7B-8B với context 16k-32k) chỉ mất khoảng **$0.20 - $0.40 / giờ** (khoảng 5.000 - 10.000 VNĐ/giờ).
@@ -12,7 +11,7 @@
 
 ---
 
-### 2. Liệt kê các Metrics cụ thể cần đo đạc (Đáp ứng yêu cầu Q1)
+### 2. Liệt kê các Metrics cụ thể cần đo đạc
 
 Để bài báo khoa học của nhóm đạt tiêu chuẩn cao (hướng tới phân khúc Q1 như thầy mong đợi), các chỉ số đo đạc cần được phân rã chi tiết và chuẩn hóa theo đúng quy chuẩn nghiên cứu hệ thống (System Research) thay vì chỉ liệt kê chung chung:
 
@@ -50,11 +49,11 @@ Thầy yêu cầu tìm kiếm các mô hình đã được kiểm chứng hoạt
 Để bài báo có tính thuyết phục cao đối với các phản biện (reviewers) của tạp chí lớn, nhóm nên đi theo cấu trúc mạch lập luận (Storyline) sau:
 
 *   **Đặt vấn đề (Introduction):** Việc xử lý ngữ cảnh dài bằng LLM tiếng Việt đang bị nghẽn nghiêm trọng ở bộ nhớ KV cache, đặc biệt trên các phần cứng biên/phổ thông của doanh nghiệp nhỏ.
-*   **Khoảng trống nghiên cứu (Research Gap):** Các phương pháp nén tiên tiến (như TurboQuant) được quảng cáo là giữ nguyên chất lượng trên tiếng Anh, nhưng tiếng Việt là ngôn ngữ đơn âm tiết có dấu, cấu trúc token hóa (byte-level BPE) rất khác biệt. Chưa có công trình nào đánh giá sự suy giảm chất lượng này một cách hệ thống trên tiếng Việt.
+*   **Khoảng trống nghiên cứu (Research Gap):** Các phương pháp nén tiên tiến (như TurboQuant) được quảng cáo là giữ nguyên chất lượng trên tiếng Anh, nhưng tiếng Việt là ngôn ngữ đơn âm tiết có dấu, cấu trúc token hóa (byte-level BPE) rất khác biệt. Chưa có nhiều công trình đánh giá sự suy giảm chất lượng này một cách hệ thống trên tiếng Việt.
 *   **Đóng góp (Contributions):**
     1.  Xây dựng bộ benchmark thực nghiệm đầu tiên đánh giá TurboQuant và các baseline nén KV cache trên các LLM tiếng Việt phổ biến.
-    2.  Chỉ ra ranh giới Pareto tối ưu (đường cong đánh đổi giữa dung lượng bộ nhớ tiết kiệm được và độ suy giảm chất lượng ngôn ngữ thực tế) [1].
-    3.  Đưa ra khuyến nghị cấu hình nén tối ưu (ví dụ: dùng mốc bit nào, phương pháp nào) cho doanh nghiệp khi triển khai LLM tiếng Việt trong thực tế [1].
+    2.  Chỉ ra ranh giới Pareto tối ưu (đường cong đánh đổi giữa dung lượng bộ nhớ tiết kiệm được và độ suy giảm chất lượng ngôn ngữ thực tế).
+    3.  Đưa ra khuyến nghị cấu hình nén tối ưu (ví dụ: dùng mốc bit nào, phương pháp nào) cho doanh nghiệp khi triển khai LLM tiếng Việt trong thực tế.
 
 ---
 
@@ -64,4 +63,4 @@ Với vai trò PM, bạn có thể tạo ngay các task sau lên hệ thống đ
 
 1.  **Task cho Việt Anh (Hạ tầng):** Tìm hiểu cách đăng ký tài khoản và khởi tạo một GPU RTX 4090/3090 trên RunPod hoặc Vast.ai, nạp trước thử $5 - $10 (khoảng 125k - 250k VNĐ) để làm quỹ chạy thử nghiệm.
 2.  **Task cho Minh Quân (Tech):** Cài đặt môi trường vLLM trên GPU đám mây vừa tạo và chạy thử nghiệm đo TTFT/ITL với mô hình `PhoGPT-7B5-Instruct` sử dụng tham số `--kv-cache-dtype FP8` (chạy thử baseline trước).
-3.  **Task cho Quốc Anh (Research):** Soạn thảo phần đề cương chi tiết của bài báo (Draft Paper Outline) theo mạch lập luận đã thống nhất phía trên [2].
+3.  **Task cho Quốc Anh (Research):** Soạn thảo phần đề cương chi tiết của bài báo (Draft Paper Outline) theo mạch lập luận đã thống nhất phía trên.

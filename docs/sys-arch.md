@@ -47,26 +47,26 @@ Hệ thống benchmark được chia làm **4 tầng chức năng chính** hoạ
 ## CHI TIẾT CÁC TẦNG CHỨC NĂNG (COMPONENT DETAILS)
 
 ### 1. Tầng 1: Tiền xử lý & Đóng gói dữ liệu (Data Ingestion & Preparation Layer)
-Nhiệm vụ chính là lọc sạch và phân mảnh dữ liệu ngữ cảnh dài để đảm bảo việc đo đạc công bằng [1]:
-*   **NVIDIA NeMo Curator Pipeline:** Thực hiện lọc trùng lặp (deduplication), chuẩn hóa bảng mã Unicode tiếng Việt, loại bỏ nhiễu và văn bản lỗi từ các nguồn dữ liệu thô (VMLU, VTSNLP, ViNews) [1].
+Nhiệm vụ chính là lọc sạch và phân mảnh dữ liệu ngữ cảnh dài để đảm bảo việc đo đạc công bằng:
+*   **NVIDIA NeMo Curator Pipeline:** Thực hiện lọc trùng lặp (deduplication), chuẩn hóa bảng mã Unicode tiếng Việt, loại bỏ nhiễu và văn bản lỗi từ các nguồn dữ liệu thô (VMLU, VTSNLP, ViNews).
 *   **Context Bucketizer (Phân nhóm độ dài):** Phân bổ dữ liệu đầu vào thành các nhóm ngữ cảnh (Buckets) mục tiêu: **4,000, 8,000, 16,000, và 32,000 tokens** để kiểm tra giới hạn nén.
-*   **Standardized Formatter:** Đóng gói dữ liệu thành tệp tin cấu trúc `datasets/test_set_small.json` chứa thông tin định tuyến (QA, Summarization, Retrieval) [1].
+*   **Standardized Formatter:** Đóng gói dữ liệu thành tệp tin cấu trúc `datasets/test_set_small.json` chứa thông tin định tuyến (QA, Summarization, Retrieval).
 
 ### 2. Tầng 2: Thực thi suy luận & Lõi nén (LLM Serving & Compression Layer)
 Đây là trái tim của hệ thống, điều phối luồng nén và tính toán Attention trên phần cứng:
-*   **LLM Serving Engine (vLLM):** Sử dụng vLLM làm công cụ phục vụ chính nhờ cơ chế quản lý bộ nhớ **PagedAttention** [2]. PagedAttention sẽ chia nhỏ KV Cache thành các khối bộ nhớ (Blocks) [2]. Khi kích hoạt các thuật toán nén, vLLM sẽ cấp phát các khối này dưới dạng định dạng nén tương ứng [2].
-*   **Model Loader:** Nạp các mô hình tiếng Việt đã được kiểm chứng ở định dạng gốc 16-bit (BF16/FP16) [2].
+*   **LLM Serving Engine (vLLM):** Sử dụng vLLM làm công cụ phục vụ chính nhờ cơ chế quản lý bộ nhớ **PagedAttention**. PagedAttention sẽ chia nhỏ KV Cache thành các khối bộ nhớ (Blocks). Khi kích hoạt các thuật toán nén, vLLM sẽ cấp phát các khối này dưới dạng định dạng nén tương ứng.
+*   **Model Loader:** Nạp các mô hình tiếng Việt đã được kiểm chứng ở định dạng gốc 16-bit (BF16/FP16). Trọng tâm chính của nghiên cứu này là lượng tử hóa và nén KV Cache khi thực thi suy luận, trọng số (weights) của mô hình gốc vẫn được giữ nguyên ở định dạng 16-bit (không nén weight).
 *   **Lõi lượng tử hóa KV Cache (KV Cache Quantizer):**
     *   **Full KV Cache (BF16):** Đóng vai trò là mốc so sánh (Baseline chuẩn).
     *   **FP8 (8-bit Float):** Nén tuyến tính chuẩn công nghiệp.
-    *   **PolarQuant (via PolarEngine/Triton):** Chuyển đổi dữ liệu KV Cache sang hệ tọa độ cực thông qua phép quay trực giao ngẫu nhiên kết hợp tối ưu hóa Lloyd-Max [2].
-    *   **TurboQuant:** Lấy PolarQuant làm nền tảng, áp dụng thêm một bit sửa sai **QJL (Quantized Johnson-Lindenstrauss)** trên mỗi vector để bù đắp sai số tính toán Attention [2].
-    *   *Cơ chế hoạt động:* Toàn bộ các thuật toán nén KV cache được thực thi trực tiếp bằng các nhân **Triton/CUDA** được nạp động vào vLLM [2].
+    *   **PolarQuant (via PolarEngine/Triton):** Chuyển đổi dữ liệu KV Cache sang hệ tọa độ cực thông qua phép quay trực giao ngẫu nhiên kết hợp tối ưu hóa Lloyd-Max.
+    *   **TurboQuant:** Lấy PolarQuant làm nền tảng, áp dụng thêm một bit sửa sai **QJL (Quantized Johnson-Lindenstrauss)** trên mỗi vector để bù đắp sai số tính toán Attention.
+    *   *Cơ chế hoạt động:* Các thuật toán nén KV Cache (FP8, PolarQuant, TurboQuant) được tích hợp trực tiếp vào inference engine qua các thư viện và nhân (kernels) CUDA/Triton sẵn có để đo đạc và đánh giá hiệu năng thực tế. Nghiên cứu tập trung vào việc benchmark đánh giá và tích hợp hệ thống, không yêu cầu huấn luyện lại mô hình hoặc viết lại các kernel Triton/CUDA mới từ đầu.
 
 ### 3. Tầng 3: Giám sát & Đo đạc chỉ số (Instrumentation & Monitoring Layer)
 Tầng này hoạt động song song với quá trình sinh từ (generation process) của mô hình để ghi nhận các thông số hệ thống một cách chính xác nhất:
 *   **Hardware Profiler:**
-    *   Sử dụng thư viện quản lý GPU của NVIDIA (`pynvml`) kết hợp với `torch.cuda.max_memory_allocated()` [1, 2].
+    *   Sử dụng thư viện quản lý GPU của NVIDIA (`pynvml`) kết hợp với `torch.cuda.max_memory_allocated()`.
     *   Bộ giám sát sẽ bắt đầu ghi nhận từ lúc mô hình được nạp (Base Model Memory), sau đó đo lượng VRAM tăng lên trong pha xử lý prompt đầu vào (**Prefill Peak VRAM**) và lượng VRAM đỉnh khi sinh toàn bộ chuỗi văn bản (**Decode Peak VRAM**).
 *   **Performance Tracer (Trình đo độ trễ):**
     *   Sử dụng các mốc thời gian hệ thống (High-resolution timing hooks) của Python để ghi nhận:
@@ -79,15 +79,15 @@ Tầng này hoạt động song song với quá trình sinh từ (generation pro
 
 ### 4. Tầng 4: Lưu trữ, Phân tích & Trực quan (Storage, Analysis & Reporting Layer)
 Tầng cuối cùng chịu trách nhiệm tổng hợp dữ liệu thô thành tri thức khoa học:
-*   **CSV Log Aggregator:** Tập hợp kết quả thử nghiệm từ tất cả các cặp chạy mô hình vào file thống nhất `results/template_log.csv` theo định dạng cấu trúc định nghĩa trước [1, 2].
-*   **Statistical Analyzer:** Sử dụng thư viện `pandas` để tính toán giá trị trung bình (mean) và độ lệch chuẩn (standard deviation) cho từng kịch bản thử nghiệm nhằm đảm bảo tính lặp lại (reproducibility) của kết quả [1].
-*   **Pareto Frontier Plotter:** Sử dụng `matplotlib` và `plotly` để tự động hóa việc vẽ biểu đồ phân tích đánh đổi (Trade-off curves) [2]. Biểu đồ này sẽ chỉ ra điểm **Pareto-optimal** (điểm mà tại đó dung lượng bộ nhớ được tiết kiệm nhiều nhất nhưng chất lượng ngôn ngữ suy giảm ít nhất) [2].
+*   **CSV Log Aggregator:** Tập hợp kết quả thử nghiệm từ tất cả các cặp chạy mô hình vào file thống nhất `results/template_log.csv` theo định dạng cấu trúc định nghĩa trước.
+*   **Statistical Analyzer:** Sử dụng thư viện `pandas` để tính toán giá trị trung bình (mean) và độ lệch chuẩn (standard deviation) cho từng kịch bản thử nghiệm nhằm đảm bảo tính lặp lại (reproducibility) của kết quả.
+*   **Pareto Frontier Plotter:** Sử dụng `matplotlib` và `plotly` để tự động hóa việc vẽ biểu đồ phân tích đánh đổi (Trade-off curves). Biểu đồ này sẽ chỉ ra điểm **Pareto-optimal** (điểm mà tại đó dung lượng bộ nhớ được tiết kiệm nhiều nhất nhưng chất lượng ngôn ngữ suy giảm ít nhất).
 
 ---
 
 ## Ý NGHĨA CỦA KIẾN TRÚC NÀY TRONG PAPER
 
-Khi bạn trình bày kiến trúc này trong phần **Section 5: Methodology** hoặc **Section 6: System Architecture** của bài báo tiếng Anh (Paper EN) [2], cấu trúc 4 tầng rõ ràng này sẽ giúp các phản biện (reviewers) đánh giá cao vì:
+Khi bạn trình bày kiến trúc này trong phần **Section 5: Methodology** hoặc **Section 6: System Architecture** của bài báo tiếng Anh (Paper EN), cấu trúc 4 tầng rõ ràng này sẽ giúp các phản biện (reviewers) đánh giá cao vì:
 1.  **Tính khoa học và tách biệt (Separation of Concerns):** Cho thấy hệ thống đo đạc (Tầng 3) không can thiệp và làm ảnh hưởng đến hiệu năng thực tế của lõi suy luận (Tầng 2).
 2.  **Tính thực tiễn (Industrial Relevance):** Việc phân tách đo đạc giữa pha *Prefill* và *Decode* là tối quan trọng trong các hệ thống LLM serving hiện đại vào năm 2026.
 3.  **Khả năng tái lập (Reproducibility):** Cấu trúc này mô tả rõ ràng luồng đi của dữ liệu từ khâu xử lý thô đến khâu vẽ đồ thị, giúp các nghiên cứu sau dễ dàng lặp lại thực nghiệm của nhóm.
