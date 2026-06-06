@@ -85,9 +85,8 @@ Tầng cuối cùng chịu trách nhiệm tổng hợp dữ liệu thô thành t
 
 ---
 
-## Ý NGHĨA CỦA KIẾN TRÚC NÀY TRONG PAPER
+## Ý NGHĨA CỦA KIẾN TRÚC
 
-Khi bạn trình bày kiến trúc này trong phần **Section 5: Methodology** hoặc **Section 6: System Architecture** của bài báo tiếng Anh (Paper EN), cấu trúc 4 tầng rõ ràng này sẽ giúp các phản biện (reviewers) đánh giá cao vì:
 1.  **Tính khoa học và tách biệt (Separation of Concerns):** Cho thấy hệ thống đo đạc (Tầng 3) không can thiệp và làm ảnh hưởng đến hiệu năng thực tế của lõi suy luận (Tầng 2).
 2.  **Tính thực tiễn (Industrial Relevance):** Việc phân tách đo đạc giữa pha *Prefill* và *Decode* là tối quan trọng trong các hệ thống LLM serving hiện đại vào năm 2026.
 3.  **Khả năng tái lập (Reproducibility):** Cấu trúc này mô tả rõ ràng luồng đi của dữ liệu từ khâu xử lý thô đến khâu vẽ đồ thị, giúp các nghiên cứu sau dễ dàng lặp lại thực nghiệm của nhóm.

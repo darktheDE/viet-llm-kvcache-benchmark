@@ -103,7 +103,3 @@ Tổng tiến độ dự án kéo dài **7 tuần**, chia làm **4 Phase** chạ
 | **Rủi ro Lỗi mã nguồn** | vLLM báo lỗi không tương thích phiên bản CUDA hoặc lỗi Out-of-Memory (OOM) khi kéo dài context. | **Trung bình** | - Chỉ định Duy làm "Help desk" xử lý lỗi kỹ thuật.<br>- Thêm tham số `--max-num-batched-tokens 4096` khi chạy và bật PagedAttention. |
 | **Rủi ro Khoa học** | Dữ liệu nén thử nghiệm trên tiếng Việt bị lỗi hiển thị phông chữ Unicode sau khi tokenize. | **Trung bình** | Team Data (Phát, Huy) bắt buộc phải kiểm tra kỹ bộ test-set bằng cách giải mã ngược (detokenize) thử 1-2 mẫu trước khi chạy benchmark đại trà. |
 | **Rủi ro Tiến độ** | Viết báo cáo tiếng Việt và bài báo tiếng Anh song song bị quá tải vào Tuần 7. | **Cao** | - Kiến Hưng giám sát chặt chẽ tiến độ trên `plane.so`.<br>- Khởi tạo khung tài liệu Overleaf ngay từ Tuần 1 và cập nhật dần kết quả thay vì dồn vào tuần cuối. |
-
----
-
-Bạn hoàn toàn có thể lưu bản Master Plan này vào **Notion Workspace** của nhóm hoặc copy các đầu việc chi tiết trong từng Phase để tạo nhanh các thẻ công việc (Issues/Tasks) trên **Plane.so** cho các thành viên thực hiện. Bạn có muốn tôi hỗ trợ viết chi tiết mô tả công việc (Task Description) cho bất kỳ Sprint cụ thể nào không?

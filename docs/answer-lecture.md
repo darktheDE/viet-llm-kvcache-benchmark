@@ -54,13 +54,3 @@ Thầy yêu cầu tìm kiếm các mô hình đã được kiểm chứng hoạt
     1.  Xây dựng bộ benchmark thực nghiệm đầu tiên đánh giá TurboQuant và các baseline nén KV cache trên các LLM tiếng Việt phổ biến.
     2.  Chỉ ra ranh giới Pareto tối ưu (đường cong đánh đổi giữa dung lượng bộ nhớ tiết kiệm được và độ suy giảm chất lượng ngôn ngữ thực tế).
     3.  Đưa ra khuyến nghị cấu hình nén tối ưu (ví dụ: dùng mốc bit nào, phương pháp nào) cho doanh nghiệp khi triển khai LLM tiếng Việt trong thực tế.
-
----
-
-### 5. Hành động tiếp theo cho Hưng (Phân rã task trên `plane.so`)
-
-Với vai trò PM, bạn có thể tạo ngay các task sau lên hệ thống để giải tỏa áp lực hạ tầng cho cả nhóm:
-
-1.  **Task cho Việt Anh (Hạ tầng):** Tìm hiểu cách đăng ký tài khoản và khởi tạo một GPU RTX 4090/3090 trên RunPod hoặc Vast.ai, nạp trước thử $5 - $10 (khoảng 125k - 250k VNĐ) để làm quỹ chạy thử nghiệm.
-2.  **Task cho Minh Quân (Tech):** Cài đặt môi trường vLLM trên GPU đám mây vừa tạo và chạy thử nghiệm đo TTFT/ITL với mô hình `PhoGPT-7B5-Instruct` sử dụng tham số `--kv-cache-dtype FP8` (chạy thử baseline trước).
-3.  **Task cho Quốc Anh (Research):** Soạn thảo phần đề cương chi tiết của bài báo (Draft Paper Outline) theo mạch lập luận đã thống nhất phía trên.
