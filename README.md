@@ -146,7 +146,7 @@ python scripts/run_baseline.py \
     --output "results/phogpt_baseline.csv"
 ```
 
-The script will automatically measure and append the following fields to your local results file [1, 2]:
+The script will automatically measure and append the following fields to your local results file:
 *   `peak_memory_mb`
 *   `latency_ms_per_token`
 *   `throughput_tokens_per_s`
