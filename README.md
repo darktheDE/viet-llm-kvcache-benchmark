@@ -195,7 +195,8 @@ This project is a collaborative effort by **Group 1**:
 | Name | Primary Team | Primary Role / Responsibility |
 |---|---|---|
 | **Do Kien Hung** | Writing & Coordination | Project Manager, Agile/Scrum Coordinator, Document Manager |
-| **Ho Viet Anh** | Writing & Coordination / Tech | Joint Coordination, Technical Setup, DataOps/DevOps Engineer |
+| **Phan Trong Qui** | Writing & Coordination | Joint Coordinator, Documentation & Peer Review |
+| **Ho Viet Anh** | Technical & Experiment | Joint Coordination, Technical Setup, DataOps/DevOps Engineer |
 | **Pham Minh Quan** | Technical & Experiment | Infrastructure Setup, Inference pipeline optimization |
 | **Tran Minh Khanh** | Technical & Experiment | Local GPU Environment, Baseline Runner |
 | **Nguyen Van Quang Duy** | Technical & Experiment | Quantization Setup (TurboQuant config & patching) |
@@ -218,9 +219,15 @@ This project is a collaborative effort by **Group 1**:
 
 ## References
 
-1.  Leskovec, J., et al. (2020). *Mining of Massive Datasets*, 3rd Edition, Cambridge University Press.
-2.  Damji, J. S., et al. (2020). *Learning Spark*, 2nd Edition, O’Reilly.
-3.  Chambers, B., & Zaharia, M. (2018). *Spark: The Definitive Guide*, O'Reilly.
-4.  James, G., et al. (2021). *An Introduction to Statistical Learning*, 2nd Edition, Springer.
+1. Leskovec, J., et al. (2020). *Mining of Massive Datasets*, 3rd Edition, Cambridge University Press.
+2. Damji, J. S., et al. (2020). *Learning Spark*, 2nd Edition, O’Reilly.
+3. Chambers, B., & Zaharia, M. (2018). *Spark: The Definitive Guide*, O'Reilly.
+4. James, G., et al. (2021). *An Introduction to Statistical Learning*, 2nd Edition, Springer.
+5. Zandieh, A., Daliri, M., Hadian, M., & Mirrokni, V. (2025). *TurboQuant: Online Vector Quantization with Near-optimal Distortion Rate*. arXiv preprint arXiv:2504.19874.
+6. Han, T., et al. (2025). *PolarQuant: Leveraging Polar Transformation for Efficient Key Cache Quantization and Decoding Acceleration*. NeurIPS 2025. arXiv preprint arXiv:2502.00527.
+7. Kwon, W., Li, Z., Stoica, I., et al. (2023). *Efficient Memory Management for Large Language Model Serving with PagedAttention*. SOSP 2023. arXiv preprint arXiv:2309.06180.
+8. Micikevicius, P., et al. (2022). *FP8 Quantization for Deep Learning*. arXiv preprint arXiv:2209.05433.
+9. Badri, H., & Shaji, A. (2023-2024). *Half-Quadratic Quantization (HQQ)*. Mobius Labs. [github.com/mobiusml/hqq](https://github.com/mobiusml/hqq).
+10. *KV-CoRE: Benchmarking Data-Dependent Low-Rank Compressibility of KV-Caches in LLMs* (2026). arXiv preprint arXiv:2602.04142.
 
 ***

@@ -81,7 +81,8 @@ Tổng tiến độ dự án kéo dài **7 tuần**, chia làm **4 Phase** chạ
 | Thành viên | Vai trò trong dự án | Phase 1 (Prep) | Phase 2 (Exp) | Phase 3 (Analysis) | Phase 4 (Writing) |
 |---|---|:---:|:---:|:---:|:---:|
 | **Đỗ Kiến Hưng** | PM / Agile Coordinator | **R** / **A** | **A** | **A** | **R** / **A** |
-| **Hồ Việt Anh** | Joint Coordinator / Tech | **R** | **R** (PhoGPT) | **C** | **R** (Báo cáo) |
+| **Phan Trọng Quí** | Joint Coordinator / Writing | **R** | **C** | **C** | **R** (Báo cáo) |
+| **Hồ Việt Anh** | Technical & Experiment | **R** (Cloud Setup) | **R** (PhoGPT) | **C** | **C** |
 | **Phạm Minh Quân** | Tech Lead / Optimizer | **R** (CUDA setup) | **R** (PhoGPT) | **C** | **C** |
 | **Trần Minh Khánh** | Tech runner | **C** | **R** (Qwen) | **C** | **C** |
 | **Nguyễn V. Q. Duy** | Quantization / Patching | **C** (vLLM config) | **R** (Qwen/Debug) | **C** | **C** |

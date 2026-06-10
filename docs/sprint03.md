@@ -104,7 +104,7 @@ Dựa trên bảng số liệu tổng hợp và các biểu đồ phân tích đ
 *   **Title:** `[COORD] Tổng hợp Bản thảo Báo cáo Tiếng Việt (Word Draft v1) & Review Tiến độ Dự án`
 *   **Module:** Phase 4: Viết bài + chỉnh sửa
 *   **Sprint:** Sprint 3 (Week 5-6)
-*   **Team / Role:** Writing & Coordination (Do Kien Hung - Lead, Ho Viet Anh)
+*   **Team / Role:** Writing & Coordination (Do Kien Hung - Lead, Phan Trong Qui)
 *   **Priority:** High
 
 #### 1. Mô tả chi tiết Task (Description)

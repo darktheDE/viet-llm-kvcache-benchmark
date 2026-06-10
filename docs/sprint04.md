@@ -4,7 +4,7 @@
 *   **Title:** `[COORD] Hoàn thiện Báo cáo Word tiếng Việt (>=30 trang), Thiết kế Slide thuyết trình bảo vệ (15-25 slides) & Chuẩn bị kịch bản phản biện (Mock Q&A)`
 *   **Module:** Phase 4: Viết bài + chỉnh sửa
 *   **Sprint:** Sprint 4 (Week 7)
-*   **Team / Role:** Writing & Coordination (Do Kien Hung - Lead, Ho Viet Anh)
+*   **Team / Role:** Writing & Coordination (Do Kien Hung - Lead, Phan Trong Qui)
 *   **Priority:** High
 
 #### 1. Mô tả chi tiết Task (Description)

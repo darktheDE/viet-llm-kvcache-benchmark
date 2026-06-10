@@ -5,7 +5,7 @@
 *   **Title:** `[COORD] Thiết lập Không gian làm việc chung, Agile Backlog trên Plane.so & Soạn thảo Tài liệu Khởi động dự án`
 *   **Module:** Project Management & Coordination
 *   **Sprint:** Sprint 1 (Week 1-2)
-*   **Team / Role:** Writing & Coordination (Do Kien Hung - Lead, Ho Viet Anh)
+*   **Team / Role:** Writing & Coordination (Do Kien Hung - Lead, Phan Trong Qui)
 *   **Priority:** High
 
 #### 1. Mô tả chi tiết Task (Description)
