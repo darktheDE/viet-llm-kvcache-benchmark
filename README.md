@@ -179,7 +179,7 @@ Main package versions:
 
 ```bash
 python scripts/download_datasets.py --max-records-per-source 5000
-python scripts/clean_with_nemo.py --input-dir data/raw --output data/processed/cleaned.jsonl
+python scripts/clean_with_nemo.py --input-dir data/raw --output data/processed/cleaned.jsonl --backend auto
 python scripts/build_long_context_testset.py --input data/processed/cleaned.jsonl --output datasets/test_set_small.json
 python scripts/validate_testset.py --input datasets/test_set_small.json
 ```
@@ -188,10 +188,27 @@ python scripts/validate_testset.py --input datasets/test_set_small.json
 
 ```bash
 python scripts/download_datasets.py --max-records-per-source 200
-python scripts/clean_with_nemo.py --input-dir data/raw --output data/processed/cleaned.jsonl
+python scripts/clean_with_nemo.py --input-dir data/raw --output data/processed/cleaned.jsonl --backend auto
 python scripts/build_long_context_testset.py --input data/processed/cleaned.jsonl --output datasets/test_set_small.json --allow-smoke-test
 python scripts/validate_testset.py --input datasets/test_set_small.json --allow-smoke-test
 ```
+
+### Pipeline status
+
+The data pipeline scripts are available in `scripts/`:
+
+* `download_datasets.py` downloads `5760/vmlu` and `VTSNLP/vietnamese_curated_dataset` from Hugging Face into JSONL.
+* `clean_with_nemo.py` defaults to `--backend auto`, builds a NeMo Curator `DocumentBatch`, runs `Modify[UnicodeReformatter]`, `Modify[NewlineNormalizer]`, and NeMo heuristic `DocumentFilter` checks, then applies Python filters for Vietnamese-specific quality checks and deduplication.
+* `build_long_context_testset.py` builds `datasets/test_set_small.json` with a Transformers tokenizer.
+* `validate_testset.py` validates schema, token counts, and group-level token statistics.
+
+Cleaning backend flags:
+
+* `--backend auto`: prefer NeMo Curator; fall back to Python if the installed API is unavailable.
+* `--backend nemo`: require NeMo Curator API initialization and processing.
+* `--backend python`: skip NeMo Curator and run Python-only cleaning.
+
+`datasets/dataset_brief.md` documents the sources, processing rules, Docker commands, and current limitations.
 
 ### Optional GPU
 
