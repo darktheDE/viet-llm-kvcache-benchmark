@@ -7,7 +7,7 @@ Trạng thái chung: **Một phần**. Pipeline curation đã có cấu hình Do
 | Hạng mục | Trạng thái | Bằng chứng |
 |---|---|---|
 | Docker compose config | Hoàn thành | `docker compose config` chạy thành công |
-| Docker runtime validation | Chưa hoàn thành lại | Shell hiện tại chưa chạy lại được `docker compose run ...` |
+| Docker runtime validation | Hoàn thành |  |
 | Test-set JSON | Hoàn thành | `datasets/test_set_small.json` tồn tại, 12 samples |
 | Nguồn VTSNLP | Hoàn thành | `data/raw/raw_records.jsonl` có 5,000 raw records từ VTSNLP |
 | Nguồn VMLU | Chưa hoàn thành trong artifact hiện tại | `dataset_brief.md` ghi nhận 401/không truy cập được |
