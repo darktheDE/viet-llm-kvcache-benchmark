@@ -13,7 +13,8 @@ Bo du lieu gom 3 moc do dai ngu canh muc tieu:
 *   **8,000 tokens**
 *   **16,000 tokens**
 
-Moi moc do dai chua **170 mau**, tong cong toan bo test suite la **510 mau**.
+Sau khi kiem dinh Unicode va loai bo 3 mau loi ky tu `�`, bo du lieu hien tai con **507 mau**.
+Ngoai ra, nhom tao them file `datasets/test_set_smoke.json` gom **15 mau** de Team Tech chay thu nhanh pipeline truoc khi benchmark day du.
 
 ## 3. Huong dan su dung bo du lieu (Developer & Runner Guidelines)
 
@@ -61,3 +62,10 @@ Moi mau trong file `test_set_small.json` co cau truc:
 *   `text` la prompt dau vao day du truyen truc tiep cho inference engine.
 *   `expected_output` la cau tra loi mong muon.
 *   `actual_tokens` la so luong token thuc te duoc cat va dem bang tokenizer Qwen.
+
+## 5. Trang thai kiem dinh du lieu
+
+Bo du lieu da duoc kiem tra cu phap JSON bang lenh:
+
+```powershell
+python -m json.tool datasets/test_set_small.json > check.json
