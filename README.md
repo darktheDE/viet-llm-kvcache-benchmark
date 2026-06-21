@@ -24,6 +24,7 @@ This project is conducted as the final group research project for the course **B
   - [Evaluation Metrics](#evaluation-metrics)
 - [Project Structure](#-project-structure)
 - [Installation & Environment Setup](#-installation--environment-setup)
+- [Docker setup for Vietnamese Data Pipeline](#docker-setup-for-vietnamese-data-pipeline)
 - [Quick Start](#-quick-start)
 - [Workflow & Timeline](#-workflow--timeline)
 - [Contributors](#-contributors)
@@ -135,6 +136,80 @@ pip install -r scripts/requirements.txt
 > - As of mid-2026, **TurboQuant** and **PolarQuant** are natively supported/plugged into **vLLM** and **SGLang** via custom Triton/CUDA kernels.
 > - **FP8 KV** is included as our primary production-grade baseline, substituting algorithms without native inference kernel support (e.g., pure vector search quantization methods) to ensure realistic latency and throughput metrics.
 ---
+
+## Docker setup for Vietnamese Data Pipeline
+
+This Docker setup rebuilds a Linux environment for the Vietnamese data pipeline from source files in this repository. It uses Python 3.10 and installs NeMo Curator with the CPU text-processing extra so the default service can run on machines without an NVIDIA GPU.
+
+### Requirements
+
+* Docker Desktop on Windows/macOS/Linux.
+* Internet access to download Python packages and Hugging Face datasets.
+* GPU is optional.
+
+### Build image
+
+The same command works in PowerShell, CMD, and Linux shells:
+
+```bash
+docker compose build
+```
+
+### Enter container
+
+```bash
+docker compose run --rm data-pipeline bash
+```
+
+### Verify environment
+
+```bash
+python --version
+python -c "import pandas, datasets, transformers; print('basic deps OK')"
+python -c "import nemo_curator; print('nemo curator OK')"
+```
+
+Main package versions:
+
+* Python: 3.10 from `python:3.10-slim`.
+* NeMo Curator: `nemo-curator[text-cpu]==1.2.0`.
+* `datasets`, `transformers`, `tokenizers`, `sentencepiece`, `accelerate`, `pandas`, `numpy`, `pyarrow`, `scikit-learn`, `matplotlib`, `plotly`, `jupyter`, and `ipykernel` are installed from `requirements.txt`.
+
+### Run full pipeline
+
+```bash
+python scripts/download_datasets.py --max-records-per-source 5000
+python scripts/clean_with_nemo.py --input-dir data/raw --output data/processed/cleaned.jsonl
+python scripts/build_long_context_testset.py --input data/processed/cleaned.jsonl --output datasets/test_set_small.json
+python scripts/validate_testset.py --input datasets/test_set_small.json
+```
+
+### Run smoke test
+
+```bash
+python scripts/download_datasets.py --max-records-per-source 200
+python scripts/clean_with_nemo.py --input-dir data/raw --output data/processed/cleaned.jsonl
+python scripts/build_long_context_testset.py --input data/processed/cleaned.jsonl --output datasets/test_set_small.json --allow-smoke-test
+python scripts/validate_testset.py --input datasets/test_set_small.json --allow-smoke-test
+```
+
+### Optional GPU
+
+The text-cleaning pipeline does not require a GPU. If a machine has an NVIDIA GPU and NVIDIA Container Toolkit installed, build the image first and then run one of the commands below.
+
+PowerShell:
+
+```powershell
+docker run --rm -it --gpus all -v ${PWD}:/workspace vietnamese-data-pipeline:latest bash
+```
+
+CMD:
+
+```cmd
+docker run --rm -it --gpus all -v "%cd%:/workspace" vietnamese-data-pipeline:latest bash
+```
+
+If GPU-accelerated NeMo Curator text modules are needed, update `requirements.txt` from `nemo-curator[text-cpu]` to the CUDA text extra supported by the target machine and rebuild the image.
 
 ## Quick Start
 
