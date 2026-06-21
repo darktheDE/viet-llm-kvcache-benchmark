@@ -20,7 +20,7 @@ V-Bench chua duoc tich hop trong phien ban nay vi chua xac dinh duoc dataset ID 
 Quy trinh tai lap gom cac buoc:
 
 1. `scripts/download_datasets.py` tai raw records bang `datasets.load_dataset`, tu detect field text va ghi `data/raw/raw_records.jsonl`.
-2. `scripts/clean_with_nemo.py --backend auto` chay voi backend `hybrid_nemo_python`. NeMo Curator duoc dung that su cho document representation/loading bang `DocumentBatch[pandas_dataframe]`, text modification bang `Modify[UnicodeReformatter(normalization=NFC)]` va `Modify[NewlineNormalizer]`, cung generic quality filtering bang `DocumentFilter[word_count:WordCountFilter]`, `DocumentFilter[urls_ratio:UrlsFilter]`, `DocumentFilter[alpha_numeric:NonAlphaNumericFilter]`, `DocumentFilter[white_space:WhiteSpaceFilter]`. Python custom filters tiep tuc xu ly cac buoc tieng Viet chuyen biet va dedup.
+2. `scripts/clean_with_nemo.py --backend auto` chay voi backend `hybrid_nemo_python`. NeMo Curator duoc dung that su cho document representation/loading bang `DocumentBatch[pandas_dataframe]`, text modification bang `Modify[ProjectFtfyFixText]`, `Modify[UnicodeReformatter(normalization=NFC)]`, `Modify[NewlineNormalizer]` va `Modify[ProjectTextPostprocessor(normalization=NFC,control_char_removal,whitespace_normalization)]`. Built-in NeMo `DocumentFilter` xu ly word count, URL ratio, alpha-numeric ratio va whitespace ratio; cac rule rieng cua project cho min characters, replacement char, letter ratio, strange symbol ratio va Vietnamese signal duoc chuyen thanh custom NeMo-compatible `DocumentFilter`. Python chi con xu ly exact dedup va near dedup trong nhanh hybrid.
 3. `scripts/build_long_context_testset.py` dung `transformers.AutoTokenizer` de ghep cac record thanh mau long-context va ghi `datasets/test_set_small.json`.
 4. `scripts/validate_testset.py` validate schema, token count va thong ke theo nhom.
 
@@ -29,21 +29,20 @@ Quy trinh tai lap gom cac buoc:
 Cleaning pipeline hien tai gom:
 
 * NeMo Curator `DocumentBatch` voi pandas DataFrame.
+* NeMo Curator `Modify[ProjectFtfyFixText]`.
 * NeMo Curator `Modify[UnicodeReformatter(normalization=NFC)]`.
 * NeMo Curator `Modify[NewlineNormalizer]`.
-* NeMo Curator heuristic `DocumentFilter` cho word count, URL ratio, alpha-numeric ratio va whitespace ratio.
-* Unicode normalization NFC.
-* `ftfy.fix_text`.
-* Xoa control characters.
-* Chuan hoa whitespace.
-* Loai text duoi 200 ky tu.
-* Loai text co replacement character.
-* Loai text co ty le chu cai thap hoac qua nhieu symbol la.
-* Uu tien text co dau hieu tieng Viet bang ky tu co dau hoac tu tieng Viet pho bien.
-* Exact dedup bang SHA-256 hash.
-* Near dedup bang SimHash ket hop character n-gram Jaccard.
+* NeMo Curator `Modify[ProjectTextPostprocessor(normalization=NFC,control_char_removal,whitespace_normalization)]`.
+* Built-in NeMo heuristic `DocumentFilter` cho word count, URL ratio, alpha-numeric ratio va whitespace ratio.
+* Custom NeMo-compatible `DocumentFilter[min_characters:MinCharacterCountFilter]` loai text duoi 200 ky tu.
+* Custom NeMo-compatible `DocumentFilter[replacement_char_free:ReplacementCharacterFilter]` loai text co replacement character.
+* Custom NeMo-compatible `DocumentFilter[letter_ratio:LetterRatioFilter]` loai text co ty le chu cai thap.
+* Custom NeMo-compatible `DocumentFilter[strange_symbol_ratio:StrangeSymbolRatioFilter]` loai text co qua nhieu symbol la.
+* Custom NeMo-compatible `DocumentFilter[vietnamese_signal:VietnameseSignalFilter]` uu tien text co dau hieu tieng Viet bang ky tu co dau hoac tu tieng Viet pho bien.
+* Python exact dedup bang SHA-256 hash.
+* Python near dedup bang SimHash ket hop character n-gram Jaccard.
 
-NeMo Curator import duoc trong Docker image va duoc tich hop qua API thuc te cua `nemo-curator[text-cpu]==1.2.0`: `nemo_curator.tasks.document.DocumentBatch`, `nemo_curator.stages.text.modifiers.modifier.Modify`, `nemo_curator.stages.text.modifiers.unicode.unicode_reformatter.UnicodeReformatter`, `nemo_curator.stages.text.modifiers.string.newline_normalizer.NewlineNormalizer`, va cac heuristic filters trong `nemo_curator.stages.text.filters.heuristic.string`. Python custom filters duoc dung cho cac buoc tieng Viet chuyen biet: dau hieu tieng Viet, replacement char, length threshold, exact dedup va near dedup.
+NeMo Curator import duoc trong Docker image va duoc tich hop qua API thuc te cua `nemo-curator[text-cpu]==1.2.0`: `nemo_curator.tasks.document.DocumentBatch`, `nemo_curator.stages.text.modifiers.modifier.Modify`, `nemo_curator.stages.text.modifiers.unicode.unicode_reformatter.UnicodeReformatter`, `nemo_curator.stages.text.modifiers.string.newline_normalizer.NewlineNormalizer`, `nemo_curator.stages.text.filters.doc_filter.DocumentFilter`, va cac heuristic filters trong `nemo_curator.stages.text.filters.heuristic.string`. Cac filter tieng Viet/rule rieng cua project la custom `DocumentFilter` tuong thich NeMo, khong phai built-in filter cua NVIDIA. Python custom logic con lai trong nhanh hybrid la stateful dedup.
 
 ## 5. Cau truc JSON
 
@@ -89,7 +88,7 @@ Thong ke artifact `datasets/test_set_small.json` sau full/medium run:
 * Raw records tai duoc: 5,000.
 * Cleaned records: 4,998.
 * Cleaning backend counts sau lan chay `--backend auto`: `hybrid_nemo_python=4,998`, `nemo_curator=0`, `python_fallback=0`.
-* NeMo steps da ghi trong metadata moi record: `DocumentBatch[pandas_dataframe]`, `Modify[UnicodeReformatter(normalization=NFC)]`, `Modify[NewlineNormalizer]`, `DocumentFilter[word_count:WordCountFilter]`, `DocumentFilter[urls_ratio:UrlsFilter]`, `DocumentFilter[alpha_numeric:NonAlphaNumericFilter]`, `DocumentFilter[white_space:WhiteSpaceFilter]`.
+* NeMo steps da ghi trong metadata moi record: `DocumentBatch[pandas_dataframe]`, `Modify[ProjectFtfyFixText]`, `Modify[UnicodeReformatter(normalization=NFC)]`, `Modify[NewlineNormalizer]`, `Modify[ProjectTextPostprocessor(normalization=NFC,control_char_removal,whitespace_normalization)]`, `DocumentFilter[word_count:WordCountFilter]`, `DocumentFilter[urls_ratio:UrlsFilter]`, `DocumentFilter[alpha_numeric:NonAlphaNumericFilter]`, `DocumentFilter[white_space:WhiteSpaceFilter]`, `DocumentFilter[min_characters:MinCharacterCountFilter]`, `DocumentFilter[replacement_char_free:ReplacementCharacterFilter]`, `DocumentFilter[letter_ratio:LetterRatioFilter]`, `DocumentFilter[strange_symbol_ratio:StrangeSymbolRatioFilter]`, `DocumentFilter[vietnamese_signal:VietnameseSignalFilter]`.
 
 ## 7. Cach chay tai lap bang Docker
 
@@ -119,5 +118,5 @@ Test-set nay duoc thiet ke cho benchmark long-context trong repo, khong phai ben
 
 * V-Bench chua duoc tich hop trong phien ban nay vi chua xac dinh duoc dataset ID Hugging Face/GitHub on dinh.
 * `5760/vmlu` nam trong danh sach nguon nhung khong truy cap duoc trong lan chay kiem thu ngay 2026-06-21, nen artifact hien tai chua co mau tu nguon nay.
-* Cleaning chay backend `hybrid_nemo_python`: NeMo Curator xu ly document batch, Unicode/newline modification va generic heuristic filters; Python xu ly cac filter tieng Viet va dedup.
+* Cleaning chay backend `hybrid_nemo_python`: NeMo Curator adapter xu ly document batch, ftfy/Unicode/newline/postprocess modifiers, built-in heuristic filters va custom NeMo-compatible filters cho cac rule tieng Viet; Python xu ly exact/near dedup.
 * Full mode da dat schema va so mau yeu cau, nhung nguon du lieu hien tai chi den tu mot dataset do gioi han truy cap cua `5760/vmlu`.

@@ -1,209 +1,172 @@
-Bạn đã hoàn thành Docker setup và Data Pipeline, nhưng hiện tại `scripts/clean_with_nemo.py` mới chỉ import được `nemo_curator` rồi dùng Python fallback filters. Điều này chưa đủ vì task yêu cầu sử dụng NVIDIA NeMo Curator để làm sạch/lọc dữ liệu.
+Bạn là senior data engineering reviewer. Hãy kiểm tra repo hiện tại và xác định chính xác pipeline `hybrid_nemo_python` đang chia trách nhiệm như thế nào: bước nào thực sự dùng NVIDIA NeMo Curator, bước nào dùng Python custom logic.
 
-Hãy cập nhật pipeline để tích hợp NeMo Curator thật sự ở mức khả dụng với package hiện tại:
+## Bối cảnh
 
-```text
-nemo-curator[text-cpu]==1.2.0
-```
-
-Không làm lại Dockerfile, docker-compose.yml hoặc requirements.txt trừ khi thật sự bắt buộc.
-
-## 1. Mục tiêu sửa
-
-Cập nhật:
+Project đã có pipeline Data Curation tiếng Việt với các file chính:
 
 ```text
 scripts/clean_with_nemo.py
-datasets/dataset_brief.md
-README.md nếu cần
-```
-
-Có thể thêm helper:
-
-```text
 scripts/nemo_backend.py
+scripts/utils_text.py
+scripts/build_long_context_testset.py
+scripts/validate_testset.py
+datasets/dataset_brief.md
+README.md
 ```
 
-Mục tiêu là `clean_with_nemo.py` phải thật sự thử dùng API của NeMo Curator để xử lý dataset. Python fallback chỉ được dùng khi API NeMo không khả dụng hoặc một bước cụ thể không hỗ trợ.
-
-## 2. Yêu cầu quan trọng
-
-Không được chỉ làm:
-
-```python
-import nemo_curator
-```
-
-rồi gọi đó là dùng NeMo.
-
-Phải inspect package hiện tại trong container để tìm API thật:
-
-```bash
-python - <<'PY'
-import nemo_curator
-import pkgutil
-print("nemo_curator:", nemo_curator)
-print("submodules:")
-for m in pkgutil.walk_packages(nemo_curator.__path__, nemo_curator.__name__ + "."):
-    name = m.name
-    if any(k in name.lower() for k in ["filter", "dedup", "document", "dataset", "modifier", "classifier"]):
-        print(name)
-PY
-```
-
-Sau đó kiểm tra class/function dùng được:
-
-```bash
-python - <<'PY'
-import inspect
-# import các module NeMo Curator tìm được rồi print signature class/function chính
-PY
-```
-
-Dựa trên API thực tế của version đã cài, hãy tích hợp NeMo Curator vào pipeline.
-
-## 3. Backend design bắt buộc
-
-Trong `scripts/clean_with_nemo.py`, thiết kế backend rõ ràng:
+Agent trước đó báo cáo rằng pipeline đang dùng backend:
 
 ```text
-backend = "nemo_curator" nếu dùng được NeMo Curator cho bước xử lý chính
-backend = "hybrid_nemo_python" nếu NeMo dùng một phần, Python dùng một phần
-backend = "python_fallback" nếu không dùng được API NeMo
+hybrid_nemo_python
 ```
 
-Mỗi record output phải có metadata:
+với NeMo Curator cho các bước generic curation và Python cho Vietnamese-specific filters/dedup/metadata. Tôi cần bạn kiểm chứng lại bằng cách đọc code thật, không chỉ dựa vào mô tả trước đó.
 
-```json
-{
-  "cleaning_backend": "nemo_curator hoặc hybrid_nemo_python hoặc python_fallback",
-  "nemo_curator_available": true,
-  "nemo_curator_steps": [
-    "..."
-  ],
-  "python_fallback_steps": [
-    "..."
-  ]
-}
-```
+## Nhiệm vụ
 
-## 4. Tối thiểu NeMo Curator phải tham gia vào một trong các nhóm sau
-
-Hãy cố gắng dùng NeMo Curator trực tiếp cho ít nhất một bước thật:
-
-1. Document dataset representation/loading.
-2. Document filtering.
-3. Text cleaning/modification.
-4. Exact deduplication.
-5. Fuzzy/near deduplication.
-6. Quality filtering.
-
-Nếu NeMo Curator có sẵn class filter/modifier/dedup phù hợp, hãy dùng nó.
-
-Nếu API NeMo Curator không có filter tiếng Việt chuyên biệt, vẫn có thể dùng NeMo cho phần generic document pipeline/dataset/filtering, rồi dùng Python custom filters cho tiếng Việt.
-
-## 5. Không được phá pipeline hiện tại
-
-Các lệnh cũ vẫn phải chạy:
-
-```bash
-docker compose run --rm data-pipeline python scripts/clean_with_nemo.py --input data/raw/raw_records.jsonl --output data/processed/cleaned.jsonl
-docker compose run --rm data-pipeline python scripts/build_long_context_testset.py --input data/processed/cleaned.jsonl --output datasets/test_set_small.json
-docker compose run --rm data-pipeline python scripts/validate_testset.py --input datasets/test_set_small.json
-```
-
-Nếu tích hợp NeMo làm full pipeline bị lỗi, thêm flag:
-
-```bash
---backend auto
---backend nemo
---backend python
-```
-
-Ý nghĩa:
+Hãy đọc trực tiếp các file:
 
 ```text
---backend auto    ưu tiên NeMo, lỗi thì fallback Python
---backend nemo    bắt buộc dùng NeMo, lỗi thì fail
---backend python  chỉ dùng Python fallback
+scripts/clean_with_nemo.py
+scripts/nemo_backend.py
+scripts/utils_text.py
+scripts/build_long_context_testset.py
+scripts/validate_testset.py
+datasets/dataset_brief.md
+README.md
 ```
 
-Default phải là:
+Sau đó trả lời rõ:
 
-```text
---backend auto
+1. Những bước nào thật sự gọi API NVIDIA NeMo Curator.
+2. Những bước nào dùng Python custom.
+3. Những bước nào thuộc cleaning/filtering.
+4. Những bước nào thuộc packaging/benchmark/validation, không nên tính là NeMo cleaning.
+5. Metadata output hiện ghi backend/steps có chính xác với code không.
+6. Có chỗ nào mô tả quá tay, ví dụ nói “NeMo làm toàn bộ pipeline” nhưng thực tế là hybrid không.
+
+## Lệnh kiểm chứng nên chạy
+
+Chạy hoặc dùng lệnh tương đương:
+
+```bash
+grep -R "nemo_curator\|DocumentBatch\|UnicodeReformatter\|NewlineNormalizer\|WordCountFilter\|UrlsFilter\|NonAlphaNumericFilter\|WhiteSpaceFilter\|cleaning_backend\|nemo_curator_steps\|python_fallback_steps" -n scripts datasets README.md
 ```
 
-## 6. Validation mới
-
-Sau khi sửa, chạy:
+Chạy thử cleaning để lấy metadata thật:
 
 ```bash
 docker compose run --rm data-pipeline python scripts/clean_with_nemo.py --input data/raw/raw_records.jsonl --output data/processed/cleaned.jsonl --backend auto
 ```
 
-Sau đó kiểm tra metadata:
+Sau đó thống kê metadata:
 
 ```bash
-python - <<'PY'
+docker compose run --rm data-pipeline python - <<'PY'
 import json
 from collections import Counter
 
-counter = Counter()
+backend = Counter()
 nemo_steps = Counter()
+python_steps = Counter()
 
 with open("data/processed/cleaned.jsonl", encoding="utf-8") as f:
     for line in f:
         r = json.loads(line)
         md = r.get("metadata", {})
-        counter[md.get("cleaning_backend", "missing")] += 1
+        backend[md.get("cleaning_backend", "missing")] += 1
         for s in md.get("nemo_curator_steps", []):
             nemo_steps[s] += 1
+        for s in md.get("python_fallback_steps", []):
+            python_steps[s] += 1
 
-print("backend counts:", counter)
-print("nemo steps:", nemo_steps)
+print("backend counts:")
+for k, v in backend.items():
+    print(k, v)
+
+print("\nNeMo Curator steps:")
+for k, v in nemo_steps.items():
+    print(k, v)
+
+print("\nPython custom/fallback steps:")
+for k, v in python_steps.items():
+    print(k, v)
 PY
 ```
 
-Yêu cầu:
+Nếu có lỗi vì thiếu raw data, hãy dùng dataset hiện có hoặc chạy lại:
 
-* Nếu `backend counts` chỉ toàn `python_fallback`, thì task chưa đạt yêu cầu NeMo.
-* Cần có ít nhất một phần records dùng `nemo_curator` hoặc `hybrid_nemo_python`.
-* Nếu thật sự không thể dùng API NeMo sau khi inspect, phải lưu log lỗi chi tiết và ghi rõ trong `dataset_brief.md`.
-
-## 7. Cập nhật dataset_brief.md
-
-Cập nhật phần quy trình xử lý.
-
-Không được viết mơ hồ:
-
-```text
-Sử dụng NeMo Curator
+```bash
+docker compose run --rm data-pipeline python scripts/download_datasets.py --max-records-per-source 200
+docker compose run --rm data-pipeline python scripts/clean_with_nemo.py --input data/raw/raw_records.jsonl --output data/processed/cleaned.jsonl --backend auto
 ```
 
-Phải viết cụ thể:
+## Output yêu cầu
+
+Trả về báo cáo dạng bảng:
+
+| Nhóm bước | Bước cụ thể | Dùng NeMo hay Python | File/code liên quan | Bằng chứng | Ghi chú |
+| --------- | ----------- | -------------------- | ------------------- | ---------- | ------- |
+
+Phân nhóm tối thiểu:
+
+### A. NeMo Curator steps
+
+Liệt kê chính xác các API/class/function NeMo được gọi, ví dụ nếu có:
 
 ```text
-Pipeline chạy với backend hybrid_nemo_python. NeMo Curator được dùng cho các bước: ...
-Python custom filters được dùng cho các bước tiếng Việt chuyên biệt: ...
+DocumentBatch[pandas_dataframe]
+Modify[UnicodeReformatter(normalization=NFC)]
+Modify[NewlineNormalizer]
+DocumentFilter[word_count:WordCountFilter]
+DocumentFilter[urls_ratio:UrlsFilter]
+DocumentFilter[alpha_numeric:NonAlphaNumericFilter]
+DocumentFilter[white_space:WhiteSpaceFilter]
 ```
 
-Nếu vẫn fallback:
+### B. Python custom cleaning/filtering steps
+
+Liệt kê chính xác các bước còn chạy bằng Python, ví dụ:
 
 ```text
-NeMo Curator chỉ import được nhưng API xử lý chưa được tích hợp thành công trong phiên bản này.
+Vietnamese signal detection
+replacement char filter
+custom character length filter
+exact dedup
+near dedup
+metadata enrichment
 ```
 
-Nhưng đây là trạng thái chưa đạt yêu cầu chính.
+### C. Benchmark packaging/validation steps
 
-## 8. Kết quả cần báo cáo
+Liệt kê những bước không thuộc NeMo cleaning, ví dụ:
 
-Sau khi hoàn tất, trả về:
+```text
+build 4k/8k/16k JSON test-set
+tokenize with Qwen tokenizer
+detokenize validation
+schema validation
+dataset_brief generation/update
+```
 
-1. File đã sửa.
-2. API/module NeMo Curator đã inspect được.
-3. NeMo Curator được dùng ở bước nào.
-4. Backend counts sau cleaning.
-5. Số record dùng `nemo_curator`, `hybrid_nemo_python`, `python_fallback`.
-6. Kết quả build test-set và validate lại.
-7. Nếu không thể dùng NeMo API, đưa lỗi cụ thể và lý do kỹ thuật, không nói chung chung.
+## Đánh giá bắt buộc
+
+Sau bảng, hãy kết luận:
+
+1. Pipeline hiện tại có đúng là `hybrid_nemo_python` không?
+2. Có thể gọi là “NeMo Curator pipeline” không, hay chỉ nên gọi là “hybrid NeMo Curator + Python custom pipeline”?
+3. Phần nào không nên tuyên bố là do NeMo làm?
+4. Nếu muốn NeMo hóa thêm, nên chuyển bước nào thành custom NeMo-compatible filters?
+5. Có cần chỉnh `dataset_brief.md` hoặc README để mô tả chính xác hơn không?
+
+## Nếu tài liệu mô tả chưa chính xác
+
+Nếu phát hiện `dataset_brief.md` hoặc README mô tả sai, hãy đề xuất patch nội dung, nhưng chưa tự sửa nếu chưa được xác nhận.
+
+## Quy tắc
+
+* Không được phán đoán theo tên file.
+* Phải đọc code thật.
+* Không được nói “NeMo dùng hết” nếu dedup/build/validate vẫn là Python.
+* Không được nói “chỉ import NeMo” nếu code thật có gọi API NeMo.
+* Không xóa file hoặc sửa code trong bước review này.
