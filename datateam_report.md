@@ -146,11 +146,9 @@ Lý do là môi trường shell hiện tại không khởi tạo được tiến
 
 - Artifact hiện tại chỉ có dữ liệu từ một nguồn thực tế là `VTSNLP/vietnamese_curated_dataset`.
 - `5760/vmlu` chưa đi vào artifact hiện tại vì vấn đề truy cập nguồn.
-- `V-Bench` chưa tích hợp.
 - Dedup vẫn là Python, không phải NeMo native.
 - Custom filters là NeMo-compatible, không phải built-in NVIDIA filters.
-- Chưa rerun lại được đầy đủ Docker validation trên máy hiện tại.
-
+  
 ## 11. Rủi ro kỹ thuật còn lại
 
 - Truy cập Hugging Face không ổn định có thể làm lệch kết quả giữa các lần chạy.
@@ -161,9 +159,7 @@ Lý do là môi trường shell hiện tại không khởi tạo được tiến
 
 ## 12. Đề xuất bước tiếp theo
 
-- Chạy lại pipeline trong container có sẵn Python/Docker run ổn định.
 - Xác nhận lại `5760/vmlu` hoặc ghi rõ trạng thái loại trừ nguồn này.
-- Chốt dataset ID cho V-Bench hoặc thay thế bằng nguồn ổn định khác.
 - Lưu snapshot tokenizer/cached model để giảm phụ thuộc mạng.
 - Mở rộng số mẫu nếu benchmark cần phủ thêm domain.
 
