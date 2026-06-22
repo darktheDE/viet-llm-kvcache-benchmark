@@ -19,20 +19,22 @@
     *   **Peak VRAM (GB) during Prefill Phase:** Bộ nhớ đỉnh khi xử lý prompt đầu vào (ngữ cảnh dài).
     *   **Peak VRAM (GB) during Decode Phase:** Bộ nhớ đỉnh trong quá trình sinh text (nơi KV cache phình to).
     *   **KV Cache Size (MB):** Dung lượng bộ nhớ thực tế bị chiếm dụng bởi KV cache tương ứng với các độ dài chuỗi (4k, 8k, 16k, 32k).
+    *   **KV Cache Compression Ratio (Tỷ lệ nén - %):** Tỷ số dung lượng KV Cache sau nén so với dung lượng gốc (BF16).
+    *   **Base VRAM vs. Dynamic VRAM:** Phân tách bộ nhớ nạp mô hình tĩnh (Base Model Memory) và bộ nhớ chạy động (KV Cache, Activation) để làm nổi bật tác dụng của nén KV Cache.
 2.  **Về tốc độ suy luận (Inference Speed):**
     *   **Time to First Token (TTFT - mili-giây):** Thời gian phản hồi token đầu tiên (đo hiệu năng của Prefill).
     *   **Inter-Token Latency (ITL - mili-giây/token):** Thời gian trung bình để sinh ra các token tiếp theo (đo hiệu năng của Decode).
     *   **Generation Throughput (tokens/giây):** Đo ở các mức độ tải khác nhau (Batch Size = 1 cho ứng dụng đơn lẻ và Batch Size = 4/8/16 cho server chịu tải).
+    *   **GPU Memory Efficiency Index (Tokens/s/MB):** Tỷ lệ throughput giải mã sinh ra trên mỗi MB bộ nhớ động VRAM được cấp phát, đo độ hiệu dụng của phần cứng.
 3.  **Về chất lượng ngôn ngữ (Output Quality):**
     *   **Perplexity (PPL):** Đo trên tập dữ liệu tiếng Việt chuẩn (như WikiText-vi hoặc ViWiki) để đánh giá mức độ suy giảm khả năng hiểu ngôn ngữ sau khi nén.
     *   **Task-specific Metrics (Đo theo tác vụ):** Điểm số **F1** và **Exact Match (EM)** trên bộ dữ liệu Vi-SQuAD (Hỏi đáp), hoặc điểm **ROUGE-L** cho tác vụ tóm tắt văn bản dài tiếng Việt.
 
 ---
 
-### 3. Danh sách các Vietnamese LLMs đã được kiểm chứng (Để đối chiếu)
+### 3. Danh sách các Vietnamese LLMs & Tập Dữ liệu đã được kiểm chứng (Để đối chiếu)
 
-Thầy yêu cầu tìm kiếm các mô hình đã được kiểm chứng hoạt động tốt trong môi trường tiếng Việt để đối chiếu. Dưới đây là 4 ứng viên xuất sắc nhất, có hỗ trợ ngữ cảnh dài và đã được cộng đồng nghiên cứu kiểm chứng trên bảng xếp hạng **VMLU** (Zalo AI công bố):
-
+#### 3.1. Các mô hình tiếng Việt xuất sắc
 1.  **`vinai/PhoGPT-7B5-Instruct` (7.5 Billion parameters):**
     *   *Lý do:* Mô hình thuần Việt do VinAI phát triển, được huấn luyện từ đầu trên 102 tỷ token tiếng Việt. Sử dụng cơ chế ALiBi cho phép ngoại suy độ dài ngữ cảnh tốt. Đây là baseline thuần Việt không thể thiếu.
 2.  **`Qwen/Qwen2.5-7B-Instruct` (hoặc bản tinh chỉnh tiếng Việt `Qwen2.5-7B-Instruct-vietnamese`):**
@@ -41,6 +43,17 @@ Thầy yêu cầu tìm kiếm các mô hình đã được kiểm chứng hoạt
     *   *Lý do:* Đã được kiểm chứng đạt điểm số rất cao trên benchmark VMLU tiếng Việt. Hỗ trợ ngữ cảnh dài mặc định lên tới 128k tokens nhờ kiến trúc RoPE điều chỉnh.
 4.  **`Viet-Mistral/Vistral-7B-Chat`:**
     *   *Lý do:* Bản thích ứng tiếng Việt dựa trên Mistral-7B, văn phong tiếng Việt rất mượt mà. Mặc dù giới hạn ngữ cảnh gốc là 8k, mô hình này rất thích hợp để làm đối chứng xem khi nén vượt ngưỡng thì chất lượng suy giảm ra sao.
+5.  **`ura-hcmut/ura-llama-3-8b-instruct` (8 Billion parameters):**
+    *   *Lý do:* Được phát triển bởi nhóm URA tại Đại học Bách Khoa TP.HCM (HCMUT), tối ưu đặc biệt cho việc hỏi đáp và xử lý tiếng Việt. Kế thừa kiến trúc Llama-3 hỗ trợ 128k tokens context window, là đại diện xuất sắc cho nghiên cứu LLM học thuật tại Việt Nam.
+
+#### 3.2. Tập dữ liệu cào bổ sung & Nguồn đóng gói sẵn (News & Social Media)
+Nhóm sẽ thu thập thêm dữ liệu sách, báo và mạng xã hội tiếng Việt có tính thời sự nóng bằng hai con đường phối hợp:
+1.  **Viết Scraper mẫu cào từ báo điện tử:** Cào trực tiếp các bài báo thời sự nóng từ VnExpress / Tuổi Trẻ (sử dụng requests kết hợp BeautifulSoup) để tạo kho ngữ cảnh thời sự.
+2.  **Tích hợp các nguồn đóng gói sẵn có tính thời sự cao:**
+    *   `vietnews` (Hugging Face Datasets): Dataset tóm tắt tin tức tiếng Việt chất lượng cao chứa hàng ngàn bài viết từ các trang báo lớn.
+    *   `binhvq/news-corpus` (GitHub/HF): Corpus báo chí tiếng Việt lớn, đa dạng chủ đề từ 2020-2026.
+    *   `UIT-VSFC` & `nhanvtp/vietnamese-social-media-sentiment` (HF): Các bài viết mạng xã hội tiếng Việt thực tế, bình luận nóng về đời sống xã hội.
+    *   `wikimedia/wikipedia` (vi subset): Phiên bản tiếng Việt mới nhất của Wikipedia chứa các sự kiện thời sự cập nhật.
 
 ---
 
