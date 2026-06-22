@@ -50,20 +50,21 @@ Viết script Python tự động gom cụm tất cả các file CSV số liệu
 
 #### 3. Từng bước thực hiện chi tiết (Step-by-Step)
 *   **Bước 1:** Viết script `scripts/plot_results.py` sử dụng thư viện `pandas` để tự động quét thư mục `results/`, đọc toàn bộ các file CSV thô và gộp (merge) chúng lại theo cấu trúc thống nhất.
-*   **Bước 2:** Tính toán các chỉ số thống kê trung bình và độ lệch chuẩn của Peak VRAM, Latency per token, Throughput và Perplexity cho từng điều kiện thử nghiệm (Model $\times$ Method $\times$ Context).
-*   **Bước 3:** Sử dụng `matplotlib` hoặc `seaborn` để thiết kế và vẽ 3 loại đồ thị chuẩn học thuật lưu vào `results/plots/`:
+*   **Bước 2:** Tính toán các chỉ số thống kê trung bình và độ lệch chuẩn của Peak VRAM, Latency per token, Throughput, Perplexity, Compression Ratio và GPU Memory Efficiency Index cho từng điều kiện thử nghiệm (Model $\times$ Method $\times$ Context).
+*   **Bước 3:** Sử dụng `matplotlib` hoặc `seaborn` để thiết kế và vẽ 4 loại đồ thị chuẩn học thuật lưu vào `results/plots/`:
     *   *Đồ thị 1:* Memory tiêu thụ (trục Y) biểu diễn theo độ dài ngữ cảnh (trục X), phân tách màu sắc theo từng phương pháp nén.
     *   *Đồ thị 2:* Latency / Throughput sinh từ (trục Y) biểu diễn theo độ dài ngữ cảnh (trục X).
     *   *Đồ thị 3 (Đồ thị Pareto quan trọng nhất):* Sự đánh đổi giữa Perplexity (chất lượng ngôn ngữ - trục Y) và Peak VRAM tiêu thụ (hiệu năng phần cứng - trục X).
+    *   *Đồ thị 4 (Đồ thị bổ sung nâng cao):* Tỷ lệ nén (KV Cache Compression Ratio) và Hiệu suất bộ nhớ (GPU Memory Efficiency Index) (trục Y) biểu diễn theo độ dài ngữ cảnh (trục X).
 *   **Bước 4:** Định dạng các đồ thị theo đúng chuẩn hiển thị của bài báo khoa học: phông chữ rõ ràng, phân biệt màu sắc tốt cho cả chế độ in trắng đen, có chú giải (legend) đầy đủ.
 
 #### 4. Kết quả đầu ra (Expected Output)
 *   File gộp kết quả cuối cùng `results/all_results_compiled.csv`.
-*   Tối thiểu 3 tệp tin đồ thị định dạng ảnh chất lượng cao (PNG hoặc PDF vector) trong thư mục `results/plots/`.
+*   Tối thiểu 4 tệp tin đồ thị định dạng ảnh chất lượng cao (PNG hoặc PDF vector) trong thư mục `results/plots/`.
 
 #### 5. Tiêu chuẩn hoàn thành (Definition of Done - DoD)
 *   [ ] Script `plot_results.py` thực thi thành công không lỗi, tự động xuất ra toàn bộ các biểu đồ khi chạy.
-*   [ ] Các biểu đồ hiển thị rõ ràng, ghi chú đầy đủ nhãn trục (axis labels), đơn vị đo (MB, ms/token, tokens/s, PPL) và các chú thích phân biệt rõ ràng giữa các phương pháp nén.
+*   [ ] Các biểu đồ hiển thị rõ ràng, ghi chú đầy đủ nhãn trục (axis labels), đơn vị đo (MB, ms/token, tokens/s, PPL, %, tokens/s/MB) và các chú thích phân biệt rõ ràng giữa các phương pháp nén.
 
 ---
 

@@ -9,7 +9,7 @@
 *   **Priority:** High
 
 #### 1. Mô tả chi tiết Task (Description)
-Xây dựng và hoàn thiện tệp mã nguồn Python `scripts/run_baseline.py` để tự động hóa toàn bộ quy trình đo đạc hiệu năng phần cứng và lưu vết chỉ số chất lượng ngôn ngữ. Script phải nhận tham số đầu vào qua dòng lệnh (`argparse`) để cấu hình linh hoạt cho từng kịch bản (Grid Search) gồm: Mô hình, Phương pháp nén, Độ dài ngữ cảnh.
+Xây dựng và hoàn thiện tệp mã nguồn Python `scripts/run_baseline.py` để tự động hóa toàn bộ quy trình đo đạc hiệu năng phần cứng, thu thập các chỉ số nén nâng cao và lưu vết chỉ số chất lượng ngôn ngữ. Script phải nhận tham số đầu vào qua dòng lệnh (`argparse`) để cấu hình linh hoạt cho từng kịch bản (Grid Search) gồm: Mô hình, Phương pháp nén, Độ dài ngữ cảnh.
 
 #### 2. Tài liệu đọc tham khảo (References)
 *   *Tài liệu API vLLM:* [vLLM Offline Inference API](https://docs.vllm.ai/en/latest/quantization/auto_awq.html) - Hướng dẫn sử dụng lớp `vllm.LLM` để truyền các đối số nén KV Cache.
@@ -33,18 +33,21 @@ Xây dựng và hoàn thiện tệp mã nguồn Python `scripts/run_baseline.py`
     )
     ```
 *   **Bước 3:** Tích hợp trình đo đạc phần cứng `pynvml`:
-    *   Trước khi chạy sinh từ: Gọi `pynvml.nvmlDeviceGetMemoryInfo` để lưu mốc VRAM cơ bản.
-    *   Trong quá trình Prefill & Decode: Thiết lập luồng đo song song (background thread) để lấy Peak VRAM cao nhất đạt được.
+    *   Trước khi chạy sinh từ: Gọi `pynvml.nvmlDeviceGetMemoryInfo` để lưu mốc VRAM cơ bản (Model Base VRAM).
+    *   Trong quá trình Prefill & Decode: Thiết lập luồng đo song song (background thread) để lấy Peak VRAM cao nhất đạt được (giúp phân biệt Base VRAM vs Dynamic VRAM).
 *   **Bước 4:** Tích hợp đo đạc thời gian:
     *   Sử dụng callback hoặc trigger của vLLM để ghi nhận chính xác thời điểm xuất hiện token đầu tiên (TTFT) và khoảng cách giữa các token tiếp theo (ITL).
-*   **Bước 5:** Đảm bảo dữ liệu kết quả đo đạc được định dạng đúng và ghi đè/nối tiếp (append) vào tệp CSV cục bộ theo đúng cấu trúc `results/template_log.csv`.
+*   **Bước 5:** Tích hợp tính toán các chỉ số bổ sung:
+    *   **KV Cache Compression Ratio:** Đo dung lượng KV cache thực tế và so sánh với dung lượng gốc ở dạng BF16.
+    *   **GPU Memory Efficiency Index (Tokens/s/MB):** Tính bằng throughput decode chia cho dung lượng bộ nhớ động VRAM đã sử dụng.
+*   **Bước 6:** Đảm bảo dữ liệu kết quả đo đạc được định dạng đúng và ghi đè/nối tiếp (append) vào tệp CSV cục bộ theo đúng cấu trúc của `results/template_log.csv` (có bổ sung thêm cột cho các chỉ số mới).
 
 #### 4. Kết quả đầu ra (Expected Output)
-*   Mã nguồn `scripts/run_baseline.py` hoàn chỉnh, hoạt động không lỗi, chấp nhận tất cả các tham số truyền vào từ dòng lệnh.
+*   Mã nguồn `scripts/run_baseline.py` hoàn chỉnh, hoạt động không lỗi, chấp nhận tất cả các tham số truyền vào từ dòng lệnh và thu thập đầy đủ chỉ số mới.
 
 #### 5. Tiêu chuẩn hoàn thành (Definition of Done - DoD)
 *   [ ] Chạy thử thành công lệnh đo đạc tự động với một mẫu thử ngắn từ dòng lệnh mà không gặp lỗi cú pháp.
-*   [ ] File CSV ghi nhận chính xác các chỉ số đo được (`peak_memory_mb`, `latency_ms_per_token`, `throughput_tokens_per_s`).
+*   [ ] File CSV ghi nhận chính xác các chỉ số đo được, bao gồm cả `compression_ratio`, `gpu_efficiency_index`, `base_vram_mb` và `dynamic_vram_mb`.
 
 ---
 
@@ -96,7 +99,7 @@ Nhận bàn giao script từ Task 1 và bộ dữ liệu từ team Data. Thực 
 *   **Priority:** High
 
 #### 1. Mô tả chi tiết Task (Description)
-Kiểm soát chất lượng đầu ra của các thử nghiệm. Tích hợp phương thức tính toán độ suy giảm ngôn ngữ **Perplexity (PPL)** thông qua việc tính toán tổn thất entropy chéo (Cross-Entropy Loss) của văn bản sinh ra đối chiếu ngược lại với mô hình gốc BF16. Rà soát các tệp CSV kết quả để đảm bảo số liệu được định dạng nhất quán.
+Kiểm soát chất lượng đầu ra của các thử nghiệm trên tập dữ liệu benchmark và dữ liệu thời sự cào mới. Tích hợp phương thức tính toán độ suy giảm ngôn ngữ **Perplexity (PPL)** thông qua việc tính toán tổn thất entropy chéo (Cross-Entropy Loss) của văn bản sinh ra đối chiếu ngược lại với mô hình gốc BF16. Rà soát các tệp CSV kết quả để đảm bảo số liệu được định dạng nhất quán.
 
 #### 2. Tài liệu đọc tham khảo (References)
 *   *Lý thuyết Perplexity:* [Hugging Face Documentation - Perplexity of Language Models](https://huggingface.co/docs/transformers/perplexity) - Cách tính toán PPL chi tiết trên một chuỗi văn bản [1.2.2].
@@ -104,16 +107,17 @@ Kiểm soát chất lượng đầu ra của các thử nghiệm. Tích hợp ph
 #### 3. Từng bước thực hiện chi tiết (Step-by-Step)
 *   **Bước 1:** Viết một hàm Python bổ trợ trong `run_baseline.py` để lấy được giá trị loss (logits) của mô hình khi sinh text, sau đó tính toán PPL:
     $$\text{PPL} = \exp\left(-\frac{1}{N} \sum_{i=1}^N \log P(x_i \mid x_{<i})\right)$$
-*   **Bước 2:** Viết bộ lọc rà soát văn bản sinh ra (output generation inspection) để phát hiện các lỗi lặp từ vô hạn (repetition loops) hoặc sinh ký tự rác (gibberish tokens) - hiện tượng thường gặp khi nén KV cache quá sâu mà không có cơ chế bù lỗi tốt.
-*   **Bước 3:** Phối hợp chặt chẽ với team Tech để kiểm tra tính hợp lệ của file `results/template_log.csv`, đảm bảo không có sự sai lệch về thứ tự các trường hoặc định dạng dữ liệu giữa các mốc chạy khác nhau.
+*   **Bước 2:** Viết bộ lọc rà soát văn bản sinh ra (output generation inspection) để phát hiện các lỗi lặp từ vô hạn (repetition loops) hoặc sinh ký tự rác (gibberish tokens) khi nén KV cache sâu, đặc biệt trên tập dữ liệu thời sự nóng và mạng xã hội cào bổ sung.
+*   **Bước 3:** Đo đạc các chỉ số Exact Match (EM) và F1 của mô hình trên tập dữ liệu QA/Retrieval thời sự bổ sung.
+*   **Bước 4:** Phối hợp chặt chẽ với team Tech để kiểm tra tính hợp lệ của file `results/template_log.csv`, đảm bảo có đầy đủ các cột metrics mới bổ sung (compression ratio, gpu efficiency index, base/dynamic VRAM) mà không bị lệch cột.
 
 #### 4. Kết quả đầu ra (Expected Output)
-*   Hàm tính toán PPL hoạt động chính xác tích hợp sẵn vào script đo đạc chung.
-*   Báo cáo đánh giá sơ bộ về hiện tượng lỗi sinh từ (sinh rác, lặp từ) của các mô hình khi nén ở mốc 16k tokens.
+*   Hàm tính toán PPL và hệ thống kiểm định EM/F1 hoạt động chính xác tích hợp sẵn vào script đo đạc chung.
+*   Báo cáo đánh giá sơ bộ về hiện tượng lỗi sinh từ (sinh rác, lặp từ) của các mô hình khi nén ở mốc 16k tokens trên tập dữ liệu thời sự bổ sung.
 
 #### 5. Tiêu chuẩn hoàn thành (Definition of Done - DoD)
-*   [ ] Chỉ số Perplexity được ghi nhận đầy đủ cho các mốc chạy thử nghiệm mà không gây lỗi crash runtime.
-*   [ ] File CSV dữ liệu kết quả đo đạc sạch sẽ, không bị lệch cột hoặc sai định dạng kiểu dữ liệu.
+*   [ ] Chỉ số Perplexity, Exact Match và F1 được ghi nhận đầy đủ cho các mốc chạy thử nghiệm mà không gây lỗi crash runtime.
+*   [ ] File CSV dữ liệu kết quả đo đạc sạch sẽ, không bị lệch cột, ghi nhận đầy đủ các cột chỉ số phần cứng mới.
 
 ---
 

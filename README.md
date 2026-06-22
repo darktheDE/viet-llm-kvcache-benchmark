@@ -68,6 +68,7 @@ We evaluate the methods across **4 to 6 Vietnamese LLMs** (including foundationa
 *   `PhoGPT-7B` (or equivalent foundational Vietnamese models)
 *   `Qwen-VN` (Vietnamese adapted variants)
 *   `Llama-VN` (Vietnamese adapted variants)
+*   `URA-LLaMa-3-8B` (Vietnamese LLM developed by ura-hcmut)
 
 ### Compression Methods
 *   **Baseline:** Full KV Cache (uncompressed, BF16/FP16)
