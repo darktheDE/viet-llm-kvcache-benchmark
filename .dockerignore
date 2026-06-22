@@ -1,0 +1,14 @@
+.git
+__pycache__
+*.pyc
+.ipynb_checkpoints
+data/raw
+data/interim
+data/processed
+datasets/*.json
+.cache
+.venv
+venv
+env
+*.log
+results

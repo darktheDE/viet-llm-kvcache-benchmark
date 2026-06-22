@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Tiến Độ Lần 01 - Slide</title>
+    <style>
+        /* CSS Reset & Basic Setup */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --accent-color: #555555;
+            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --font-serif: 'Georgia', serif;
+        }
+
+        /* Scroll Snapping for Presentation Mode */
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            font-family: var(--font-main);
+            color: var(--text-color);
+            background-color: #eeeeee;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .deck {
+            width: 100vw;
+        }
+
+        .slide {
+            scroll-snap-align: start;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-color);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 5vh 8vw;
+            overflow: hidden;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* Slide Inner Layout */
+        .header {
+            position: absolute;
+            top: 5vh;
+            left: 8vw;
+            right: 8vw;
+            border-bottom: 2px solid #000;
+            padding-bottom: 1vh;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .header-title {
+            font-size: 1.2vw;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-color);
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-top: 10vh;
+            margin-bottom: 5vh;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 5vh;
+            left: 8vw;
+            right: 8vw;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1vw;
+            color: var(--accent-color);
+        }
+
+        /* Typography */
+        h1 { font-size: 3.5vw; font-weight: 700; line-height: 1.2; margin-bottom: 2vh; }
+        h2 { font-size: 2.5vw; font-weight: 600; margin-bottom: 3vh; }
+        h3 { font-size: 1.8vw; margin-top: 2vh; margin-bottom: 1vh; font-weight: 500; }
+        p { font-size: 1.5vw; line-height: 1.5; margin-bottom: 2vh; }
+        ul, ol { font-size: 1.5vw; line-height: 1.6; padding-left: 2vw; margin-bottom: 2vh; }
+        li { margin-bottom: 1.5vh; }
+
+        .subtitle {
+            font-size: 1.8vw;
+            color: var(--accent-color);
+            font-family: var(--font-serif);
+            font-style: italic;
+            margin-bottom: 4vh;
+        }
+
+        /* Title Slide Adjustments */
+        .slide-title .content { align-items: center; text-align: center; }
+        .slide-title .header { border-bottom: none; }
+        .author-info { margin-top: 5vh; font-size: 1.2vw; color: var(--accent-color); }
+
+        /* Grids & Images */
+        .split-layout { display: flex; gap: 4vw; height: 100%; align-items: center; }
+        .split-half { flex: 1; }
+        .img-grid { display: flex; gap: 2vw; justify-content: center; align-items: flex-start; }
+        .img-grid figure { display: flex; flex-direction: column; align-items: center; }
+        .img-grid img { max-width: 100%; max-height: 40vh; object-fit: contain; border: 1px solid #ccc; }
+        
+        figcaption { margin-top: 1vh; font-size: 1vw; color: var(--accent-color); font-style: italic; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin-top: 2vh; font-size: 1.3vw; }
+        th, td { border-bottom: 1px solid #ccc; padding: 1.5vh 1vw; text-align: left; }
+        th { font-weight: 600; background-color: #f9f9f9; }
+
+        /* Print Styles for PDF Export */
+        @media print {
+            @page { size: 16in 9in; margin: 0; }
+            html, body { background: white; scroll-snap-type: none; }
+            .slide { width: 16in; height: 9in; page-break-after: always; border-bottom: none; padding: 0.5in 1in; }
+            h1 { font-size: 50pt; } h2 { font-size: 40pt; } p, ul, ol, table { font-size: 24pt; }
+            .header-title { font-size: 16pt; } .footer { font-size: 14pt; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="deck">
+
+    <!-- SLIDE 1: Title -->
+    <section class="slide slide-title" id="slide-1">
+        <div class="content">
+            <h1>Báo Cáo Tiến Độ Lần 01</h1>
+            <div class="subtitle">Benchmarking TurboQuant and KV Cache Compression Methods<br>on Vietnamese Large Language Models</div>
+            <div class="author-info">
+                <p><strong>Thực hiện:</strong> Data Team & Infrastructure</p>
+                <p><strong>Ngày:</strong> Tháng 06/2026</p>
+            </div>
+        </div>
+        <div class="footer"><span>Dự án DBML434077</span><span>1</span></div>
+    </section>
+
+    <!-- SLIDE 2: Executive Summary -->
+    <section class="slide" id="slide-2">
+        <div class="header"><div class="header-title">01. Tổng Quan</div></div>
+        <div class="content">
+            <h2>Tóm Tắt Trạng Thái (Executive Summary)</h2>
+            <p>Trạng thái tổng thể: <strong>Hoàn thành một phần (Ước lượng đạt 20% dự án)</strong>.</p>
+            <ul>
+                <li><strong>Cấu trúc hạ tầng:</strong> Thiết lập xong máy chủ Host và cấu hình môi trường Docker.</li>
+                <li><strong>Pipeline dữ liệu:</strong> Luồng làm sạch dữ liệu Hybrid NeMo-compatible curation đã chạy ổn định.</li>
+                <li><strong>Thành quả dữ liệu:</strong> Xử lý thành công 5,000 raw records từ VTSNLP và tạo bộ test-set ngữ cảnh dài (4k/8k/16k).</li>
+                <li><strong>Khó khăn:</strong> Gặp lỗi 401 khi tải nguồn VMLU, và V-Bench chưa có ID cố định.</li>
+            </ul>
+        </div>
+        <div class="footer"><span>Benchmarking TurboQuant</span><span>2</span></div>
+    </section>
+
+    <!-- SLIDE 3: Infrastructure Specs -->
+    <section class="slide" id="slide-3">
+        <div class="header"><div class="header-title">02. Hạ Tầng Phần Cứng</div></div>
+        <div class="content">
+            <div class="split-layout">
+                <div class="split-half">
+                    <h2>Cấu Hình Máy Chủ (Host)</h2>
+                    <p>Thực hiện bởi: <strong>Hồ Việt Anh (AndyAnh174)</strong></p>
+                    <ul>
+                        <li><strong>GPU:</strong> NVIDIA RTX A6000</li>
+                        <li><strong>CPU:</strong> AMD EPYC 7542</li>
+                        <li><strong>RAM:</strong> 516 GB</li>
+                        <li><strong>Mô hình thuê:</strong> Pay-as-you-go</li>
+                        <li><strong>Chi phí:</strong> Dao động từ $0.7 - $1 / giờ</li>
+                    </ul>
+                    <p><em>Hạ tầng này đảm bảo sức mạnh vượt trội cho các thuật toán Quantization và xử lý pipeline NeMo.</em></p>
+                </div>
+                <div class="split-half">
+                    <div class="img-grid" style="flex-direction: column;">
+                        <img src="system-req.jpg" alt="System Requirements">
+                        <figcaption>Cấu hình máy chủ được cấp phát</figcaption>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer"><span>Benchmarking TurboQuant</span><span>3</span></div>
+    </section>
+
+    <!-- SLIDE 4: Infrastructure Costs -->
+    <section class="slide" id="slide-4">
+        <div class="header"><div class="header-title">02. Hạ Tầng Phần Cứng</div></div>
+        <div class="content">
+            <div class="split-layout">
+                <div class="split-half">
+                    <h2>Chi Phí & Biên Lai Thuê Máy Chủ</h2>
+                    <p>Việc áp dụng hình thức <strong>Pay-as-you-go</strong> giúp nhóm chủ động kiểm soát chi phí trong các phiên thực nghiệm cường độ cao, tận dụng tối đa sức mạnh của RTX A6000 mà không gây lãng phí tài nguyên.</p>
+                </div>
+                <div class="split-half">
+                    <div class="img-grid" style="flex-direction: column;">
+                        <img src="price02.jpg" alt="Bảng giá thuê máy chủ">
+                        <figcaption>Bảng giá thuê máy chủ (price02.jpg)</figcaption>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer"><span>Benchmarking TurboQuant</span><span>4</span></div>
+    </section>
+
+    <!-- SLIDE 5: Team Progress - Phat -->
+    <section class="slide" id="slide-5">
+        <div class="header"><div class="header-title">03. Đóng Góp Của Thành Viên</div></div>
+        <div class="content">
+            <h2>Thiết Lập Môi Trường \& Bộ Lọc</h2>
+            <p><strong>Nguyễn Hồ Phát (Phat.Nguyen):</strong></p>
+            <ul>
+                <li><strong>Hạ tầng Docker:</strong> Hoàn tất cấu hình <code>docker-compose.yml</code> với base image <code>python:3.10-slim</code>. Xác thực runtime thành công trên các môi trường.</li>
+                <li><strong>Curation Filters:</strong> Viết mới các bộ lọc chuẩn tiếng Việt (Vietnamese signal, character ratio, strange symbols) tương thích hoàn toàn với nền tảng NeMo Curator.</li>
+                <li><strong>Báo cáo:</strong> Khởi tạo bản ghi chép tiến độ Data Team chi tiết.</li>
+            </ul>
+        </div>
+        <div class="footer"><span>Benchmarking TurboQuant</span><span>5</span></div>
+    </section>
+
+    <!-- SLIDE 6: Team Progress - Tri & Quoc Anh -->
+    <section class="slide" id="slide-6">
+        <div class="header"><div class="header-title">03. Đóng Góp Của Thành Viên</div></div>
+        <div class="content">
+            <h2>Chuẩn Hóa Pipeline \& Kiểm Thử</h2>
+            <ul>
+                <li>
+                    <strong>Huỳnh Hữu Huy (TriH28):</strong> 
+                    <br>Tập trung vào khâu quản lý chất lượng: Bổ sung <em>Data Quality Checklist</em>, dọn dẹp sạch (clean) bộ Vietnamese test suite, và đặc biệt là thêm <em>smoke dataset</em> giúp nhóm thực nghiệm nhanh chóng mà không tốn tài nguyên.
+                </li>
+                <li style="margin-top: 3vh;">
+                    <strong>Nguyễn Đặng Quốc Anh (QUOC ANH):</strong> 
+                    <br>Chịu trách nhiệm luồng xử lý dữ liệu phức tạp: Hoàn thành pipeline xử lý từ hai nguồn VMLU và VTSNLP. Tinh chỉnh (calibrate) và đóng gói thành công 510 mẫu kiểm thử đầu ra chất lượng cao.
+                </li>
+            </ul>
+        </div>
+        <div class="footer"><span>Benchmarking TurboQuant</span><span>6</span></div>
+    </section>
+
+    <!-- SLIDE 7: Architecture -->
+    <section class="slide" id="slide-7">
+        <div class="header"><div class="header-title">04. Kiến Trúc Dữ Liệu</div></div>
+        <div class="content">
+            <h2>Mô Hình Hybrid NeMo-Compatible Curation</h2>
+            <div class="split-layout">
+                <div class="split-half">
+                    <h3>1. Framework NeMo Curator</h3>
+                    <p>Chuyên dụng xử lý khối lượng lớn:</p>
+                    <ul>
+                        <li>Sửa lỗi văn bản (ftfy fix).</li>
+                        <li>Chuẩn hóa Unicode (NFC) & Newline.</li>
+                        <li>Chạy qua màng lọc heuristic tiếng Việt.</li>
+                    </ul>
+                </div>
+                <div class="split-half">
+                    <h3>2. Tầng Python Orchestration</h3>
+                    <p>Điều hướng & logic nội bộ:</p>
+                    <ul>
+                        <li>Quản lý JSONL I/O stream.</li>
+                        <li>Deduplication (Exact & Near dedup).</li>
+                        <li>Xây test-set theo yêu cầu context.</li>
+                        <li>Validation schema tự động.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer"><span>Benchmarking TurboQuant</span><span>7</span></div>
+    </section>
+
+    <!-- SLIDE 8: Outputs -->
+    <section class="slide" id="slide-8">
+        <div class="header"><div class="header-title">05. Dữ Liệu Đầu Ra</div></div>
+        <div class="content">
+            <h2>Chi Tiết Tập Test-set (Long-Context)</h2>
+            <p>File <code>test_set_small.json</code> đã được tạo, sử dụng Tokenizer <code>Qwen/Qwen2.5-7B-Instruct</code> trên nguồn chính VTSNLP.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nhóm Context</th>
+                        <th>Số lượng mẫu</th>
+                        <th>Min Tokens</th>
+                        <th>Max Tokens</th>
+                        <th>Avg Tokens</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>4k</td><td>4</td><td>5000</td><td>5000</td><td>5000.0</td></tr>
+                    <tr><td>8k</td><td>4</td><td>8099</td><td>9500</td><td>8731.5</td></tr>
+                    <tr><td>16k</td><td>4</td><td>14562</td><td>18500</td><td>17255.0</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="footer"><span>Benchmarking TurboQuant</span><span>8</span></div>
+    </section>
+
+    <!-- SLIDE 9: Risks -->
+    <section class="slide" id="slide-9">
+        <div class="header"><div class="header-title">06. Phân Tích Rủi Ro</div></div>
+        <div class="content">
+            <h2>Rủi Ro Kỹ Thuật \& Hạn Chế Hiện Tại</h2>
+            <ul>
+                <li><strong>Nguồn dữ liệu lỗi (VMLU):</strong> Việc API Hugging Face trả về 401 Unauthorized cản trở việc đa dạng hóa nguồn tài liệu đầu vào. Tương tự, V-Bench chưa có Dataset ID ổn định.</li>
+                <li><strong>Thắt cổ chai (Bottleneck) ở Deduplication:</strong> Quá trình loại bỏ trùng lặp (Dedup) hiện tại đang chạy hoàn toàn bằng Python script thay vì NeMo native, tiềm ẩn rủi ro giảm hiệu suất khi scale lên hàng triệu record.</li>
+                <li><strong>Bất đồng bộ môi trường:</strong> Một số shell nội bộ chưa khởi tạo được tiến trình Python/Docker ổn định cho khâu validation cuối.</li>
+            </ul>
+        </div>
+        <div class="footer"><span>Benchmarking TurboQuant</span><span>9</span></div>
+    </section>
+
+    <!-- SLIDE 10: Next Steps -->
+    <section class="slide" id="slide-10">
+        <div class="header"><div class="header-title">07. Đề Xuất \& Kế Hoạch</div></div>
+        <div class="content">
+            <h2>Các Bước Tiếp Theo</h2>
+            <ol>
+                <li><strong>Khắc phục nguồn dữ liệu:</strong> Nhóm sẽ liên hệ hoặc tìm giải pháp bypass/thay thế cho nguồn VMLU. Đánh giá lại việc sử dụng V-Bench.</li>
+                <li><strong>Tối ưu hóa Pipeline:</strong> Lưu trữ (snapshot) Tokenizer & Model Cache xuống thư mục local nhằm giảm sự phụ thuộc vào băng thông tải từ Hugging Face trong các chu kỳ test lặp lại.</li>
+                <li><strong>Mở rộng Context Coverage:</strong> Nâng số lượng mẫu Test-set để tăng cường độ phủ (domain coverage), chuẩn bị tốt nhất cho pha đánh giá Benchmark chính thức.</li>
+            </ol>
+        </div>
+        <div class="footer"><span>Benchmarking TurboQuant</span><span>10</span></div>
+    </section>
+
+    <!-- SLIDE 11: Q&A -->
+    <section class="slide slide-title" id="slide-11">
+        <div class="content">
+            <h1 style="font-size: 5vw;">Q & A</h1>
+            <div class="subtitle" style="margin-top: 2vh;">Questions & Answers</div>
+            <p style="color: var(--accent-color); font-size: 1.5vw; margin-top: 4vh;">Cảm ơn thầy và các bạn đã lắng nghe báo cáo của nhóm.</p>
+        </div>
+    </section>
+    
+    <!-- SLIDE 12: Thank You -->
+    <section class="slide slide-title" id="slide-12">
+        <div class="content">
+            <h1 style="font-size: 6vw;">THANK YOU!</h1>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // Enable arrow keys navigation between slides
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown') {
+            e.preventDefault();
+            window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
+        } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
+            e.preventDefault();
+            window.scrollBy({ top: -window.innerHeight, behavior: 'smooth' });
+        }
+    });
+</script>
+
+</body>
+</html>
