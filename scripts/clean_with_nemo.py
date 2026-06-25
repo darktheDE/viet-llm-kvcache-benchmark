@@ -51,15 +51,12 @@ LOGGER = logging.getLogger("clean_with_nemo")
 
 CLEANING_PIPELINE = [
     "nemo_document_batch",
+    "nemo_ftfy_fix_text_modifier",
     "nemo_unicode_reformatter",
     "nemo_newline_normalizer",
-    "nemo_heuristic_document_filters",
-    "unicode_normalization_nfc",
-    "ftfy_fix_text",
-    "control_char_removal",
-    "whitespace_normalization",
-    "length_filter",
-    "vietnamese_quality_filter",
+    "nemo_project_text_postprocessor",
+    "nemo_generic_heuristic_filters",
+    "nemo_project_quality_filters",
     "exact_dedup",
     "near_dedup",
 ]
@@ -70,6 +67,10 @@ PYTHON_FALLBACK_STEPS = [
     "whitespace_normalization",
     "length_filter",
     "vietnamese_quality_filter",
+    "exact_dedup",
+    "near_dedup",
+]
+HYBRID_PYTHON_STEPS = [
     "exact_dedup",
     "near_dedup",
 ]
@@ -116,13 +117,7 @@ def clean_text(text: str) -> str:
     return normalize_whitespace(no_control)
 
 
-def python_postprocess_text(text: str) -> str:
-    normalized = normalize_nfc(text or "")
-    no_control = remove_control_chars(normalized)
-    return normalize_whitespace(no_control)
-
-
-def resolve_nemo_backend(backend_arg: str) -> NemoTextBackend | None:
+def resolve_nemo_backend(backend_arg: str, min_chars: int) -> NemoTextBackend | None:
     if backend_arg == "python":
         LOGGER.info("Using python_fallback backend by request.")
         return None
@@ -135,7 +130,7 @@ def resolve_nemo_backend(backend_arg: str) -> NemoTextBackend | None:
         return None
 
     try:
-        backend = NemoTextBackend()
+        backend = NemoTextBackend(min_chars=min_chars)
         LOGGER.info("Using hybrid_nemo_python backend.")
         LOGGER.info("NeMo Curator steps: %s", ", ".join(backend.steps))
         return backend
@@ -188,7 +183,7 @@ def iter_clean_records(args: argparse.Namespace):
 
     raw_records = raw_records_from_inputs(args)
     stats["input_records"] = len(raw_records)
-    nemo_backend = resolve_nemo_backend(args.backend)
+    nemo_backend = resolve_nemo_backend(args.backend, min_chars=args.min_chars)
     active_backend = "hybrid_nemo_python" if nemo_backend is not None else "python_fallback"
 
     nemo_results = None
@@ -207,7 +202,8 @@ def iter_clean_records(args: argparse.Namespace):
     for index, raw_record in enumerate(raw_records):
         nemo_steps: list[str] = []
         nemo_scores: dict[str, Any] = {}
-        python_steps = PYTHON_FALLBACK_STEPS[:]
+        python_steps = HYBRID_PYTHON_STEPS[:] if nemo_results is not None else PYTHON_FALLBACK_STEPS[:]
+        flags: dict[str, bool | float] | None = None
 
         if nemo_results is not None:
             nemo_result = nemo_results[index]
@@ -215,23 +211,33 @@ def iter_clean_records(args: argparse.Namespace):
             nemo_scores = nemo_result.scores
             if not nemo_result.keep:
                 stats["removed_nemo_filter"] += 1
+                if nemo_result.rejection_reason == "min_characters":
+                    stats["removed_too_short"] += 1
+                elif nemo_result.rejection_reason == "replacement_char_free":
+                    stats["removed_unicode_replacement"] += 1
+                elif nemo_result.rejection_reason in {
+                    "letter_ratio",
+                    "strange_symbol_ratio",
+                    "vietnamese_signal",
+                }:
+                    stats["removed_low_quality"] += 1
                 continue
-            text = python_postprocess_text(nemo_result.text)
+            text = nemo_result.text
         else:
             text = clean_text(str(raw_record.get("text") or ""))
 
-        if len(text) < args.min_chars:
-            stats["removed_too_short"] += 1
-            continue
+            if len(text) < args.min_chars:
+                stats["removed_too_short"] += 1
+                continue
 
-        flags = text_quality_flags(text)
-        if not flags["replacement_char_free"] or not flags["unicode_valid"]:
-            stats["removed_unicode_replacement"] += 1
-            continue
+            flags = text_quality_flags(text)
+            if not flags["replacement_char_free"] or not flags["unicode_valid"]:
+                stats["removed_unicode_replacement"] += 1
+                continue
 
-        if not flags["vietnamese_ratio_ok"]:
-            stats["removed_low_quality"] += 1
-            continue
+            if not flags["vietnamese_ratio_ok"]:
+                stats["removed_low_quality"] += 1
+                continue
 
         text_hash = stable_text_hash(text)
         if text_hash in seen_hashes:
@@ -249,6 +255,8 @@ def iter_clean_records(args: argparse.Namespace):
         stats["final_records"] += 1
         backend_counts[active_backend] += 1
         raw_metadata: dict[str, Any] = raw_record.get("metadata") or {}
+        if flags is None:
+            flags = text_quality_flags(text)
         metadata = {
             **raw_metadata,
             "split": raw_record.get("split"),
@@ -256,7 +264,8 @@ def iter_clean_records(args: argparse.Namespace):
             "cleaning_backend": active_backend,
             "cleaning_implementation": active_backend,
             "nemo_curator_steps": nemo_steps,
-            "python_fallback_steps": python_steps,
+            "python_custom_steps": python_steps,
+            "python_fallback_steps": [] if nemo_steps else python_steps,
             "nemo_curator_scores": nemo_scores,
             "cleaning_pipeline": CLEANING_PIPELINE if nemo_steps else PYTHON_FALLBACK_STEPS,
             "quality_flags": {
@@ -281,7 +290,7 @@ def iter_clean_records(args: argparse.Namespace):
     LOGGER.info("active backend: %s", active_backend)
     LOGGER.info("backend counts: %s", dict(backend_counts))
     LOGGER.info("input records: %s", stats["input_records"])
-    LOGGER.info("removed by NeMo filter: %s", stats["removed_nemo_filter"])
+    LOGGER.info("removed by NeMo-compatible filters: %s", stats["removed_nemo_filter"])
     LOGGER.info("removed too short: %s", stats["removed_too_short"])
     LOGGER.info("removed unicode/replacement: %s", stats["removed_unicode_replacement"])
     LOGGER.info("removed low quality: %s", stats["removed_low_quality"])

@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.venv/
+env/
+venv/
+ENV/
+conda/
+.conda/
+.ipynb_checkpoints/
+
+# Project Datasets (Raw data should not be pushed to GitHub)
+datasets/vmlu_dialog_v1/
+datasets/vmlu_squad_v1/
+datasets/vmlu_mqa_v1.5/
+
+# OS files
+.DS_Store
+Thumbs.db

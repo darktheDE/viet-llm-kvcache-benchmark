@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding & Master Plan | BDML Group 1</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ===========================================
+           CSS CUSTOM PROPERTIES (THEME: NEON CYBER)
+           =========================================== */
+        :root {
+            --bg-primary: #070913;
+            --bg-secondary: #0c0f24;
+            --text-primary: #ffffff;
+            --text-secondary: #8e9bb0;
+            --accent-cyan: #00f5d4;
+            --accent-purple: #9d4edd;
+            --accent-yellow: #ffee32;
+            --card-bg: rgba(12, 15, 36, 0.7);
+            --border-color: rgba(0, 245, 212, 0.15);
+            --border-glow: rgba(0, 245, 212, 0.4);
+
+            /* Typography */
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            --title-size: clamp(2rem, 5vw, 4.5rem);
+            --h2-size: clamp(1.5rem, 3.5vw, 2.5rem);
+            --h3-size: clamp(1.1rem, 2.5vw, 1.6rem);
+            --body-size: clamp(0.85rem, 1.6vw, 1.15rem);
+            --small-size: clamp(0.7rem, 1.2vw, 0.95rem);
+
+            /* Spacing */
+            --slide-padding: clamp(1.5rem, 5vw, 4rem);
+            --content-gap: clamp(1rem, 3vw, 2.5rem);
+            --element-gap: clamp(0.5rem, 1.5vw, 1.25rem);
+
+            /* Animation */
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration-normal: 0.8s;
+        }
+
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===========================================
+           VIEWPORT FITTING: MANDATORY BASE STYLES
+           =========================================== */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        /* Cyberpunk Grid Background Overlay */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 245, 212, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 212, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Abstract glowing particles in corners */
+        .slide::after {
+            content: '';
+            position: absolute;
+            width: 30vw;
+            height: 30vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(157, 78, 221, 0.08) 0%, transparent 70%);
+            bottom: -10vw;
+            right: -10vw;
+            pointer-events: none;
+            z-index: 1;
+            filter: blur(50px);
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 100%;
+            overflow: hidden;
+            padding: var(--slide-padding);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Typography Styles */
+        h1, h2, h3 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .slide-title {
+            font-size: var(--h2-size);
+            color: var(--text-primary);
+            margin-bottom: var(--content-gap);
+            border-left: 4px solid var(--accent-cyan);
+            padding-left: 1rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .slide-title span.number {
+            font-family: var(--font-mono);
+            font-size: var(--small-size);
+            color: var(--accent-cyan);
+            background: rgba(0, 245, 212, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 245, 212, 0.2);
+        }
+
+        /* Global UI Elements */
+        .progress-bar {
+            position: fixed;
+            top: 0; left: 0; height: 4px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            width: 0%;
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        .nav-dots {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+            transform: scale(1.3);
+        }
+
+        .keyboard-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+            background: rgba(12, 15, 36, 0.8);
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 100;
+            pointer-events: none;
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Lists & Paragraphs */
+        .bullet-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--element-gap);
+            list-style: none;
+        }
+
+        .bullet-list li {
+            font-size: var(--body-size);
+            color: var(--text-secondary);
+            line-height: 1.5;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .bullet-list li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: var(--accent-cyan);
+            font-family: var(--font-mono);
+            font-weight: 700;
+        }
+
+        .bullet-list li strong {
+            color: var(--text-primary);
+        }
+
+        /* Grid layouts */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--content-gap);
+            align-items: center;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--element-gap);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: clamp(1rem, 2vw, 1.5rem);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 245, 212, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: var(--h3-size);
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-desc {
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Code slides */
+        .code-container {
+            background: #02040a;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1.25rem;
+            font-family: var(--font-mono);
+            font-size: clamp(0.7rem, 1.2vw, 0.9rem);
+            line-height: 1.5;
+            color: #e6edf3;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        /* Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity var(--duration-normal) var(--ease-out-expo),
+                        transform var(--duration-normal) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal.delay-1 { transition-delay: 0.15s; }
+        .reveal.delay-2 { transition-delay: 0.3s; }
+        .reveal.delay-3 { transition-delay: 0.45s; }
+        .reveal.delay-4 { transition-delay: 0.6s; }
+
+        /* Specific Title Slide Styles */
+        .title-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide h1 {
+            font-size: var(--title-size);
+            background: linear-gradient(45deg, #ffffff 30%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -1.5px;
+        }
+
+        .title-slide p.subtitle {
+            font-size: var(--h3-size);
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 800px;
+        }
+
+        .title-slide .badge {
+            background: rgba(0, 245, 212, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-family: var(--font-mono);
+            font-size: var(--small-size);
+            margin-bottom: 2rem;
+            display: inline-block;
+        }
+
+        /* Technical architecture visual schema */
+        .arch-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .arch-node {
+            flex: 1;
+            background: rgba(12, 15, 36, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            font-size: var(--small-size);
+        }
+
+        .arch-node.active {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 245, 212, 0.15);
+        }
+
+        .arch-node h4 {
+            color: var(--accent-cyan);
+            margin-bottom: 4px;
+            font-family: var(--font-display);
+        }
+
+        .arch-arrow {
+            color: var(--accent-purple);
+            font-family: var(--font-mono);
+            font-weight: bold;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-height: 700px) {
+            :root {
+                --slide-padding: 1.5rem;
+                --content-gap: 1.25rem;
+                --element-gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-bar"></div>
+    <nav class="nav-dots"></nav>
+
+    <!-- Slide 1: Welcome / Title -->
+    <section class="slide title-slide">
+        <div class="slide-content">
+            <span class="badge reveal">DỰ ÁN NGHIÊN CỨU CUỐI KỲ - DBML434077</span>
+            <h1 class="reveal delay-1">Benchmarking TurboQuant & KV Cache Compression</h1>
+            <p class="subtitle reveal delay-2">Đánh giá thực nghiệm các phương pháp nén KV Cache trên mô hình ngôn ngữ lớn tiếng Việt</p>
+            <p class="reveal delay-3" style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: var(--small-size);">
+                GROUP 1 | ONBOARDING & KẾ HOẠCH TRIỂN KHAI CHI TIẾT
+            </p>
+        </div>
+    </section>
+
+    <!-- Slide 2: Bối cảnh & Mục tiêu -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title reveal">Bối cảnh dự án <span class="number">01 / 09</span></h2>
+            <div class="grid-layout">
+                <ul class="bullet-list reveal delay-1">
+                    <li><strong>Memory Bottleneck:</strong> Trong suy luận LLM, bộ nhớ <strong>Key-Value (KV) Cache</strong> tăng tuyến tính theo chiều dài context, gây nghẽn VRAM nghiêm trọng.</li>
+                    <li><strong>Các giải pháp nén mới:</strong> Các thuật toán Post-Training Quantization (PTQ) như <strong>TurboQuant, PolarQuant, HQQ</strong> giúp giảm tải VRAM hiệu quả.</li>
+                    <li><strong>Khoảng trống nghiên cứu:</strong> Hầu hết các benchmark hiện tại chỉ tập trung vào tiếng Anh; chưa có đánh giá hệ thống trên tiếng Việt (vốn có cấu trúc token hóa và âm tiết khác biệt).</li>
+                    <li><strong>Mục tiêu:</strong> Xây dựng bộ benchmark thực nghiệm, tìm ra ranh giới <strong>Pareto tối ưu</strong> giữa dung lượng bộ nhớ tiết kiệm và chất lượng đầu ra.</li>
+                </ul>
+                <div class="card reveal delay-2" style="border-left: 4px solid var(--accent-purple);">
+                    <h3 class="card-title" style="color: var(--accent-purple);">Giá trị bài nghiên cứu</h3>
+                    <p class="card-desc" style="font-size: var(--body-size); margin-top: 10px;">
+                        Kết quả benchmark sẽ đưa ra các khuyến nghị cấu hình nén tối ưu cho doanh nghiệp khi triển khai (deploy) LLMs tiếng Việt trên các phần cứng biên/giới hạn VRAM.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 3: Câu hỏi nghiên cứu (RQs) -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title reveal">Câu hỏi nghiên cứu (RQ1 - RQ4) <span class="number">02 / 09</span></h2>
+            <div class="grid-cards reveal delay-1">
+                <div class="card">
+                    <h3 class="card-title">RQ1: Hiệu năng thực tế</h3>
+                    <p class="card-desc">TurboQuant có thực sự làm giảm dung lượng VRAM (Peak VRAM) và cải thiện độ trễ sinh từ (ITL, Throughput) trên tiếng Việt so với baseline không?</p>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">RQ2: Chất lượng ngôn ngữ</h3>
+                    <p class="card-desc">Chất lượng ngôn ngữ tiếng Việt (Perplexity - PPL) bị suy giảm ở mức độ nào dưới các mốc nén (4-bit, 3-bit) trên các tập dữ liệu khác nhau?</p>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">RQ3: Scaling Context</h3>
+                    <p class="card-desc">Mối quan hệ đánh đổi (trade-off) giữa hiệu năng phần cứng và chất lượng đầu ra biến thiên thế nào khi context scale từ 4k lên 32k tokens?</p>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">RQ4: Pareto Boundary</h3>
+                    <p class="card-desc">Phương pháp nén nào (TurboQuant, PolarQuant, HQQ, FP8) tạo ra đường biên Pareto tối ưu ổn định nhất cho việc deploy thực tế?</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 4: Đối tượng Benchmark (Scope) -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title reveal">Phạm vi thực nghiệm (Scope) <span class="number">03 / 09</span></h2>
+            <div class="grid-cards reveal delay-1">
+                <div class="card">
+                    <h3 class="card-title">1. Vietnamese LLMs</h3>
+                    <p class="card-desc">
+                        • PhoGPT-7B5-Instruct (Mô hình thuần Việt)<br>
+                        • Qwen2.5-7B-Instruct (Mô hình đa ngôn ngữ tốt)<br>
+                        • Llama-3.1-8B-Instruct (Đối chứng ngoài)<br>
+                        • Vistral-7B-Chat (Mô hình chuyển đổi tốt)
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">2. Compression Methods</h3>
+                    <p class="card-desc">
+                        • Full KV Cache (BF16 Baseline)<br>
+                        • FP8 KV Cache (Standard Baseline)<br>
+                        • HQQ (Marlin Kernels)<br>
+                        • PolarQuant & TurboQuant (Mốc 4-bit, 3-bit)
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">3. Datasets</h3>
+                    <p class="card-desc">
+                        • VMLU (Benchmark tổng hợp tiếng Việt)<br>
+                        • VTSNLP/vietnamese_curated_dataset<br>
+                        • datasets/test_set_small.json (10-20 mẫu ngữ cảnh dài 4k, 8k, 16k đã làm sạch)
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">4. Evaluation Metrics</h3>
+                    <p class="card-desc">
+                        • Memory: Peak VRAM (Prefill & Decode)<br>
+                        • Speed: TTFT, ITL (ms/token), Throughput<br>
+                        • Quality: Perplexity (PPL), EM/F1, ROUGE-L
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 5: Kiến trúc Hệ thống -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title reveal">Kiến trúc Hệ thống Benchmark <span class="number">04 / 09</span></h2>
+            <ul class="bullet-list reveal delay-1" style="margin-bottom: 1.5rem;">
+                <li><strong>Pipeline một chiều:</strong> Dữ liệu thô qua xử lý -> Chạy Serving -> Giám sát chỉ số -> Tổng hợp và trực quan hóa Pareto.</li>
+                <li><strong>Inference Engine:</strong> vLLM / SGLang tích hợp PagedAttention, nạp động các nhân Triton/CUDA tùy biến của TurboQuant/PolarQuant.</li>
+            </ul>
+
+            <div class="arch-flow reveal delay-2">
+                <div class="arch-node active">
+                    <h4>Tầng 1: Data Prep</h4>
+                    <p style="font-size: 11px; color: var(--text-secondary);">NeMo Curator cleaning & context bucketizer (4k-32k)</p>
+                </div>
+                <span class="arch-arrow">→</span>
+                <div class="arch-node active">
+                    <h4>Tầng 2: LLM Serving</h4>
+                    <p style="font-size: 11px; color: var(--text-secondary);">vLLM Model Loader + Triton/CUDA Compression Kernels</p>
+                </div>
+                <span class="arch-arrow">→</span>
+                <div class="arch-node active">
+                    <h4>Tầng 3: Monitoring</h4>
+                    <p style="font-size: 11px; color: var(--text-secondary);">pynvml VRAM hook + TTFT/ITL timers + Perplexity API</p>
+                </div>
+                <span class="arch-arrow">→</span>
+                <div class="arch-node active">
+                    <h4>Tầng 4: Analysis</h4>
+                    <p style="font-size: 11px; color: var(--text-secondary);">CSV aggregator + Pandas stats + Pareto Plotter</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 6: Lộ trình timeline -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title reveal">Lộ trình triển khai (Sprints) <span class="number">05 / 09</span></h2>
+            <div class="grid-cards reveal delay-1">
+                <div class="card">
+                    <h3 class="card-title" style="font-size: var(--body-size);">Sprint 1 (Tuần 1-2): Setup & Prep</h3>
+                    <p class="card-desc" style="font-size: 12px;">
+                        • Đăng ký Cloud GPU (RunPod/Vast.ai), cài CUDA/Conda.<br>
+                        • Làm sạch tiếng Việt bằng NeMo Curator.<br>
+                        • Tạo test-set_small.json (mốc 4k, 8k, 16k).<br>
+                        • Viết khung script run_baseline.py, chạy thử BF16.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 class="card-title" style="font-size: var(--body-size);">Sprint 2 (Tuần 3-4): Run Baseline</h3>
+                    <p class="card-desc" style="font-size: 12px;">
+                        • Hoàn thiện script run_baseline.py tự động đo đạc.<br>
+                        • Tải weights PhoGPT-7B5 và Qwen2.5-7B.<br>
+                        • Chạy benchmark mốc baseline và lưu file CSV.<br>
+                        • Thiết lập khung LaTeX Overleaf (IEEE/Springer).
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 class="card-title" style="font-size: var(--body-size);">Sprint 3 (Tuần 5-6): Main Exp & Plots</h3>
+                    <p class="card-desc" style="font-size: 12px;">
+                        • Duy tối ưu hóa VRAM tránh lỗi OOM ở context dài.<br>
+                        • Chạy nén: FP8, HQQ, PolarQuant, TurboQuant.<br>
+                        • Thạch viết script plot_results.py vẽ đồ thị Pareto.<br>
+                        • Viết nháp chương Results & Discussion tiếng Anh.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 class="card-title" style="font-size: var(--body-size);">Sprint 4 (Tuần 7): Handover & Polish</h3>
+                    <p class="card-desc" style="font-size: 12px;">
+                        • Tổng hợp Báo cáo tiếng Việt (>=30 trang).<br>
+                        • Thiết kế Slide thuyết trình (15-25 slides).<br>
+                        • Hoàn thiện Paper tiếng Anh (>=6 trang chuẩn IEEE).<br>
+                        • Họp review nội bộ chạy thử slide & mock Q&A.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 7: Phân bổ nhân sự (RACI) -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title reveal">Phân bổ nhân sự (RACI Matrix) <span class="number">06 / 09</span></h2>
+            <div class="grid-layout">
+                <ul class="bullet-list reveal delay-1">
+                    <li><strong>Writing & Coordination:</strong> Đỗ Kiến Hưng (Lead/PM), Phan Trọng Quí. Điều phối tiến độ, biên tập báo cáo tiếng Việt và slide thuyết trình.</li>
+                    <li><strong>Technical & Experiment:</strong> Phạm Minh Quân (Lead), Hồ Việt Anh, Trần Minh Khánh, Nguyễn Van Quang Duy (Quantization & Helpdesk xử lý OOM/CUDA).</li>
+                    <li><strong>Data & Analysis:</strong> Nguyễn Hồ Phát (Lead), Huỳnh Hữu Huy (curate test set), Huỳnh Ngọc Thạch (viết script plotting vẽ Pareto curves).</li>
+                    <li><strong>Research & Scope:</strong> Nguyễn Đăng Quốc Anh (Lead/Idea), Phan Trọng Phú. Viết Paper tiếng Anh trên Overleaf, chuẩn hóa references.</li>
+                </ul>
+                <div class="card reveal delay-2" style="border-left: 4px solid var(--accent-cyan);">
+                    <h3 class="card-title">Agile Management</h3>
+                    <p class="card-desc">
+                        Mọi thành viên cập nhật tiến độ công việc trực tiếp trên <strong>app.plane.so</strong> theo từng Sprint. Các cuộc họp được lên lịch qua Google Calendar của nhóm.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 8: Workflow quản lý tài liệu -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title reveal">Workflow quản lý tài liệu <span class="number">07 / 09</span></h2>
+            <ul class="bullet-list reveal delay-1" style="margin-bottom: 1.5rem;">
+                <li><strong>Notion (Trung tâm Tri thức):</strong> Nơi đọc và lưu trữ thông tin lý thuyết, biên bản họp. Link Notion được nhúng vào thẻ task Plane.</li>
+                <li><strong>Plane.so (Quản lý Task):</strong> Chỉ ghi checklist ngắn, mô tả DoD và link tài liệu Notion/Git liên quan. Tránh viết tài liệu dài lên Plane.</li>
+            </ul>
+            <div class="grid-cards reveal delay-2">
+                <div class="card">
+                    <h3 class="card-title" style="font-size: var(--body-size);">GitHub (Code & Technical)</h3>
+                    <p class="card-desc" style="font-size: 12px;">
+                        Chỉ chứa code, configs, requirements.txt và các tài liệu kỹ thuật viết trực tiếp bằng Markdown/LaTeX. Tuyệt đối không đẩy file Word, Excel, PPTX lên Git.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 class="card-title" style="font-size: var(--body-size);">Google Drive (Heavy Storage)</h3>
+                    <p class="card-desc" style="font-size: 12px;">
+                        Lưu trữ bản thảo báo cáo cuối kỳ (.docx), slide (.pptx) và các file dữ liệu thô dung lượng lớn. PM chốt phiên bản theo tuần (Draft_v1, Draft_v2).
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 9: Quản trị rủi ro -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title reveal">Kế hoạch Quản trị Rủi ro <span class="number">08 / 09</span></h2>
+            <div class="grid-layout">
+                <div class="card reveal delay-1">
+                    <h3 class="card-title">1. Rủi ro phần cứng & Chi phí</h3>
+                    <p class="card-desc" style="font-size: var(--body-size); line-height: 1.5;">
+                        • **Nguy cơ:** Server vật lý không có GPU hoặc driver không tương thích vLLM.<br>
+                        • **Khắc phục:** Thuê Cloud GPU (RTX 4090/3090, Vast.ai/RunPod). Chi phí chỉ khoảng $0.2 - $0.4/giờ (~130k-250k VNĐ cho cả dự án).
+                    </p>
+                </div>
+                <div class="card reveal delay-2">
+                    <h3 class="card-title">2. Lỗi CUDA OOM ở context dài</h3>
+                    <p class="card-desc" style="font-size: var(--body-size); line-height: 1.5;">
+                        • **Nguy cơ:** Mô hình lớn ở context 16k-32k gây sập bộ nhớ GPU.<br>
+                        • **Khắc phục:** Duy cấu hình FlashAttention-2, giảm block size từ 16 xuống 8, giảm max_num_seqs=1 để tránh phân mảnh bộ nhớ.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 10: DoD & Kêu gọi hành động -->
+    <section class="slide">
+        <div class="slide-content">
+            <h2 class="slide-title reveal">Definition of Done (DoD) <span class="number">09 / 09</span></h2>
+            <div class="grid-layout">
+                <ul class="bullet-list reveal delay-1">
+                    <li><strong>Mã nguồn sạch:</strong> Upload đầy đủ lên GitHub, chạy tự động qua `run_baseline.py`, có file requirements.txt cài đặt nhanh.</li>
+                    <li><strong>Báo cáo cuối kỳ:</strong> Báo cáo tiếng Việt $\ge 30$ trang định dạng chuẩn, Slide thuyết trình 15-25 slides.</li>
+                    <li><strong>Bài báo tiếng Anh:</strong> Bản thảo $\ge 6$ trang (IEEE Conference) không lỗi biên dịch LaTeX trên Overleaf.</li>
+                    <li><strong>Diễn tập nhóm:</strong> Họp review nội bộ, chạy thử slide, phân vai và thống nhất kịch bản trả lời Q&A.</li>
+                </ul>
+                <div class="card reveal delay-2" style="border-color: var(--accent-cyan); background: rgba(0, 245, 212, 0.05); text-align: center;">
+                    <h3 class="card-title" style="justify-content: center; color: var(--accent-cyan);">BẮT ĐẦU SPRINT 1!</h3>
+                    <p class="card-desc" style="font-size: var(--body-size); margin-top: 10px; color: var(--text-primary);">
+                        Việt Anh khởi tạo GPU Cloud và viết khung run_baseline.py.<br>
+                        Phát tiền xử lý và đóng gói test_set_small.json.<br>
+                        Quốc Anh soạn thảo Proposal v2 trên Overleaf.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Keyboard Hint Component -->
+    <div class="keyboard-hint">
+        <span>← / → : Chuyển Slide</span>
+        <span>|</span>
+        <span>Space : Tiếp theo</span>
+    </div>
+
+    <script>
+        /* ===========================================
+           SLIDE PRESENTATION CONTROLLER
+           =========================================== */
+        class SlidePresentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.currentSlide = 0;
+                this.progressBar = document.querySelector('.progress-bar');
+                this.dotsContainer = document.querySelector('.nav-dots');
+                this.isTransitioning = false;
+
+                this.init();
+            }
+
+            init() {
+                this.setupNavDots();
+                this.setupIntersectionObserver();
+                this.setupKeyboardNav();
+                this.setupTouchNav();
+                this.setupScrollSnapListener();
+                
+                // Show first slide animations immediately
+                setTimeout(() => {
+                    this.slides[0].classList.add('visible');
+                    this.updateUI(0);
+                }, 100);
+            }
+
+            setupNavDots() {
+                this.slides.forEach((_, index) => {
+                    const dot = document.createElement('div');
+                    dot.classList.add('nav-dot');
+                    if (index === 0) dot.classList.add('active');
+                    dot.addEventListener('click', () => this.scrollToSlide(index));
+                    this.dotsContainer.appendChild(dot);
+                });
+                this.dots = document.querySelectorAll('.nav-dot');
+            }
+
+            setupIntersectionObserver() {
+                const observerOptions = {
+                    root: null,
+                    threshold: 0.5
+                };
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            const index = Array.from(this.slides).indexOf(entry.target);
+                            this.currentSlide = index;
+                            this.updateUI(index);
+                        }
+                    });
+                }, observerOptions);
+
+                this.slides.forEach(slide => observer.observe(slide));
+            }
+
+            setupScrollSnapListener() {
+                // Throttle scroll events to update UI correctly
+                let scrollTimeout;
+                window.addEventListener('scroll', () => {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        const scrollPosition = window.scrollY;
+                        const slideHeight = window.innerHeight;
+                        const index = Math.round(scrollPosition / slideHeight);
+                        if (index !== this.currentSlide && index >= 0 && index < this.slides.length) {
+                            this.currentSlide = index;
+                            this.updateUI(index);
+                        }
+                    }, 50);
+                }, { passive: true });
+            }
+
+            scrollToSlide(index) {
+                if (index < 0 || index >= this.slides.length || this.isTransitioning) return;
+                
+                this.isTransitioning = true;
+                this.currentSlide = index;
+                
+                this.slides[index].scrollIntoView({ behavior: 'smooth' });
+                this.updateUI(index);
+
+                setTimeout(() => {
+                    this.isTransitioning = false;
+                }, 800);
+            }
+
+            updateUI(index) {
+                // Update navigation dots
+                if (this.dots) {
+                    this.dots.forEach((dot, idx) => {
+                        if (idx === index) {
+                            dot.classList.add('active');
+                        } else {
+                            dot.classList.remove('active');
+                        }
+                    });
+                }
+
+                // Update progress bar
+                const percent = (index / (this.slides.length - 1)) * 100;
+                this.progressBar.style.width = `${percent}%`;
+            }
+
+            setupKeyboardNav() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                        e.preventDefault();
+                        this.scrollToSlide(this.currentSlide + 1);
+                    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        this.scrollToSlide(this.currentSlide - 1);
+                    }
+                });
+            }
+
+            setupTouchNav() {
+                let startY = 0;
+                
+                document.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                }, { passive: true });
+
+                document.addEventListener('touchend', (e) => {
+                    const endY = e.changedTouches[0].clientY;
+                    const diffY = startY - endY;
+
+                    // Detect swipe threshold of 50px
+                    if (Math.abs(diffY) > 50) {
+                        if (diffY > 0) {
+                            // Swipe up (next slide)
+                            this.scrollToSlide(this.currentSlide + 1);
+                        } else {
+                            // Swipe down (prev slide)
+                            this.scrollToSlide(this.currentSlide - 1);
+                        }
+                    }
+                }, { passive: true });
+            }
+        }
+
+        // Initialize presentation
+        window.addEventListener('DOMContentLoaded', () => {
+            new SlidePresentation();
+        });
+    </script>
+</body>
+</html>
