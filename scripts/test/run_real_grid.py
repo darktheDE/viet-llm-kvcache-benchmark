@@ -1,0 +1,122 @@
+"""
+Script Quản đốc: Chạy tự động toàn bộ Grid Search THỰC TẾ trên GPU.
+Gọi run_real_benchmark.py cho từng cấu hình (Model x Method x Context).
+
+Kết quả xuất ra: results/real_benchmark_log.csv
+
+Yêu cầu: Máy chủ GPU Cloud (RunPod/Vast.ai) đã cài vLLM, pynvml.
+
+Cách chạy:
+    python scripts/test/run_real_grid.py
+"""
+
+import subprocess
+import time
+import os
+import sys
+
+MODELS = [
+    "VinAI/PhoGPT-7B5-Instruct",
+    "Qwen/Qwen2.5-7B-Instruct",
+    "meta-llama/Meta-Llama-3.1-8B-Instruct",
+    "ura-hcmut/URA-LLaMa-3-8B",
+    "Viet-Mistral/Vistral-7B-Chat"
+]
+
+KV_CACHE_TYPES = ["FP16", "FP8", "HQQ", "PolarQuant", "TurboQuant"]
+CONTEXT_LENGTHS = [4000, 8000, 16000]
+OUTPUT_CSV = "results/real_benchmark_log.csv"
+SCRIPT_PATH = "scripts/test/run_real_benchmark.py"
+
+
+def main():
+    total = len(MODELS) * len(KV_CACHE_TYPES) * len(CONTEXT_LENGTHS)
+    print("=" * 60)
+    print("  REAL GPU BENCHMARK - GRID SEARCH (75 cau hinh)")
+    print("=" * 60)
+    print(f"Tong so cau hinh: {total}")
+    print(f"Output CSV: {OUTPUT_CSV}")
+    print(f"Models: {len(MODELS)} | Methods: {len(KV_CACHE_TYPES)} | Contexts: {len(CONTEXT_LENGTHS)}")
+    print("=" * 60 + "\n")
+
+    count = 1
+    success_count = 0
+    oom_count = 0
+    error_count = 0
+
+    start_all = time.time()
+
+    for model in MODELS:
+        for kv_type in KV_CACHE_TYPES:
+            for ctx in CONTEXT_LENGTHS:
+                print(f"\n[{count}/{total}] Model={model} | Method={kv_type} | Context={ctx}")
+                print("-" * 50)
+
+                cmd = [
+                    sys.executable, SCRIPT_PATH,
+                    "--model", model,
+                    "--kv_cache_type", kv_type,
+                    "--context_length", str(ctx),
+                    "--output", OUTPUT_CSV,
+                    "--num_samples", "5",
+                    "--max_new_tokens", "128",
+                ]
+
+                try:
+                    env = os.environ.copy()
+                    env["PYTHONUTF8"] = "1"
+
+                    result = subprocess.run(
+                        cmd,
+                        capture_output=True,
+                        text=True,
+                        encoding='utf-8',
+                        errors='replace',
+                        env=env,
+                        timeout=600  # Timeout 10 phut cho moi cau hinh
+                    )
+
+                    # In output cua subprocess
+                    if result.stdout:
+                        print(result.stdout[-500:])  # In 500 ky tu cuoi
+
+                    if result.returncode == 0:
+                        print(f"  [OK] Hoan tat thanh cong.")
+                        success_count += 1
+                    else:
+                        # Kiểm tra xem có phải OOM không
+                        if "OOM" in result.stdout or "OutOfMemory" in result.stderr:
+                            print(f"  [OOM] Tran bo nho GPU.")
+                            oom_count += 1
+                        else:
+                            print(f"  [ERROR] Return code: {result.returncode}")
+                            if result.stderr:
+                                print(result.stderr[-300:])
+                            error_count += 1
+
+                except subprocess.TimeoutExpired:
+                    print(f"  [TIMEOUT] Vuot qua 10 phut, bo qua.")
+                    error_count += 1
+                except Exception as e:
+                    print(f"  [ERROR] Loi he thong: {e}")
+                    error_count += 1
+
+                count += 1
+
+    end_all = time.time()
+    elapsed = round(end_all - start_all, 1)
+
+    # Báo cáo tổng kết
+    print("\n" + "=" * 60)
+    print("  TONG KET BENCHMARK")
+    print("=" * 60)
+    print(f"  Thanh cong:  {success_count}/{total}")
+    print(f"  OOM:         {oom_count}/{total}")
+    print(f"  Loi khac:    {error_count}/{total}")
+    print(f"  Tong thoi gian: {elapsed}s ({round(elapsed/60, 1)} phut)")
+    print(f"  Ket qua CSV: {OUTPUT_CSV}")
+    print("=" * 60)
+
+
+if __name__ == "__main__":
+    main()
