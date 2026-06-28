@@ -1,0 +1,116 @@
+\section{Methodology and Experimental Setup}
+\label{sec:methodology}
+
+This section describes the theoretical framework of the benchmarked Key-Value (KV) Cache compression algorithms, the hardware serving infrastructure, and the evaluation metrics used to quantify performance and quality trade-offs on Vietnamese LLMs.
+
+\subsection{Theoretical Foundations of KV Cache Compression}
+
+In Transformer-based Large Language Models, the autoregressive generation phase stores the key and value states of all past tokens to avoid recomputation. For a sequence of length $L$, batch size $B$, number of attention heads $H$, and head dimension $D$, the memory footprint of the KV Cache scales as $\mathcal{O}(2 \times B \times L \times H \times D)$. At large context lengths (e.g., $16k$ or $32k$ tokens), the KV Cache dominates the GPU VRAM consumption, leading to severe serving constraints or Out-Of-Memory (OOM) errors.
+
+Post-Training Quantization (PTQ) reduces the memory footprint of the KV Cache by mapping high-precision 16-bit floating-point (BF16/FP16) key-value states to low-bit representations (e.g., 8-bit, 4-bit, or 3-bit). We detail the baseline and advanced quantization methods evaluated in this study below.
+
+\subsubsection{Rotary Position Embedding (RoPE) and Cartesian Outliers}
+Modern LLMs, such as LLaMA and Qwen, incorporate Rotary Position Embedding (RoPE) to encode relative positional information. For a 2D coordinate pair $(x_{2j-1}, x_{2j})$ of a key vector $\mathbf{k} \in \mathbb{R}^D$ at position $m$, RoPE applies a rotation matrix:
+\begin{equation}
+R_{\theta_j, m} = \begin{pmatrix} \cos m\theta_j & -\sin m\theta_j \\ \sin m\theta_j & \cos m\theta_j \end{pmatrix}
+\end{equation}
+While RoPE enables effective relative position encoding, it introduces a major challenge for standard quantization. The rotation causes key embeddings to exhibit a highly non-uniform distribution with severe coordinate outliers when represented in standard Cartesian coordinates. Applying standard linear quantization in the Cartesian space leads to large quantization errors and subsequent language quality degradation.
+
+\subsubsection{PolarQuant: Polar Coordinate Transformation}
+To address the coordinate outliers induced by RoPE, PolarQuant \cite{han2025polarquant} transforms the Cartesian coordinate pairs of the key vectors into polar coordinates. For each pair $(k_{2j-1}, k_{2j})$ of the key vector $\mathbf{k}$, the polar transformation computes the magnitude $r_j$ and the phase angle $\phi_j$:
+\begin{equation}
+r_j = \sqrt{k_{2j-1}^2 + k_{2j}^2}
+\end{equation}
+\begin{equation}
+\phi_j = \text{atan2}(k_{2j}, k_{2j-1})
+\end{equation}
+The key insight of PolarQuant is that the phase angles $\phi_j$ are uniformly distributed in the interval $[-\pi, \pi]$ and are highly stable across different sequences and contexts. Consequently, $\phi_j$ can be quantized uniformly using a simple uniform quantizer without storing expensive scaling parameters (scale and zero-point) per block. The magnitude $r_j$ is positive-valued and is quantized using a non-uniform Lloyd-Max scalar quantizer tailored to its empirical distribution.
+
+\subsubsection{TurboQuant: Random Orthogonal Rotation}
+TurboQuant \cite{zandieh2025turboquant} expands on the polar coordinate approach by applying a random orthogonal rotation matrix $\mathbf{U} \in \mathbb{R}^{D \times D}$ to the input key vectors prior to quantization:
+\begin{equation}
+\mathbf{k}' = \mathbf{U} \mathbf{k}
+\end{equation}
+According to the Central Limit Theorem, applying a random rotation concentrates the coordinate distributions of $\mathbf{k}'$ towards a Gaussian or Beta distribution, eliminating directional outliers and coordinate correlations. This coordinate concentration allows scalar quantization to achieve a near-optimal mean-squared error (MSE) distortion rate without needing complex calibration datasets.
+
+\subsubsection{Quantized Johnson-Lindenstrauss (QJL) Error Correction}
+Although random rotations minimize quantization error, low-bit quantization (e.g., 3-bit or 4-bit) still introduces non-negligible error in estimating the query-key inner products, which directly affects the attention logits. To compensate for this estimation error $\epsilon = \mathbf{q}^T \mathbf{k} - \tilde{\mathbf{q}}^T \tilde{\mathbf{k}}$ (where $\tilde{\mathbf{q}}$ and $\tilde{\mathbf{k}}$ are the quantized vectors), TurboQuant integrates a Quantized Johnson-Lindenstrauss (QJL) correction mechanism. 
+
+The residual error vector $\mathbf{v} = \mathbf{k} - \tilde{\mathbf{k}}$ is projected using a random 1-bit projection matrix $\mathbf{S}$:
+\begin{equation}
+s(\mathbf{v}) = \text{sign}(\mathbf{S} \mathbf{v})
+\end{equation}
+The query-key attention logit is corrected online during decoding by computing:
+\begin{equation}
+\text{Attention}(Q, K) \approx \tilde{\mathbf{q}}^T \tilde{\mathbf{k}} + \alpha \cdot \text{sign}(\mathbf{S} \mathbf{q})^T \text{sign}(\mathbf{S} \mathbf{v})
+\end{equation}
+where $\alpha$ is a scaling constant. The 1-bit representation of the correction vector requires only 1 bit per dimension of VRAM and can be processed using high-speed bitwise operations, correcting attention errors with minimal hardware overhead.
+
+\subsection{Hardware and Serving Infrastructure}
+All experiments in this benchmark are executed on an enterprise-grade cloud GPU node to ensure reproducibility:
+\begin{itemize}
+    \item \textbf{GPU:} NVIDIA RTX 4090 (Ada Lovelace architecture) with 24 GB of GDDR6X VRAM.
+    \item \textbf{Operating System:} Ubuntu 22.04 LTS.
+    \item \textbf{CUDA Environment:} CUDA Toolkit 12.2 with NVIDIA Driver version 535.104.
+    \item \textbf{Serving Engine:} vLLM v0.7.0, utilizing PagedAttention \cite{kwon2023pagedattention} with a logical block size of 16 to manage memory allocations dynamically.
+\end{itemize}
+
+\subsection{Benchmarked Models and Dataset}
+The benchmark evaluates three high-performance Vietnamese LLM variants:
+\begin{enumerate}
+    \item \textbf{PhoGPT-7B5-Instruct:} A foundational model trained on 102 billion Vietnamese tokens, using ALiBi positional embeddings \cite{nguyen2023phogpt}.
+    \item \textbf{Qwen2.5-7B-Instruct:} A state-of-the-art multilingual model with an native 128k context window and excellent Vietnamese capabilities \cite{qwen2024qwen25}.
+    \item \textbf{URA-Llama-3-8B-Instruct:} A Vietnamese instruction-tuned model built on Llama-3, developed by the URA research group at HCMUT.
+\end{enumerate}
+The test suite consists of `test_set_small.json`, a curated collection of long-context Vietnamese documents spanning $4k$, $8k$, and $16k$ token lengths, processed using NVIDIA NeMo Curator to filter out low-quality text and near-duplicates.
+
+\subsection{Evaluation Metrics}
+
+We evaluate the models across performance (latency and throughput), hardware efficiency (VRAM), and linguistic quality (perplexity).
+
+\subsubsection{Time to First Token (TTFT)}
+TTFT measures the time elapsed from submitting the prompt to receiving the first generated token, quantifying prefill phase latency:
+\begin{equation}
+\text{TTFT} = t_{\text{first\_token}} - t_{\text{prompt\_received}} \quad (\text{ms})
+\end{equation}
+
+\subsubsection{Inter-Token Latency (ITL)}
+ITL measures the average time taken to generate successive tokens during the decoding phase:
+\begin{equation}
+\text{ITL} = \frac{1}{M - 1} \sum_{i=2}^{M} (t_i - t_{i-1}) \quad (\text{ms/token})
+\end{equation}
+where $M$ is the total number of decoded tokens.
+
+\subsubsection{Generation Throughput}
+Throughput measures the overall generation speed in tokens per second:
+\begin{equation}
+\text{Throughput} = \frac{M}{\Delta T} \quad (\text{tokens/s})
+\end{equation}
+where $\Delta T$ is the total time spent in the decoding phase.
+
+\subsubsection{Perplexity (PPL)}
+Perplexity serves as the primary linguistic metric to evaluate text quality degradation under quantization. It is defined as the exponentiated cross-entropy loss over a sequence of $N$ tokens:
+\begin{equation}
+\text{PPL} = \exp\left(-\frac{1}{N} \sum_{i=1}^{N} \ln P(x_i \mid x_{<i})\right)
+\end{equation}
+where $P(x_i \mid x_{<i})$ is the probability assigned by the model to the target token $x_i$ given the preceding context.
+
+\subsubsection{GPU Memory Efficiency Index (GMEI)}
+To capture the joint efficiency of serving speed and VRAM overhead, we define GMEI as the ratio of decoding throughput to peak dynamic VRAM:
+\begin{equation}
+\text{GMEI} = \frac{\text{Throughput}}{\text{Peak Dynamic VRAM (MB)}} \quad (\text{tokens/s/MB})
+\end{equation}
+where Peak Dynamic VRAM is computed by subtracting the static model loading memory from the peak VRAM recorded during generation.
+
+\subsubsection{KV Cache Compression Ratio (KCCR)}
+KCCR measures the relative VRAM savings achieved by the compressed format compared to the baseline 16-bit format:
+\begin{equation}
+\text{KCCR} = \frac{\text{Size}_{\text{compressed\_KV}}}{\text{Size}_{\text{BF16\_KV}}} \times 100\% \quad (\%)
+\end{equation}
+
+\subsubsection{Downstream Accuracy Metrics}
+For downstream tasks (such as extractive Q\&A from VMLU and SQuAD), we report the F1-Score and Exact Match (EM) metrics. Exact Match is a binary indicator:
+\begin{equation}
+\text{EM} = \begin{cases} 1 & \text{if } \text{prediction} = \text{ground truth} \\ 0 & \text{otherwise} \end{cases}
+\end{equation}
+and the F1-score is computed based on token-level precision and recall.

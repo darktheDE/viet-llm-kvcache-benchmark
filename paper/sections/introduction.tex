@@ -1,0 +1,6 @@
+\section{Introduction}
+\label{sec:intro}
+
+The deployment of Large Language Models (LLMs) has revolutionized natural language processing (NLP) applications worldwide, including in Vietnam. However, during autoregressive decoding, the Key-Value (KV) Cache grows linearly with both the context length and the batch size, presenting a critical memory bottleneck for serving engines. 
+
+This issue is particularly pronounced for Vietnamese LLMs. Due to tokenization differences and morphological structures, Vietnamese sequences often yield a larger number of tokens per semantic unit compared to English, inflating the KV Cache overhead. This paper establishes a systematic benchmark to evaluate state-of-the-art Post-Training Quantization (PTQ) and compression methods, such as TurboQuant and PolarQuant, on Vietnamese LLMs to determine their hardware efficiency and output quality trade-offs.
