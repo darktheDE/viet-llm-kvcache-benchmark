@@ -179,19 +179,39 @@ Main package versions:
 ### Run full pipeline
 
 ```bash
+# 1. Download raw records
 python scripts/download_datasets.py --max-records-per-source 5000
+
+# 2. Clean records using NeMo Curator
 python scripts/clean_with_nemo.py --input-dir data/raw --output data/processed/cleaned.jsonl --backend auto
+
+# 3. Build canonical long-context test suite
 python scripts/build_long_context_testset.py --input data/processed/cleaned.jsonl --output datasets/test_set_small.json
-python scripts/validate_testset.py --input datasets/test_set_small.json
+
+# 4. Validate canonical dataset
+python scripts/validate_testset.py --input datasets/test_set_small.json --schema long_context
+
+# 5. Validate task benchmark dataset
+python scripts/validate_testset.py --input datasets/test_set_tasks_small.json --schema task
 ```
 
 ### Run smoke test
 
 ```bash
+# 1. Download smoke records
 python scripts/download_datasets.py --max-records-per-source 200
+
+# 2. Clean smoke records
 python scripts/clean_with_nemo.py --input-dir data/raw --output data/processed/cleaned.jsonl --backend auto
-python scripts/build_long_context_testset.py --input data/processed/cleaned.jsonl --output datasets/test_set_small.json --allow-smoke-test
-python scripts/validate_testset.py --input datasets/test_set_small.json --allow-smoke-test
+
+# 3. Build canonical smoke test suite
+python scripts/build_long_context_testset.py --input data/processed/cleaned.jsonl --output datasets/test_set_smoke.json --allow-smoke-test
+
+# 4. Validate canonical smoke dataset
+python scripts/validate_testset.py --input datasets/test_set_smoke.json --schema long_context --allow-smoke-test
+
+# 5. Validate task smoke dataset
+python scripts/validate_testset.py --input datasets/test_set_tasks_smoke.json --schema task --allow-smoke-test
 ```
 
 ### Pipeline status
