@@ -25,8 +25,8 @@ MODELS = [
 
 KV_CACHE_TYPES = ["FP16", "FP8", "HQQ", "PolarQuant", "TurboQuant"]
 CONTEXT_LENGTHS = [4000, 8000, 16000]
-OUTPUT_CSV = "../../results/real_benchmark_log.csv"
-SCRIPT_PATH = "./run_real_benchmark.py"
+OUTPUT_CSV = "results/real_benchmark_log.csv"
+SCRIPT_PATH = "scripts/test/run_real_benchmark.py"
 
 
 def main():
