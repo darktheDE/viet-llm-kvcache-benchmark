@@ -35,6 +35,11 @@ This repository contains the official implementation, datasets, experimental con
     pip install -r requirements.txt
     ```
 
+## Testing & Execution
+- **Run Baseline:** Use `scripts/run_baseline.py` for testing Full KV Cache performance.
+  - Example: `python scripts/run_baseline.py --model "vilm/vinallama-7b-chat" --dataset "datasets/test_set_small.json" --context_length 8000 --max_new_tokens 128 --output "results/baseline.csv"`
+- Always test locally before creating Pull Requests.
+
 ---
 
 ## 3. Project Directory Structure

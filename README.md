@@ -66,7 +66,7 @@ The benchmark pipeline consists of three core stages:
 
 ### Models
 We evaluate the methods across **4 to 6 Vietnamese LLMs** (including foundational and instruction-tuned variants):
-*   `PhoGPT-7B` (or equivalent foundational Vietnamese models)
+*   `VinaLLaMA-7B` (or equivalent foundational Vietnamese models)
 *   `Qwen-VN` (Vietnamese adapted variants)
 *   `Llama-VN` (Vietnamese adapted variants)
 *   `URA-LLaMa-3-8B` (Vietnamese LLM developed by ura-hcmut)
@@ -252,7 +252,7 @@ To run a baseline measurement with uncompressed Full KV Cache on a selected mode
 
 ```bash
 python scripts/run_baseline.py \
-    --model "VinAI/PhoGPT-7B-Instruct" \
+    --model "vilm/vinallama-7b-chat" \
     --dataset "datasets/test_set_small.json" \
     --context_length 8000 \
     --max_new_tokens 128 \

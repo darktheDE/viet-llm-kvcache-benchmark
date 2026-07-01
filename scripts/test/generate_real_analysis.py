@@ -1,11 +1,11 @@
 """
 Script tạo file Jupyter Notebook phân tích kết quả Benchmark THỰC TẾ.
-Đọc file results/real_benchmark_log.csv và vẽ biểu đồ so sánh.
+Đọc file ../../results/real_benchmark_log.csv và vẽ biểu đồ so sánh.
 
 Cách chạy:
     python scripts/test/generate_real_analysis.py
 
-Kết quả: results/real_benchmark_analysis.ipynb
+Kết quả: ../../results/real_benchmark_analysis.ipynb
 """
 
 import json
@@ -24,7 +24,7 @@ def main():
                     "so sánh hiệu năng của 5 phương pháp KV Cache (FP16, FP8, HQQ, PolarQuant, TurboQuant)\n",
                     "trên 5 mô hình LLM tiếng Việt ở 3 mốc ngữ cảnh (4K, 8K, 16K).\n",
                     "\n",
-                    "**Nguồn dữ liệu:** `results/real_benchmark_log.csv`\n",
+                    "**Nguồn dữ liệu:** `../../results/real_benchmark_log.csv`\n",
                     "\n",
                     "---"
                 ]
@@ -75,7 +75,7 @@ def main():
                     "plt.rcParams.update({'figure.dpi': 120, 'font.size': 12})\n",
                     "\n",
                     "# Nap du lieu thuc te\n",
-                    "df = pd.read_csv('real_benchmark_log.csv')\n",
+                    "df = pd.read_csv('../../results/real_benchmark_log.csv')\n",
                     "df['peak_memory_mb'] = pd.to_numeric(df['peak_memory_mb'], errors='coerce')\n",
                     "df['latency_ms_per_token'] = pd.to_numeric(df['latency_ms_per_token'], errors='coerce')\n",
                     "df['throughput_tokens_per_s'] = pd.to_numeric(df['throughput_tokens_per_s'], errors='coerce')\n",
@@ -111,7 +111,7 @@ def main():
                     "    plt.xticks(rotation=15)\n",
                     "    plt.legend(title='KV Cache Type')\n",
                     "    plt.tight_layout()\n",
-                    "    plt.savefig('plots/real_vram_comparison_16k.png', dpi=150)\n",
+                    "    plt.savefig('../../results/plots/real_vram_comparison_16k.png', dpi=150)\n",
                     "    plt.show()\n",
                     "else:\n",
                     "    print('Khong co du lieu context 16K. Kiem tra lai file CSV.')"
@@ -147,7 +147,7 @@ def main():
                     "    plt.xticks([4000, 8000, 16000])\n",
                     "    plt.grid(True, linestyle='--', alpha=0.7)\n",
                     "    plt.tight_layout()\n",
-                    "    plt.savefig('plots/real_vram_scaling.png', dpi=150)\n",
+                    "    plt.savefig('../../results/plots/real_vram_scaling.png', dpi=150)\n",
                     "    plt.show()\n",
                     "else:\n",
                     "    print('Khong co du lieu hop le.')"
@@ -183,7 +183,7 @@ def main():
                     "        plt.xlabel('Peak Memory (MB) -> (Cang nho cang tot)')\n",
                     "        plt.ylabel('Latency (ms/token) -> (Cang nho cang tot)')\n",
                     "        plt.tight_layout()\n",
-                    "        plt.savefig('plots/real_pareto_frontier.png', dpi=150)\n",
+                    "        plt.savefig('../../results/plots/real_pareto_frontier.png', dpi=150)\n",
                     "        plt.show()\n",
                     "    else:\n",
                     "        print('Khong co du lieu 16K cho Pareto.')"
@@ -214,7 +214,7 @@ def main():
                     "    plt.xticks(rotation=15)\n",
                     "    plt.legend(title='KV Cache Type')\n",
                     "    plt.tight_layout()\n",
-                    "    plt.savefig('plots/real_throughput_8k.png', dpi=150)\n",
+                    "    plt.savefig('../../results/plots/real_throughput_8k.png', dpi=150)\n",
                     "    plt.show()\n",
                     "else:\n",
                     "    print('Khong co du lieu throughput.')"
@@ -245,7 +245,7 @@ def main():
                     "    plt.ylabel('Perplexity (PPL) -> Cang thap cang tot')\n",
                     "    plt.xlabel('KV Cache Type')\n",
                     "    plt.tight_layout()\n",
-                    "    plt.savefig('plots/real_perplexity_boxplot.png', dpi=150)\n",
+                    "    plt.savefig('../../results/plots/real_perplexity_boxplot.png', dpi=150)\n",
                     "    plt.show()\n",
                     "else:\n",
                     "    print('Khong co du lieu PPL.')"
@@ -309,7 +309,7 @@ def main():
         "nbformat_minor": 4
     }
 
-    output_path = "results/real_benchmark_analysis.ipynb"
+    output_path = "../../results/real_benchmark_analysis.ipynb"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(notebook, f, indent=1, ensure_ascii=False)
 

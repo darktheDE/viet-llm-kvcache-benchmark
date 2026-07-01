@@ -1,7 +1,5 @@
 # Báo Cáo Hoàn Thành Task: Benchmark KV Cache Compression
 
-Dựa trên các source code và kết quả đo đạc, dưới đây là tổng hợp chi tiết về tiến độ, các công việc đã thực hiện và kết quả đạt được của 2 task yêu cầu.
-
 ## 1. Các Task Đã Hoàn Thành
 
 Đã hoàn thành xuất sắc 2 task kỹ thuật chính theo đúng yêu cầu (đáp ứng đầy đủ Definition of Done):
@@ -20,7 +18,7 @@ Dựa trên các source code và kết quả đo đạc, dưới đây là tổn
 
 ### Tự Động Hóa Quá Trình Benchmark với `scripts/run_mock_grid.py`
 - Xây dựng thành công hệ thống chạy quét (Grid Search) đa tiến trình để đo đạc tự động tất cả các kịch bản thực nghiệm kết hợp giữa:
-  - **5 Mô hình tiếng Việt tiêu biểu:** PhoGPT-7B5, Qwen2.5-7B, Llama-3.1-8B, URA-LLaMa-3-8B, Vistral-7B-Chat.
+  - **5 Mô hình tiếng Việt tiêu biểu:** VinaLLaMA-7B, Qwen2.5-7B, Llama-3.1-8B, URA-LLaMa-3-8B, Vistral-7B-Chat.
   - **5 Phương pháp KV Cache:** FP16, FP8, HQQ, PolarQuant, TurboQuant.
   - **3 Mốc độ dài ngữ cảnh:** 4000, 8000, 16000 tokens.
 

@@ -22,7 +22,7 @@ Hệ thống Benchmark hoạt động theo một luồng Pipeline một chiều 
 
 Dự án đánh giá hiệu suất nén trên 5 mô hình ngôn ngữ (tập trung vào năng lực tiếng Việt):
 
-1. **`VinAI/PhoGPT-7B5-Instruct`**: Mô hình 7.5B tham số thuần Việt, sử dụng cơ chế ALiBi giúp ngoại suy ngữ cảnh dài cực tốt. Đây là baseline chuẩn không thể thiếu.
+1. **`vilm/vinallama-7b-chat`**: Mô hình 7B tham số thuần Việt do nhóm VILM phát triển, dựa trên kiến trúc LLaMA-2 và được huấn luyện trên 800 tỷ token tiếng Việt. Thay thế PhoGPT (do gated access) làm baseline thuần Việt.
 2. **`Qwen/Qwen2.5-7B-Instruct`**: Mô hình mã nguồn mở mạnh mẽ, có bản tinh chỉnh tiếng Việt xịn, hỗ trợ context cực lớn (lên tới 32k-128k). *Lưu ý: Mô hình này dễ gây phân mảnh bộ nhớ, cần cấu hình kỹ biến `max_num_batched_tokens`.*
 3. **`meta-llama/Meta-Llama-3.1-8B-Instruct`**: SOTA model thế giới ở mức 8B tham số, có khả năng xử lý tiếng Việt rất tốt, thường được dùng làm thước đo chuẩn quốc tế.
 4. **`ura-hcmut/URA-LLaMa-3-8B`**: Phiên bản Llama được nhóm nghiên cứu của Đại học Bách Khoa TP.HCM (ura-hcmut) tiếp tục huấn luyện (continual pre-training) dành riêng cho dữ liệu tiếng Việt.
@@ -33,15 +33,15 @@ Dự án đánh giá hiệu suất nén trên 5 mô hình ngôn ngữ (tập tru
 ## 3. Step-by-Step Mô Phỏng Luồng Chạy Thực Tế
 
 Để xác nhận xem Plan có đi đúng hướng không, hãy tưởng tượng bạn gõ dòng lệnh sau vào Terminal:
-`python scripts/run_baseline.py --model VinAI/PhoGPT-7B5-Instruct --context_length 8000 --kv_cache_type TurboQuant`
+`python scripts/run_baseline.py --model vilm/vinallama-7b-chat --context_length 8000 --kv_cache_type TurboQuant`
 
 Đây là chuyện gì sẽ diễn ra bên trong hệ thống:
 
 *   **Bước 1 (Nhận lệnh & Data):** Hệ thống nhận tham số `--context_length 8000`. Nó vào file `datasets/test_set_small.json`, bốc ra vài văn bản tiếng Việt dài đúng 8000 chữ.
-*   **Bước 2 (Tải Model):** Hệ thống tải `PhoGPT-7B5` (giữ nguyên độ nặng 15GB của nó) nhét vào con Card RTX 4090.
+*   **Bước 2 (Tải Model):** Hệ thống tải `VinaLLaMA-7B` (giữ nguyên độ nặng 14GB của nó) nhét vào con Card RTX 4090.
 *   **Bước 3 (Đọc & Nén - Trọng tâm):** Bắt đầu quá trình Inference. Mô hình đọc 8000 chữ đó. Lúc này, quá trình đọc sinh ra cực kỳ nhiều "bộ nhớ tạm" (KV Cache). Ngay lập tức, lệnh `--kv_cache_type TurboQuant` kích hoạt lõi CUDA của TurboQuant bên dưới vLLM, **bóp nghẹt cái đống "bộ nhớ tạm" đó từ 16-bit xuống còn 4-bit theo thời gian thực (real-time)** để tiết kiệm chỗ chứa.
 *   **Bước 4 (Giám sát):** Mã nguồn `run_baseline.py` của chúng ta (dùng `pynvml`) đứng ngoài quan sát và ghi nhận: *"À, nhờ có TurboQuant nén bộ nhớ tạm lại, nên lúc đọc 8000 chữ, GPU chỉ tốn tổng cộng 16GB VRAM (chứ không bị lố lên 30GB gây nổ card như bình thường). Thời gian nhả chữ là 30ms/token"*.
-*   **Bước 5 (Xuất Kết quả):** Các con số *(PhoGPT, TurboQuant, 8000, 16GB, 30ms)* được xuất thành 1 dòng trong file `results/template_log.csv`. Hoàn tất một vòng lặp đo đạc!
+*   **Bước 5 (Xuất Kết quả):** Các con số *(VinaLLaMA, TurboQuant, 8000, 16GB, 30ms)* được xuất thành 1 dòng trong file `results/template_log.csv`. Hoàn tất một vòng lặp đo đạc!
 
 ---
 

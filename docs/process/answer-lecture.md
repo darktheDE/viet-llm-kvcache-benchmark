@@ -35,8 +35,8 @@
 ### 3. Danh sách các Vietnamese LLMs & Tập Dữ liệu đã được kiểm chứng (Để đối chiếu)
 
 #### 3.1. Các mô hình tiếng Việt xuất sắc
-1.  **`vinai/PhoGPT-7B5-Instruct` (7.5 Billion parameters):**
-    *   *Lý do:* Mô hình thuần Việt do VinAI phát triển, được huấn luyện từ đầu trên 102 tỷ token tiếng Việt. Sử dụng cơ chế ALiBi cho phép ngoại suy độ dài ngữ cảnh tốt. Đây là baseline thuần Việt không thể thiếu.
+1.  **`vilm/vinallama-7b-chat` (7 Billion parameters):**
+    *   *Lý do:* Mô hình thuần Việt do nhóm VILM phát triển, dựa trên kiến trúc LLaMA-2 và được tiếp tục huấn luyện trên 800 tỷ token tiếng Việt. Đạt điểm cao trên các benchmark tiếng Việt (VLSP, VMLU). Đây là baseline thuần Việt thay thế PhoGPT (do PhoGPT bị gated access).
 2.  **`Qwen/Qwen2.5-7B-Instruct` (hoặc bản tinh chỉnh tiếng Việt `Qwen2.5-7B-Instruct-vietnamese`):**
     *   *Lý do:* Qwen2.5 là dòng mô hình mã nguồn mở hàng đầu hiện nay, hỗ trợ tiếng Việt cực kỳ tốt và có cửa sổ ngữ cảnh hỗ trợ lên tới 128k tokens. Đây là mô hình lý tưởng để đo đạc sự thay đổi khi kéo dài ngữ cảnh từ 4k lên 32k.
 3.  **`meta-llama/Meta-Llama-3.1-8B-Instruct`:**
