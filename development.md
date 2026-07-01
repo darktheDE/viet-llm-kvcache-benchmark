@@ -1,69 +1,166 @@
-# DEVELOPMENT GUIDELINE
+# Hướng dẫn Phát triển (Development Guidelines)
+
+Tài liệu này đóng vai trò là cẩm nang phát triển và tài liệu onboarding kỹ thuật cho dự án **Vietnamese LLM KV Cache Benchmarking**. Nó chi tiết hóa việc thiết lập môi trường, chiến lược phân nhánh Git, các quy ước lập trình, quy trình kiểm thử và các tiêu chuẩn đảm bảo chất lượng.
 
 ---
 
-## I. QUY TRÌNH PHÁT TRIỂN TÍNH NĂNG (FEATURE WORKFLOW)
+## 1. Công nghệ & Kiến trúc dự án (Project Stack & Architecture)
 
-Quy trình triển khai và hoàn thành một Task được thực hiện tuần tự theo mô hình Agile/Git-Flow dưới đây:
+Chúng tôi tập trung vào đánh giá các kỹ thuật nén KV Cache trên các mô hình ngôn ngữ lớn (LLM) tiếng Việt sử dụng cấu trúc công nghệ sau:
+*   **Core (Lõi)**: Python 3.10, PyTorch, vLLM, llama.cpp, HQQ.
+*   **Xử lý dữ liệu (Data Processing)**: NVIDIA NeMo Curator, Hugging Face `datasets` & `transformers`.
+*   **Hạ tầng (Infrastructure)**: RunPod / Vast.ai (Cần GPUs có bộ nhớ lớn $\ge$ 24GB VRAM như RTX 3090/4090 hoặc L4).
+*   **Giám sát & Phân tích (Monitoring & Analysis)**: `pynvml` (giám sát chỉ số GPU), `pandas` (tổng hợp dữ liệu thống kê), `matplotlib`/`plotly` (trực quan hóa kết quả).
 
-### 1. Đọc và nhận Task
-* Nhận nhiệm vụ được phân bổ trên bảng Kanban [Plane.so](https://app.plane.so).
-* Đọc kỹ các thông tin: **Mô tả**, **Từng bước thực hiện**, và **Tiêu chuẩn hoàn thành** như đã được định nghĩa cụ thể trong các tài liệu Sprint.
-
-### 2. Tạo nhánh làm việc (Branching Strategy)
-Mọi đoạn code đóng góp vào kho lưu trữ phải xuất phát từ nhánh `develop` và tuân thủ quy tắc đặt tên:
-* Tạo nhánh mới từ nhánh `develop` trên GitHub/Local:
-  ```bash
-  git checkout develop
-  git pull origin develop
-  git checkout -b feature/ten-tính-năng
-  ```
-  *(Ví dụ: `feature/run-baseline-setup`, `feature/pareto-plotting`)*
-
-### 3. Thực thi coding & Cải tiến
-* Thực hiện từng bước (Step-by-Step) theo yêu cầu của Task.
-* **Quyền cải tiến:** Hướng dẫn trong Task chỉ mang tính chất tham khảo kỹ thuật. Lập trình viên được khuyến khích chỉnh sửa, tối ưu hóa thuật toán hoặc cải thiện cấu trúc file nếu phương án đó đem lại hiệu năng hoặc độ sạch của code tốt hơn.
-
-### 4. Tạo Pull Request (PR) & Review chéo
-Khi hoàn thành code và tự kiểm thử (Self-test) thành công ở local:
-1. Push nhánh feature lên GitHub:
-   ```bash
-   git add .
-   git commit -m "feat: mô tả ngắn gọn thay đổi"
-   git push origin feature/ten-tính-năng
-   ```
-2. Tạo Pull Request (PR) từ nhánh `feature/...` vào nhánh `develop`.
-3. Chỉ định Reviewer vào PR.
-
-### 5. Merge code & Hoàn thành Task
-* Khi PR nhận đủ sự phê duyệt (Approved) của reviewer và không có xung đột (Conflict):
-  * Thực hiện merge PR vào nhánh `develop`.
-  * Chuyển trạng thái thẻ công việc trên **Plane.so** sang `Done`.
-  * Xóa nhánh feature tương ứng trên GitHub.
-  * Tiếp tục nhận task mới trên Plane.so.
+Đối với các thành phần chi tiết của hệ thống, vui lòng tham khảo [Tài liệu Kiến trúc Hệ thống](docs/sys-arch.md).
 
 ---
 
-## II. CÁC QUY CHUẨN CODING PHỔ BIẾN (CODE STANDARDS)
+## 2. Khởi động nhanh (Getting Started)
 
-### 1. Quy chuẩn Python (PEP 8)
-* **Đặt tên (Naming Convention):**
-  * Tên hàm, biến, thuộc tính: Dạng `snake_case`.
-  * Tên Class: Dạng `PascalCase`.
-  * Tên hằng số: Chữ in hoa `UPPER_CASE`.
-* **Format code:** Sử dụng thụt lề (indentation) bằng **4 khoảng trắng (spaces)**.
-* **Docstring & Comments:** 
-  * Mọi hàm hoặc class chính phải có docstring giải thích ngắn gọn mục tiêu, các tham số đầu vào (`Args`) và giá trị trả về (`Returns`).
-  * Giữ nguyên các comment học thuật giải thích công thức toán học nén KV cache.
+### 2.1 Điều kiện tiên quyết (Prerequisites)
+*   Một phiên bản Python đang hoạt động tốt (khuyến nghị Python 3.10).
+*   Đối với các lượt chạy trên GPU, cần môi trường tương thích CUDA 12.x.
+*   Cài đặt Docker (phục vụ cho container chạy pipeline xử lý dữ liệu).
 
-### 2. Quản lý Git Commit (Conventional Commits)
-Thông điệp commit (Commit message) cần viết rõ ràng theo định dạng:
-* `feat:` Khi thêm tính năng mới
-* `fix:` Khi sửa lỗi
-* `docs:` Khi chỉnh sửa tài liệu
-* `refactor:` Khi tối ưu hoặc tái cấu trúc code mà không đổi tính năng.
+### 2.2 Thiết lập môi trường cục bộ (Local Environment Setup)
+Để khởi tạo môi trường làm việc cục bộ của bạn:
+```bash
+# Clone kho lưu trữ
+git clone https://github.com/darktheDE/viet-llm-kvcache-benchmark.git
+cd viet-llm-kvcache-benchmark
 
-### 3. Nguyên tắc phát triển phần mềm (Clean Code)
-* **KISS (Keep It Simple, Stupid):** Viết code đơn giản, tường minh. Tránh tạo các lớp trừu tượng quá mức không cần thiết cho mục đích benchmark.
-* **Don't Repeat Yourself (DRY):** Tránh lặp lại code. Gom các đoạn mã tính toán chỉ số (như đo VRAM, TTFT, PPL) thành các hàm tiện ích dùng chung trong thư mục `scripts/`.
-* **Quản lý file phụ thuộc:** Mọi thư viện cài thêm phục vụ chạy code bắt buộc phải được ghi nhận chính xác phiên bản vào file `scripts/requirements.txt`.
+# Tạo môi trường Conda mới
+conda create -n dbml_project python=3.10 -y
+conda activate dbml_project
+
+# Cài đặt các thư viện phụ thuộc của dự án
+pip install -r requirements.txt
+```
+
+### 2.3 Docker Data Pipeline
+Pipeline tiền xử lý văn bản và xây dựng bộ kiểm thử (test-suite) được chạy bên trong môi trường Docker tương thích với CPU sử dụng NVIDIA NeMo Curator:
+```bash
+# Build Docker image
+docker compose build
+
+# Khởi chạy một shell tương tác bên trong container data-pipeline
+docker compose run --rm data-pipeline bash
+```
+
+---
+
+## 3. Quy trình Phát triển & Git-Flow (Development Workflow & Git-Flow)
+
+Mọi đóng góp mã nguồn của các thành viên phải tuân thủ quy trình Git chi tiết dưới đây:
+
+### 3.1 Chiến lược phân nhánh (Branching Strategy)
+*   **Nhánh nguồn**: Tất cả các nhánh tính năng đều phải được phân nhánh từ nhánh phát triển chung `develop`.
+*   **Quy ước đặt tên nhánh**: Đặt tiền tố cho các nhánh tính năng là `feature/` theo sau là tên mô tả ngắn gọn:
+    ```bash
+    git checkout develop
+    git pull origin develop
+    git checkout -b feature/ten-tinh-nang-cua-ban
+    ```
+    *(Ví dụ: `feature/run-baseline-setup`, `feature/pareto-plotting`)*
+
+### 3.2 Chu kỳ Tính năng (Feature Lifecycle)
+```mermaid
+graph TD
+    A[Đọc & Nhận Task trên Plane.so] --> B[Tạo nhánh feature/ từ develop]
+    B --> C[Triển khai & tối ưu hóa code ở cục bộ]
+    C --> D[Tự kiểm thử ở cục bộ hoặc chạy mock grid]
+    D --> E[Commit bằng cách dùng Conventional Commits]
+    E --> F[Push nhánh & Mở PR vào nhánh develop]
+    F --> G[Xem xét mã nguồn & phê duyệt]
+    G --> H[Merge vào nhánh develop & xóa nhánh feature]
+    H --> I[Đánh dấu Task đã hoàn thành trên Plane.so]
+    I --> J[Đánh dấu Task đã hoàn thành trong /docs/plans/ trong codebase]
+    J --> K[Cập nhật file metadata trong README.md của thư mục tương ứng]
+    K --> L[Viết tài liệu tiến trình trong /docs/process/]
+```
+
+> [!IMPORTANT]
+> **Quy trình hoàn thành Task bắt buộc:**
+> Khi kết thúc một task, ngoài việc đánh dấu hoàn thành trên **Plane.so**, người thực hiện task bắt buộc phải thực hiện thêm các bước sau trực tiếp trong codebase:
+> 1. **Đánh dấu hoàn thành trong `/docs/plans/`**: Cập nhật trạng thái task từ chưa hoàn thành `[ ]` thành đã hoàn thành `[x]` trong các file kế hoạch sprint tương ứng (ví dụ: `sprint01.md`, `sprint02.md`,...) nằm trong thư mục [docs/plans/](docs/plans).
+> 2. **Cập nhật file metadata trong `README.md` của thư mục**: Nếu task có tạo mới hoặc sửa đổi các file trong dự án, bắt buộc phải cập nhật/bổ sung thông tin chi tiết của các file đó (Tên file, Người tạo - Tên và Email, Vai trò/Mục đích) vào bảng file metadata trong file `README.md` của thư mục chứa file đó.
+> 3. **Viết tài liệu tiến trình trong `/docs/process/`**: Tạo một file tài liệu tiến trình (Process Document) chi tiết ghi lại quy trình thực hiện task, các cấu hình đã chạy và kết quả đạt được. Tài liệu này bắt buộc phải được viết **BẰNG TIẾNG VIỆT** và lưu vào thư mục [docs/process/](docs/process).
+
+### 3.3 Hướng dẫn Thông điệp Commit (Conventional Commits)
+Mỗi thông điệp commit phải thể hiện rõ ràng mục đích của thay đổi:
+*   `feat: <mô tả>` - Thêm tính năng mới.
+*   `fix: <mô tả>` - Sửa một lỗi kỹ thuật.
+*   `docs: <mô tả>` - Thay đổi hoặc bổ sung tài liệu hướng dẫn.
+*   `refactor: <mô tả>` - Tái cấu trúc mã nguồn nhưng không làm thay đổi hành vi/tính năng.
+*   `chore: <mô tả>` - Cập nhật thư viện phụ thuộc, file cấu hình, v.v.
+
+---
+
+## 4. Phong cách lập trình & Quy ước viết mã (PEP 8)
+
+### 4.1 Tiêu chuẩn Python
+*   **Định dạng**: Sử dụng chính xác **4 khoảng trắng (spaces)** để thụt lề. **Tuyệt đối không dùng tab**.
+*   **Biến & Hàm**: Sử dụng dạng `snake_case` (ví dụ: `peak_memory_mb`, `get_gpu_metrics`).
+*   **Class**: Sử dụng dạng `PascalCase` (ví dụ: `MetricTracer`, `DatasetValidator`).
+*   **Hằng số**: Sử dụng dạng chữ in hoa `UPPER_CASE` (ví dụ: `DEFAULT_CONTEXT_LENGTH`, `MAX_TOKENS`).
+
+### 4.2 Docstrings & Tài liệu hướng dẫn mã nguồn
+Mỗi class và hàm chính bắt buộc phải bao gồm một docstring mô tả chi tiết định nghĩa các tham số đầu vào (`Args`) và giá trị trả về (`Returns`):
+```python
+def log_metric(model_name: str, metric_value: float) -> bool:
+    """Ghi nhận chỉ số đo đạc hiệu năng vào file CSV mẫu.
+
+    Args:
+        model_name (str): Tên hoặc ID của mô hình LLM được đánh giá.
+        metric_value (float): Giá trị thực tế đo được của chỉ số.
+
+    Returns:
+        bool: Trả về True nếu ghi log thành công, ngược lại trả về False.
+    """
+    # phần triển khai code tại đây
+    return True
+```
+
+### 4.3 Tính liêm chính trong học thuật (Academic Integrity)
+> [!CRITICAL]
+> **Giữ nguyên tất cả các bình luận học thuật và phương trình toán học** giải thích các thuật toán nén KV Cache (ví dụ: biến đổi Polar, tối ưu hóa Lloyd-Max, công thức QJL) trong mã nguồn. Không xóa hoặc đơn giản hóa ngữ cảnh lý thuyết.
+
+### 4.4 Các nguyên tắc phần mềm (Software Principles)
+*   **KISS (Keep It Simple, Stupid)**: Viết mã nguồn đơn giản, dễ hiểu và tường minh. Tránh tạo các lớp trừu tượng không cần thiết để đo lường các chỉ số.
+*   **DRY (Don't Repeat Yourself)**: Tránh lặp lại code. Gom các đoạn mã tính toán chỉ số (ví dụ: peak VRAM measurement hooks, TTFT triggers) vào các module dùng chung trong thư mục [scripts/](scripts).
+
+---
+
+## 5. Kiểm thử & Đảm bảo Chất lượng (Testing & QA)
+
+Trước khi gửi Pull Request (PR), hãy đảm bảo thay đổi của bạn đã được kiểm chứng thông qua một trong các quy trình kiểm thử sau:
+
+### 5.1 Kiểm thử chạy cục bộ (Local Run Verification)
+Để chạy thử một đợt đánh giá cục bộ sử dụng baseline không nén (Full KV Cache):
+```bash
+python scripts/run_baseline.py \
+    --model "VinAI/PhoGPT-7B-Instruct" \
+    --dataset "datasets/test_set_small.json" \
+    --context_length 8000 \
+    --max_new_tokens 128 \
+    --output "results/phogpt_baseline.csv"
+```
+
+### 5.2 CPU Mock Testing (Kiểm thử giả lập trên CPU)
+Đối với các lập trình viên làm việc trên môi trường không có Cloud GPU, hãy sử dụng script giả lập (mock script) để kiểm thử pipeline ghi log và kiểm tra logic tính toán:
+```bash
+python scripts/run_mock_grid.py
+```
+
+---
+
+## 6. Tiêu chuẩn hoàn thành (Definition of Done - DoD)
+
+Một task được công nhận hoàn thành chính thức và đủ điều kiện để merge vào nhánh phát triển `develop` chỉ khi:
+*   [ ] Mã nguồn chạy thành công ở cục bộ và không bị crash.
+*   [ ] Bất kỳ thư viện bên thứ ba nào được thêm vào đều phải được khai báo với phiên bản chính xác trong `requirements.txt`.
+*   [ ] Các tình huống tràn bộ nhớ (Out-of-Memory - OOM) được bắt lỗi một cách mượt mà (`try...except torch.cuda.OutOfMemoryError`) và ghi nhận giá trị tương ứng là `"OOM"`.
+*   [ ] Định dạng mã nguồn tuân thủ tiêu chuẩn PEP 8 (4 khoảng trắng, không dùng tab).
+*   [ ] Tất cả các hàm chính đều có docstrings đầy đủ.
+*   [ ] PR được xem xét và phê duyệt bởi ít nhất một thành viên khác trong nhóm.

@@ -69,6 +69,49 @@ def log_result(output_path, result_dict):
             result_dict.get("status", "OK")
         ])
 
+def load_dataset_samples(path: str) -> list[dict]:
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    if isinstance(data, list):
+        return data
+    elif isinstance(data, dict) and "samples" in data:
+        return data["samples"]
+    else:
+        raise ValueError(f"Invalid dataset format in {path}: expected list or dict with 'samples' key")
+
+def filter_samples_by_length(samples: list[dict], context_length: int) -> list[dict]:
+    # Determine the target bucket
+    if context_length <= 5000:
+        target_group = "4k"
+        target_len = 4000
+    elif context_length <= 10000:
+        target_group = "8k"
+        target_len = 8000
+    else:
+        target_group = "16k"
+        target_len = 16000
+        
+    filtered = []
+    for item in samples:
+        cg = item.get("context_group")
+        clt = item.get("context_length_target")
+        tt = item.get("target_tokens")
+        
+        match = False
+        if cg is not None and str(cg).lower() == target_group.lower():
+            match = True
+        elif clt is not None and int(clt) == target_len:
+            match = True
+        elif tt is not None and (abs(int(tt) - target_len) < 1000 or (target_len == 4000 and int(tt) == 4096) or (target_len == 8000 and int(tt) == 8192) or (target_len == 16000 and int(tt) == 16384)):
+            match = True
+            
+        if match:
+            filtered.append(item)
+            
+    if not filtered:
+        filtered = samples
+    return filtered
+
 def run_mock_benchmark(args):
     print(f"\n=======================================================")
     print(f"   🚀 DEMO BENCHMARK KV CACHE COMPRESSION (MOCK MODE)  ")
@@ -77,13 +120,26 @@ def run_mock_benchmark(args):
     # Bước 1: Nạp Dữ Liệu
     print(f"[1. Nạp Dữ Liệu] Đang đọc file dataset: {args.dataset}")
     try:
-        with open(args.dataset, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            num_samples = min(len(data), 3) # Chạy thử 3 mẫu
-        print(f"  -> Thành công! Đã nạp {num_samples} mẫu văn bản tiếng Việt dài.")
-    except FileNotFoundError:
-        print(f"  -> Không tìm thấy {args.dataset}, dùng số lượng mẫu giả định = 3")
-        num_samples = 3
+        samples = load_dataset_samples(args.dataset)
+        filtered_samples = filter_samples_by_length(samples, args.context_length)
+        num_samples = min(len(filtered_samples), 3) # Chạy thử 3 mẫu
+        print(f"  -> Thành công! Đã nạp {num_samples} mẫu văn bản tiếng Việt dài sau khi lọc.")
+    except Exception as e:
+        print(f"  -> Lỗi nạp dataset: {e}")
+        # Ghi log lỗi vào CSV
+        result = {
+            "model": args.model,
+            "kv_cache_type": args.kv_cache_type,
+            "context_length": args.context_length,
+            "peak_memory_mb": 0.0,
+            "latency_ms_per_token": 0.0,
+            "throughput_tokens_per_s": 0.0,
+            "perplexity": "N/A",
+            "status": "DATASET_LOAD_ERROR"
+        }
+        log_result(args.output, result)
+        print(f"  -> Đã ghi nhận lỗi load dataset vào: {args.output}")
+        sys.exit(1)
     time.sleep(1)
         
     # Bước 2: Tải Mô hình (16-bit)
@@ -177,11 +233,26 @@ def run_real_benchmark(args):
         sampling_params = SamplingParams(max_tokens=args.max_new_tokens, temperature=0.0)
         
         # Load dataset
-        with open(args.dataset, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        try:
+            samples = load_dataset_samples(args.dataset)
+            filtered_samples = filter_samples_by_length(samples, args.context_length)
+        except Exception as e:
+            print(f"Lỗi nạp dataset: {e}")
+            result = {
+                "model": args.model,
+                "kv_cache_type": args.kv_cache_type,
+                "context_length": args.context_length,
+                "peak_memory_mb": 0.0,
+                "latency_ms_per_token": 0.0,
+                "throughput_tokens_per_s": 0.0,
+                "perplexity": "N/A",
+                "status": "DATASET_LOAD_ERROR"
+            }
+            log_result(args.output, result)
+            sys.exit(1)
             
         # Lọc các mẫu theo đúng context_length_target (tuỳ chọn)
-        prompts = [item["text"] for item in data[:5]] # Chạy 5 mẫu ví dụ
+        prompts = [item["text"] for item in filtered_samples[:5]] # Chạy 5 mẫu ví dụ
         
         # Thực hiện Generation
         start_time = time.time()

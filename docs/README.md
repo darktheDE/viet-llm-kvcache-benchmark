@@ -6,20 +6,18 @@ Thư mục này chứa toàn bộ các tài liệu hướng dẫn, kế hoạch,
 
 ## Danh mục tài liệu (Documents Directory)
 
-Dưới đây là mô tả chi tiết nội dung và mục đích của từng file trong thư mục `/docs`:
+Dưới đây là mô tả chi tiết nội dung, người tạo và mục đích của từng file trong thư mục `/docs` và các thư mục con:
 
-| Tên File | Loại tài liệu | Mô tả chi tiết |
-| :--- | :--- | :--- |
-| **[sys-arch.md](sys-arch.md)** | **Kiến trúc hệ thống** | Bản mô tả chi tiết kiến trúc benchmark 4 tầng: (1) Tiền xử lý dữ liệu, (2) LLM Serving & Lõi nén, (3) Giám sát & đo đạc chỉ số, (4) Phân tích & Trực quan hóa. |
-| **[master-plan.md](master-plan.md)** | **Kế hoạch tổng thể** | Lộ trình tổng thể 7 tuần phát triển dự án, phân bổ nhân sự (ma trận RACI) và kế hoạch quản trị rủi ro hệ thống. |
-| **[doc-review.md](doc-review.md)** | **Đánh giá & Review** | Báo cáo đánh giá tính hợp lý, khả thi của tài liệu dự án; kết quả grounding search (sửa đổi các mã arXiv bị lỗi trích dẫn) và đề xuất quy chuẩn workflow tránh trùng lặp tài liệu. |
-| **[answer-lecture.md](answer-lecture.md)** | **Giải trình & Đối chiếu** | Các phương án phản hồi ý kiến phản biện của giảng viên hướng dẫn về phần cứng, chi phí, chỉ số đo đạc cụ thể và danh sách mô hình kiểm chứng. |
-| **[onboarding_presentation.html](onboarding_presentation.html)** | **Slide Onboarding (HTML)** | Slide thuyết trình onboarding tương tác được thiết kế tối ưu hiển thị (viewport fitting) theo theme Neon Cyber. |
-| **[presentation_script.md](presentation_script.md)** | **Kịch bản Onboarding (MD)** | Lời thoại thuyết trình (Speaking Script) chi tiết cho từng slide trong onboarding_presentation.html, văn phong nói tự nhiên, dễ hiểu. |
-| **[sprint01.md](sprint01.md)** | **Sprint 01 (Week 1-2)** | Kế hoạch chi tiết giai đoạn khởi động: Thiết lập không gian cộng tác, proposal v2, tiền xử lý dữ liệu bằng NVIDIA NeMo Curator và cấu hình baseline vLLM. |
-| **[sprint02.md](sprint02.md)** | **Sprint 02 (Week 3-4)** | Kế hoạch hoàn thiện script đo đạc tự động `run_baseline.py`, chạy thực nghiệm mốc đầu trên VinaLLaMA-7B/Qwen2.5 và khởi tạo khung LaTeX bài báo trên Overleaf. |
-| **[sprint03.md](sprint03.md)** | **Sprint 03 (Week 5-6)** | Kế hoạch tối ưu hóa VRAM chống lỗi CUDA OOM, tổng hợp số liệu CSV và vẽ biểu đồ Pareto Frontier bằng python; viết chương Kết quả & Thảo luận. |
-| **[sprint04.md](sprint04.md)** | **Sprint 04 (Week 7)** | Giai đoạn đóng gói: Hoàn thiện báo cáo Word tiếng Việt (>=30 trang), slide thuyết trình bảo vệ, hoàn chỉnh Paper tiếng Anh (>=6 trang) và tài liệu Q&A. |
+| Tên File | Loại tài liệu | Người tạo | Mô tả chi tiết |
+| :--- | :--- | :--- | :--- |
+| **[sys-arch.md](sys-arch.md)** | **Kiến trúc hệ thống** | Kien Hung \<kienhung.do1105@gmail.com\> | Bản mô tả chi tiết kiến trúc benchmark 4 tầng: Tiền xử lý, Serving, Giám sát và Trực quan hóa. |
+| **[doc-review.md](doc-review.md)** | **Đánh giá & Review** | Kien Hung \<kienhung.do1105@gmail.com\> | Báo cáo đánh giá tính hợp lý của tài liệu, kết quả grounding search và quy chuẩn workflow. |
+| **[answer-lecture.md](process/answer-lecture.md)** | **Giải trình & Đối chiếu** | Kien Hung \<kienhung.do1105@gmail.com\> | Các phương án phản hồi ý kiến phản biện của giảng viên về phần cứng, chi phí, chỉ số đo đạc. |
+| **[related_works.md](related_works.md)** | **Literature Review** | Kien Hung \<kienhung.do1105@gmail.com\> | Tài liệu tổng quan lý thuyết và nghiên cứu liên quan về nén KV Cache (HQQ, PolarQuant, TurboQuant). |
+| **[plans/README.md](plans/README.md)** | **Thư mục Kế hoạch** | *Mới* | Tài liệu kế hoạch tổng thể, lộ trình sprint và các technical todolist. |
+| **[presentation/README.md](presentation/README.md)** | **Thư mục Slide Deck** | *Mới* | Tài liệu slide deck onboarding, slide proposal và speak script tương ứng. |
+| **[process/README.md](process/README.md)** | **Thư mục Tiến trình** | *Mới* | Tài liệu nhật ký tiến trình đo đạc và phân tích kết quả. |
+| **[report/README.md](report/README.md)** | **Thư mục Báo cáo** | *Mới* | Báo cáo kỹ thuật hệ thống benchmark thực tế trên Cloud GPU và báo cáo tiến độ Data Team. |
 
 ---
 

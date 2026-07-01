@@ -10,13 +10,18 @@ Môn học: **Big Data Applications: Machine Learning at Scale (DBML434077)**
 Qua quá trình thực hiện tìm kiếm và kiểm chứng thông tin (Grounding Search) trên Google và arXiv, chúng tôi phát hiện và làm rõ một số điểm sau trong tài liệu hiện tại:
 
 ### A. Độ chính xác của các tài liệu tham khảo (References)
-*   **Sai sót trong mã arXiv:** Trong file [sprint01.md](file:///d:/HCMUTE/HCMUTE_HK6/BDML/final/viet-llm-kvcache-benchmark/docs/sprint01.md#L55), tài liệu trích dẫn `KV-CoRE: Benchmarking Data-Dependent Low-Rank Compressibility of KV-Caches in LLMs` được ghi là `arXiv:2602.04142`. 
+*   **Sai sót trong mã arXiv:** Trong file [sprint01.md](plans/sprint01.md#L55), tài liệu trích dẫn `KV-CoRE: Benchmarking Data-Dependent Low-Rank Compressibility of KV-Caches in LLMs` được ghi là `arXiv:2602.04142`. 
     *   *Thực tế kiểm chứng:* Mã `arXiv:2602.04142` thuộc về bài báo *"JSynFlow: Japanese Synthesised Flowchart Visual Question Answering Dataset built with Large Language Models"*.
     *   *Mã đúng:* Bài báo **`KV-CoRE`** có mã arXiv chính xác là **`arXiv:2602.05929`**. Cần cập nhật lại thông tin này để tránh lỗi trích dẫn học thuật trong bài báo tiếng Anh (Paper EN).
 *   **Tính xác thực của TurboQuant & PolarQuant:**
     *   **TurboQuant** (`arXiv:2504.19874`): Được phát triển bởi các nhà nghiên cứu từ Google Research và NYU, công bố tại ICLR 2026. Thuật toán kết hợp phép biến đổi cực (Polar Transformation) để phân phối tọa độ đồng đều và lượng tử hóa Lloyd-Max, cùng với việc sửa sai số bằng 1-bit QJL (Quantized Johnson-Lindenstrauss).
     *   **PolarQuant** (`arXiv:2502.02617`): Được KAIST, Google Research và Yale nghiên cứu, nén KV Cache thông qua việc chuyển đổi vector sang tọa độ cực giúp loại bỏ nhu cầu lưu trữ tham số chuẩn hóa (scale và zero-points) theo block.
     *   *Tính khả thi:* Cả hai phương pháp này đều là Post-Training Quantization (PTQ) rất mới (đầu năm 2025/2026), có mã nguồn mở và đang được tích hợp/thử nghiệm trên các framework suy luận lớn.
+*   **Trạng thái cập nhật (Đã hoàn thành):** 
+    *   Mã arXiv của `KV-CoRE` đã được sửa đổi thành công thành `arXiv:2602.05929` trong tất cả tài liệu (`README.md`, `docs/plans/sprint01.md`, `docs/related_works.md`).
+    *   Thông tin tác giả của `PolarQuant` và `TurboQuant` được cập nhật chính xác.
+    *   Tệp cơ sở dữ liệu trích dẫn `paper/references.bib` đã được khởi tạo để phục vụ cho bản thảo LaTeX.
+    *   Các liên kết tương đối bị hỏng trong `docs/README.md` đã được sửa và định hướng lại chính xác.
 
 ---
 
