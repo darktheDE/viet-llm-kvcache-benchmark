@@ -6,11 +6,11 @@ File này là "Công nhân thực thi" — chạy đo đạc cho ĐÚNG 1 cấu 
 (1 Model + 1 KV Cache Type + 1 Context Length). Được gọi bởi
 run_real_grid.py (Quản đốc) hoặc chạy lẻ từ dòng lệnh.
 
-Kết quả ghi vào: results/real_benchmark_log.csv
+Kết quả ghi vào: ../../results/real_benchmark_log.csv
 
 Cách chạy lẻ:
     python scripts/test/run_real_benchmark.py \
-        --model "VinAI/PhoGPT-7B5-Instruct" \
+        --model "vilm/vinallama-7b-chat" \
         --kv_cache_type FP16 \
         --context_length 8000
 
@@ -44,7 +44,7 @@ except ImportError as e:
 # 2. Danh sách Model và Cấu hình
 # ============================================================
 SUPPORTED_MODELS = [
-    "VinAI/PhoGPT-7B5-Instruct",
+    "vilm/vinallama-7b-chat",
     "Qwen/Qwen2.5-7B-Instruct",
     "meta-llama/Meta-Llama-3.1-8B-Instruct",
     "ura-hcmut/URA-LLaMa-3-8B",
@@ -67,11 +67,11 @@ def parse_args():
         description="Real GPU Benchmark - KV Cache Compression trên Vietnamese LLMs"
     )
     parser.add_argument(
-        "--model", type=str, default="VinAI/PhoGPT-7B5-Instruct",
+        "--model", type=str, default="vilm/vinallama-7b-chat",
         choices=SUPPORTED_MODELS, help="Ten mo hinh can benchmark"
     )
     parser.add_argument(
-        "--dataset", type=str, default="datasets/test_set_small.json",
+        "--dataset", type=str, default="../../datasets/test_set_small.json",
         help="Duong dan den tap du lieu"
     )
     parser.add_argument(
@@ -88,7 +88,7 @@ def parse_args():
         help="So token toi da can sinh (Decode phase)"
     )
     parser.add_argument(
-        "--output", type=str, default="results/real_benchmark_log.csv",
+        "--output", type=str, default="../../results/real_benchmark_log.csv",
         help="Duong dan luu ket qua CSV"
     )
     parser.add_argument(

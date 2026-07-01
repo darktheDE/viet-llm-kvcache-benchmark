@@ -17,7 +17,7 @@ Dưới đây là mô tả chi tiết nội dung và mục đích của từng f
 | **[onboarding_presentation.html](onboarding_presentation.html)** | **Slide Onboarding (HTML)** | Slide thuyết trình onboarding tương tác được thiết kế tối ưu hiển thị (viewport fitting) theo theme Neon Cyber. |
 | **[presentation_script.md](presentation_script.md)** | **Kịch bản Onboarding (MD)** | Lời thoại thuyết trình (Speaking Script) chi tiết cho từng slide trong onboarding_presentation.html, văn phong nói tự nhiên, dễ hiểu. |
 | **[sprint01.md](sprint01.md)** | **Sprint 01 (Week 1-2)** | Kế hoạch chi tiết giai đoạn khởi động: Thiết lập không gian cộng tác, proposal v2, tiền xử lý dữ liệu bằng NVIDIA NeMo Curator và cấu hình baseline vLLM. |
-| **[sprint02.md](sprint02.md)** | **Sprint 02 (Week 3-4)** | Kế hoạch hoàn thiện script đo đạc tự động `run_baseline.py`, chạy thực nghiệm mốc đầu trên PhoGPT-7B5/Qwen2.5 và khởi tạo khung LaTeX bài báo trên Overleaf. |
+| **[sprint02.md](sprint02.md)** | **Sprint 02 (Week 3-4)** | Kế hoạch hoàn thiện script đo đạc tự động `run_baseline.py`, chạy thực nghiệm mốc đầu trên VinaLLaMA-7B/Qwen2.5 và khởi tạo khung LaTeX bài báo trên Overleaf. |
 | **[sprint03.md](sprint03.md)** | **Sprint 03 (Week 5-6)** | Kế hoạch tối ưu hóa VRAM chống lỗi CUDA OOM, tổng hợp số liệu CSV và vẽ biểu đồ Pareto Frontier bằng python; viết chương Kết quả & Thảo luận. |
 | **[sprint04.md](sprint04.md)** | **Sprint 04 (Week 7)** | Giai đoạn đóng gói: Hoàn thiện báo cáo Word tiếng Việt (>=30 trang), slide thuyết trình bảo vệ, hoàn chỉnh Paper tiếng Anh (>=6 trang) và tài liệu Q&A. |
 

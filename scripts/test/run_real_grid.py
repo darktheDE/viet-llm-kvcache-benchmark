@@ -2,7 +2,7 @@
 Script Quản đốc: Chạy tự động toàn bộ Grid Search THỰC TẾ trên GPU.
 Gọi run_real_benchmark.py cho từng cấu hình (Model x Method x Context).
 
-Kết quả xuất ra: results/real_benchmark_log.csv
+Kết quả xuất ra: ../../results/real_benchmark_log.csv
 
 Yêu cầu: Máy chủ GPU Cloud (RunPod/Vast.ai) đã cài vLLM, pynvml.
 
@@ -16,7 +16,7 @@ import os
 import sys
 
 MODELS = [
-    "VinAI/PhoGPT-7B5-Instruct",
+    "vilm/vinallama-7b-chat",
     "Qwen/Qwen2.5-7B-Instruct",
     "meta-llama/Meta-Llama-3.1-8B-Instruct",
     "ura-hcmut/URA-LLaMa-3-8B",
@@ -25,8 +25,8 @@ MODELS = [
 
 KV_CACHE_TYPES = ["FP16", "FP8", "HQQ", "PolarQuant", "TurboQuant"]
 CONTEXT_LENGTHS = [4000, 8000, 16000]
-OUTPUT_CSV = "results/real_benchmark_log.csv"
-SCRIPT_PATH = "scripts/test/run_real_benchmark.py"
+OUTPUT_CSV = "../../results/real_benchmark_log.csv"
+SCRIPT_PATH = "./run_real_benchmark.py"
 
 
 def main():

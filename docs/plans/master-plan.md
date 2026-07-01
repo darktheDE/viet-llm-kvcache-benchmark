@@ -42,7 +42,7 @@ Tổng tiến độ dự án kéo dài **7 tuần**, chia làm **4 Phase** chạ
 *   **Mục tiêu:** Thu thập toàn bộ số liệu thực nghiệm trên 4 dòng mô hình mục tiêu đối với tất cả các mốc thuật toán nén trên Cloud GPU.
 *   **Nhiệm vụ chi tiết:**
     *   *Kỹ thuật & Thử nghiệm (Nhóm phân vai 1-2 mô hình/người):*
-        *   **Cặp 1 (Việt Anh, Minh Quân):** Chạy thực nghiệm trên mô hình `PhoGPT-7B5-Instruct`.
+        *   **Cặp 1 (Việt Anh, Minh Quân):** Chạy thực nghiệm trên mô hình `VinaLLaMA-7B-Chat`.
         *   **Cặp 2 (Minh Khánh, Quang Duy):** Chạy thực nghiệm trên mô hình `Qwen2.5-7B-Instruct`.
         *   **Hỗ trợ chung (Duy - Infrastructure):** Đảm nhận vai trò xử lý lỗi (bug-fixing), tối ưu hóa bộ nhớ và giám sát việc chạy thử nghiệm các mốc nén KV cache: FP8, HQQ, PolarQuant, TurboQuant (mốc Full) và TurboQuant (mốc tắt QJL) trên Cloud GPU.
     *   *Đo đạc & Ghi kết quả (Toàn bộ team kỹ thuật):* Ghi nhận số liệu chính xác (gồm cả các metrics nâng cao) vào các file kết quả CSV riêng biệt của từng mô hình theo đúng template chuẩn.
@@ -74,8 +74,8 @@ Tổng tiến độ dự án kéo dài **7 tuần**, chia làm **4 Phase** chạ
 |---|---|:---:|:---:|:---:|:---:|
 | **Đỗ Kiến Hưng** | PM / Agile Coordinator | **R** / **A** | **A** | **A** | **R** / **A** |
 | **Phan Trọng Quí** | Joint Coordinator / Writing | **R** | **C** | **C** | **R** (Báo cáo) |
-| **Hồ Việt Anh** | Technical & Experiment | **R** (Cloud Setup) | **R** (PhoGPT) | **C** | **C** |
-| **Phạm Minh Quân** | Tech Lead / Optimizer | **R** (CUDA setup) | **R** (PhoGPT) | **C** | **C** |
+| **Hồ Việt Anh** | Technical & Experiment | **R** (Cloud Setup) | **R** (VinaLLaMA) | **C** | **C** |
+| **Phạm Minh Quân** | Tech Lead / Optimizer | **R** (CUDA setup) | **R** (VinaLLaMA) | **C** | **C** |
 | **Trần Minh Khánh** | Tech runner | **C** | **R** (Qwen) | **C** | **C** |
 | **Nguyễn V. Q. Duy** | Quantization / Patching | **C** (vLLM config) | **R** (Qwen/Debug) | **C** | **C** |
 | **Nguyễn Hồ Phát** | Data curator | **R** (NeMo Curator) | **A** | **R** | **C** |

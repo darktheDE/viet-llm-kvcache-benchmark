@@ -26,7 +26,7 @@ except ImportError:
     print("WARNING: Không tìm thấy thư viện vLLM, pynvml hoặc PyTorch. Chuyển sang MOCK_MODE (Chế độ giả lập).")
 
 SUPPORTED_MODELS = [
-    "VinAI/PhoGPT-7B5-Instruct",
+    "vilm/vinallama-7b-chat",
     "Qwen/Qwen2.5-7B-Instruct",
     "meta-llama/Meta-Llama-3.1-8B-Instruct",
     "ura-hcmut/URA-LLaMa-3-8B",
@@ -35,7 +35,7 @@ SUPPORTED_MODELS = [
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Benchmark KV Cache Compression on Vietnamese LLMs")
-    parser.add_argument("--model", type=str, default="VinAI/PhoGPT-7B5-Instruct", 
+    parser.add_argument("--model", type=str, default="vilm/vinallama-7b-chat", 
                         help="Tên mô hình cần benchmark", choices=SUPPORTED_MODELS)
     parser.add_argument("--dataset", type=str, default="datasets/test_set_small.json", help="Đường dẫn đến tập dữ liệu")
     parser.add_argument("--context_length", type=int, default=8000, help="Độ dài ngữ cảnh tối đa (Max Model Len)")
