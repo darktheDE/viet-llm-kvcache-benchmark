@@ -95,21 +95,18 @@ Experiments are conducted on standard, high-quality Vietnamese datasets designed
 
 ## Project Structure
 
-```text
-.
-├── configs/                # Configuration files for models and compression frameworks
-├── datasets/               # Standardized datasets and small test suite (JSON/JSONL)
-│   ├── test_set_small.json # 10-20 sample test suite spanning 4k, 8k, 16k contexts
-│   └── dataset_brief.md    # Data definitions and guidelines for the technical team
-├── experiments/            # Hardware-specific execution configurations and environment logs
-├── paper/                  # LaTeX source code for the English research paper draft
-├── results/                # Logged experiment outputs and visualization charts
-│   ├── template_log.csv    # Uniform logging template for execution records
-│   └── plots/              # Trade-off charts (Memory vs. PPL, Latency vs. Context)
-└── scripts/                # Automated run scripts, instrumentation, and plotting tools
-    ├── run_baseline.py     # Script to execute inference and measure performance metrics
-    └── plot_results.py     # Script to generate trade-off visualizations
-```
+*   [configs/](configs/) - Model-specific & engine execution configurations.
+*   [datasets/](datasets/) - Standardized datasets and small test suite (JSON/JSONL).
+    *   [test_set_small.json](datasets/test_set_small.json) - 10-20 sample test suite spanning 4k, 8k, 16k contexts.
+    *   [dataset_brief.md](datasets/dataset_brief.md) - Data definitions and guidelines.
+*   [experiments/](experiments/) - Hardware-specific execution configurations and environment logs.
+*   [paper/](paper/) - LaTeX source code for the English research paper draft.
+*   [results/](results/) - Logged experiment outputs and visualization charts.
+    *   [template_log.csv](results/template_log.csv) - Uniform logging template for execution records.
+    *   [plots/](results/plots/) - Trade-off charts (Memory vs. PPL, Latency vs. Context).
+*   [scripts/](scripts/) - Automated run scripts, instrumentation, and plotting tools.
+    *   [run_baseline.py](scripts/run_baseline.py) - Script to execute inference and measure performance metrics.
+    *   [plot_results.py](scripts/plot_results.py) - Script to generate trade-off visualizations.
 
 ---
 
@@ -117,8 +114,8 @@ Experiments are conducted on standard, high-quality Vietnamese datasets designed
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/darktheDE/vietnamese-llm-benchmark.git
-cd vietnamese-llm-benchmark
+git clone https://github.com/darktheDE/viet-llm-kvcache-benchmark.git
+cd viet-llm-kvcache-benchmark
 ```
 
 ### 2. Set Up Conda Environment
@@ -130,7 +127,7 @@ conda activate dbml_project
 
 ### 3. Install Requirements
 ```bash
-pip install -r scripts/requirements.txt
+pip install -r requirements.txt
 # Install framework-specific packages (e.g., vllm, llama-cpp-python, hqq) as guided by local scripts
 ```
 > **Technical Note on Engine Support**: 
@@ -337,10 +334,10 @@ This project is a collaborative effort by **Group 1**:
 3. Chambers, B., & Zaharia, M. (2018). *Spark: The Definitive Guide*, O'Reilly.
 4. James, G., et al. (2021). *An Introduction to Statistical Learning*, 2nd Edition, Springer.
 5. Zandieh, A., Daliri, M., Hadian, M., & Mirrokni, V. (2025). *TurboQuant: Online Vector Quantization with Near-optimal Distortion Rate*. arXiv preprint arXiv:2504.19874.
-6. Han, T., et al. (2025). *PolarQuant: Leveraging Polar Transformation for Efficient Key Cache Quantization and Decoding Acceleration*. NeurIPS 2025. arXiv preprint arXiv:2502.00527.
+6. Wu, S., et al. (2025). *PolarQuant: Leveraging Polar Transformation for Efficient Key Cache Quantization and Decoding Acceleration*. NeurIPS 2025. arXiv preprint arXiv:2502.00527.
 7. Kwon, W., Li, Z., Stoica, I., et al. (2023). *Efficient Memory Management for Large Language Model Serving with PagedAttention*. SOSP 2023. arXiv preprint arXiv:2309.06180.
 8. Micikevicius, P., et al. (2022). *FP8 Quantization for Deep Learning*. arXiv preprint arXiv:2209.05433.
 9. Badri, H., & Shaji, A. (2023-2024). *Half-Quadratic Quantization (HQQ)*. Mobius Labs. [github.com/mobiusml/hqq](https://github.com/mobiusml/hqq).
-10. *KV-CoRE: Benchmarking Data-Dependent Low-Rank Compressibility of KV-Caches in LLMs* (2026). arXiv preprint arXiv:2602.04142.
+10. *KV-CoRE: Benchmarking Data-Dependent Low-Rank Compressibility of KV-Caches in LLMs* (2026). arXiv preprint arXiv:2602.05929.
 
 ***

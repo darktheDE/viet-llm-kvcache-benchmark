@@ -50,9 +50,9 @@ Thiết lập toàn bộ hạ tầng cộng tác số cho dự án nhóm (Drive,
 Xây dựng nền tảng lý thuyết vững chắc cho bài báo tiếng Anh (Paper EN). Tập trung làm rõ kiến trúc hoạt động của **TurboQuant** (cơ chế quay ngẫu nhiên kết hợp lượng tử hóa tọa độ cực Lloyd-Max và cơ chế sửa lỗi sai số bằng một bit QJL) so với phương pháp gốc **PolarQuant**. Đọc hiểu mức độ nhạy cảm của tiếng Việt khi nén sâu KV Cache để chuẩn bị viết phần Introduction.
 
 #### 2. Tài liệu đọc tham khảo (References)
-*   *Bài báo gốc TurboQuant:* Genc, M., et al. (2025). [TurboQuant: Online Vector Quantization with Near-optimal Distortion Rate (arXiv:2504.19874)](https://arxiv.org/abs/2504.19874) [1.1.2].
-*   *Bài báo PolarQuant:* Han, T., et al. (2025). [PolarQuant: Vector Quantization for LLM Key-Value Cache via Polar Transformation (arXiv:2502.02617)](https://arxiv.org/abs/2502.02617) [1.3.1].
-*   *Bài báo đánh giá độ nhạy đa ngôn ngữ:* [KV-CoRE: Benchmarking Data-Dependent Low-Rank Compressibility of KV-Caches in LLMs (arXiv:2602.04142)](https://arxiv.org/abs/2602.04142).
+*   *Bài báo gốc TurboQuant:* Zandieh, A., et al. (2025). [TurboQuant: Online Vector Quantization with Near-optimal Distortion Rate (arXiv:2504.19874)](https://arxiv.org/abs/2504.19874) [1.1.2].
+*   *Bài báo PolarQuant:* Han, I., et al. (2025). [PolarQuant: Quantizing KV Caches with Polar Transformation (arXiv:2502.02617)](https://arxiv.org/abs/2502.02617) [1.3.1].
+*   *Bài báo đánh giá độ nhạy đa ngôn ngữ:* [KV-CoRE: Benchmarking Data-Dependent Low-Rank Compressibility of KV-Caches in LLMs (arXiv:2602.05929)](https://arxiv.org/abs/2602.05929).
 
 #### 3. Từng bước thực hiện chi tiết (Step-by-Step)
 *   **Bước 1:** Đọc hiểu chi tiết 3 bài báo khoa học trong danh mục tham chiếu nêu trên.
