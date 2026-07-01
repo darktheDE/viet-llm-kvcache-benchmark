@@ -10,9 +10,10 @@ DATASETS_DIR = "datasets"
 SQUAD_FILE = os.path.join(DATASETS_DIR, "vmlu_squad_v1", "vi_squad_benchmark_question_only.json")
 DIALOGUE_FILE = os.path.join(DATASETS_DIR, "vmlu_dialog_v1", "vi_dialogue_question_only.json")
 MQA_DIR = os.path.join(DATASETS_DIR, "vmlu_mqa_v1.5")
-OUTPUT_FILE = os.path.join(DATASETS_DIR, "test_set_small.json")
-OUTPUT_FILE_JSONL = os.path.join(DATASETS_DIR, "test_set_small.jsonl")
-BRIEF_FILE = os.path.join(DATASETS_DIR, "dataset_brief.md")
+OUTPUT_FILE = os.path.join(DATASETS_DIR, "test_set_tasks_small.json")
+OUTPUT_FILE_JSONL = os.path.join(DATASETS_DIR, "test_set_tasks_small.jsonl")
+OUTPUT_FILE_SMOKE = os.path.join(DATASETS_DIR, "test_set_tasks_smoke.json")
+BRIEF_FILE = os.path.join(DATASETS_DIR, "task_dataset_brief.md")
 
 # Fallback Tokenizer setup
 try:
@@ -66,46 +67,79 @@ def clip_text_to_tokens(text, max_tokens):
 def clean_and_load_squad():
     print(f"Dang doc du lieu SQuAD tu {SQUAD_FILE}...")
     if not os.path.exists(SQUAD_FILE):
-        raise FileNotFoundError(f"Khong tim thay file {SQUAD_FILE}")
+        print(f"WARNING: Khong tim thay file {SQUAD_FILE}. Se bo qua squad contexts.")
+        return []
     
-    with open(SQUAD_FILE, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    
-    contexts = []
-    for item in data.get("data", []):
-        ctx = normalize_vietnamese(item.get("context", ""))
-        if ctx and len(ctx) > 50:
-            contexts.append(ctx)
-            
-    contexts = list(set(contexts))
-    print(f"Tim thay {len(contexts)} doan ngu canh SQuAD doc ban.")
-    return contexts
+    try:
+        with open(SQUAD_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        
+        contexts = []
+        for item in data.get("data", []):
+            ctx = normalize_vietnamese(item.get("context", ""))
+            if ctx and len(ctx) > 50:
+                contexts.append(ctx)
+                
+        contexts = list(set(contexts))
+        print(f"Tim thay {len(contexts)} doan ngu canh SQuAD doc ban.")
+        return contexts
+    except Exception as e:
+        print(f"WARNING: Loi khi doc SQuAD: {e}")
+        return []
+
+SUBJECT_TO_DOMAIN = {
+    # STEM
+    "math": "STEM",
+    "physics": "STEM",
+    "chemistry": "STEM",
+    "biology": "STEM",
+    "computer_science": "STEM",
+    # Humanities
+    "history": "Humanity",
+    "geography": "Humanity",
+    "literature": "Humanity",
+    "philosophy": "Humanity",
+    # Social Sciences
+    "civics": "Social Science",
+    "law": "Social Science",
+    "economics": "Social Science",
+    "psychology": "Social Science",
+    "sociology": "Social Science",
+}
 
 def clean_and_load_mqa():
     print(f"Dang doc du lieu MQA tu {MQA_DIR}...")
     mqa_samples = []
+    if not os.path.exists(MQA_DIR):
+        print(f"WARNING: Khong tim thay thu muc {MQA_DIR}. Se bo qua mqa samples.")
+        return []
     
     files_to_read = ["test.jsonl", "valid.jsonl", "dev.jsonl"]
     for file_name in files_to_read:
         file_path = os.path.join(MQA_DIR, file_name)
         if os.path.exists(file_path):
             print(f"Dang doc tu file {file_path}...")
-            with open(file_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    if line.strip():
-                        try:
-                            sample = json.loads(line)
-                            question = normalize_vietnamese(sample.get("question", ""))
-                            choices = [normalize_vietnamese(c) for c in sample.get("choices", [])]
-                            answer = sample.get("answer", "").strip()
-                            if question and choices and answer:
-                                mqa_samples.append({
-                                    "question": question,
-                                    "choices": choices,
-                                    "answer": answer
-                                })
-                        except json.JSONDecodeError:
-                            continue
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if line.strip():
+                            try:
+                                sample = json.loads(line)
+                                question = normalize_vietnamese(sample.get("question", ""))
+                                choices = [normalize_vietnamese(c) for c in sample.get("choices", [])]
+                                answer = sample.get("answer", "").strip()
+                                subject = sample.get("subject", "general_knowledge")
+                                if question and choices and answer:
+                                    mqa_samples.append({
+                                        "question": question,
+                                        "choices": choices,
+                                        "answer": answer,
+                                        "subject": subject
+                                    })
+                            except json.JSONDecodeError:
+                                continue
+            except Exception as e:
+                print(f"WARNING: Loi khi doc {file_path}: {e}")
             if len(mqa_samples) >= 300:
                 break
                 
@@ -325,10 +359,15 @@ def main():
     # Neu khong co VTSNLP, dung SQuAD lam fallback
     if not vtsnlp_contexts:
         vtsnlp_contexts = squad_contexts
-        print("Su dung SQuAD lam fallback cho VTSNLP.")
+        if squad_contexts:
+            print("Su dung SQuAD lam fallback cho VTSNLP.")
         
     combined_contexts = squad_contexts + vtsnlp_contexts
     
+    if not combined_contexts:
+        print("ERROR: Khong co du lieu ngu canh nao de ghep (ca local VMLU lan online VTSNLP deu khong load duoc). Dung.")
+        return
+        
     test_set_small = []
     
     for bucket in CONTEXT_BUCKETS:
@@ -337,21 +376,31 @@ def main():
         # 1. Tao mau QA trac nghiem
         print(f"Tao mau QA ({QA_SAMPLES_PER_BUCKET} mau)...")
         qa_count = 0
-        while qa_count < QA_SAMPLES_PER_BUCKET:
-            random.shuffle(mqa_samples)
-            for mqa_sample in mqa_samples:
-                if qa_count >= QA_SAMPLES_PER_BUCKET:
-                    break
-                text, answer = generate_qa_sample(bucket, combined_contexts, mqa_sample)
-                tokens = count_tokens(text)
-                test_set_small.append({
-                    "prompt_type": "qa",
-                    "context_length_target": bucket,
-                    "text": text,
-                    "expected_output": answer,
-                    "actual_tokens": tokens
-                })
-                qa_count += 1
+        if not mqa_samples:
+            print("WARNING: Khong co mqa_samples. Bo qua buoc tao mau QA.")
+        else:
+            while qa_count < QA_SAMPLES_PER_BUCKET:
+                random.shuffle(mqa_samples)
+                for mqa_sample in mqa_samples:
+                    if qa_count >= QA_SAMPLES_PER_BUCKET:
+                        break
+                    text, answer = generate_qa_sample(bucket, combined_contexts, mqa_sample)
+                    tokens = count_tokens(text)
+                    subject = mqa_sample.get("subject", "general_knowledge")
+                    domain = SUBJECT_TO_DOMAIN.get(subject.lower(), "Others")
+                    test_set_small.append({
+                        "prompt_type": "qa",
+                        "context_length_target": bucket,
+                        "text": text,
+                        "expected_output": answer,
+                        "actual_tokens": tokens,
+                        "metadata": {
+                            "source": "vmlu_mqa_v1.5",
+                            "domain": domain,
+                            "subject": subject
+                        }
+                    })
+                    qa_count += 1
             
         # 2. Tao mau Retrieval
         print(f"Tao mau Retrieval ({RETRIEVAL_SAMPLES_PER_BUCKET} mau)...")
@@ -364,7 +413,12 @@ def main():
                 "context_length_target": bucket,
                 "text": text,
                 "expected_output": answer,
-                "actual_tokens": tokens
+                "actual_tokens": tokens,
+                "metadata": {
+                    "source": "synthetic_retrieval",
+                    "domain": "Others",
+                    "subject": "needle_in_a_haystack"
+                }
             })
             ret_count += 1
             
@@ -379,11 +433,20 @@ def main():
                 "context_length_target": bucket,
                 "text": text,
                 "expected_output": answer,
-                "actual_tokens": tokens
+                "actual_tokens": tokens,
+                "metadata": {
+                    "source": "VTSNLP/vietnamese_curated_dataset",
+                    "domain": "Others",
+                    "subject": "natural_text"
+                }
             })
             gen_count += 1
             
         print(f"Hoan thanh moc {bucket} tokens: {qa_count} QA, {ret_count} Retrieval, {gen_count} General.")
+
+    if not test_set_small:
+        print("ERROR: Khong tao duoc bat ky sample nao.")
+        return
 
     # Ghi file JSON
     print(f"\nDang ghi ket qua ra file {OUTPUT_FILE}...")
@@ -395,6 +458,19 @@ def main():
     with open(OUTPUT_FILE_JSONL, "w", encoding="utf-8") as f:
         for item in test_set_small:
             f.write(json.dumps(item, ensure_ascii=False) + "\n")
+
+    # Ghi file Smoke Test
+    print(f"Dang ghi ket qua ra file smoke test {OUTPUT_FILE_SMOKE}...")
+    smoke_set = []
+    for bucket in CONTEXT_BUCKETS:
+        bucket_samples = [x for x in test_set_small if x["context_length_target"] == bucket]
+        qa_s = [x for x in bucket_samples if x["prompt_type"] == "qa"][:2]
+        ret_s = [x for x in bucket_samples if x["prompt_type"] == "retrieval"][:2]
+        gen_s = [x for x in bucket_samples if x["prompt_type"] == "general"][:1]
+        smoke_set.extend(qa_s + ret_s + gen_s)
+    
+    with open(OUTPUT_FILE_SMOKE, "w", encoding="utf-8") as f:
+        json.dump(smoke_set, f, ensure_ascii=False, indent=2)
             
     # Tao dataset_brief.md
     print(f"Dang ghi tai lieu huong dan ra file {BRIEF_FILE}...")
@@ -417,14 +493,14 @@ Moi moc do dai chua **{QA_SAMPLES_PER_BUCKET + RETRIEVAL_SAMPLES_PER_BUCKET + GE
 
 ## 3. Huong dan su dung bo du lieu (Developer & Runner Guidelines)
 
-Bo du lieu duoc dong goi duoi dang JSON: `datasets/test_set_small.json` va JSONL: `datasets/test_set_small.jsonl`.
+Bo du lieu duoc dong goi duoi dang JSON: `datasets/test_set_tasks_small.json` va JSONL: `datasets/test_set_tasks_small.jsonl`.
 Duoi day la huong dan su dung trong cac script Python benchmark cua Team Tech:
 
 ### A. Doc du lieu tu JSON
 ```python
 import json
 
-with open("datasets/test_set_small.json", "r", encoding="utf-8") as f:
+with open("datasets/test_set_tasks_small.json", "r", encoding="utf-8") as f:
     test_suite = json.load(f)
 
 for sample in test_suite:
@@ -447,14 +523,19 @@ for sample in test_suite:
     *   Khi load cac mau 16,000 tokens, can cau hinh vLLM bat `gpu_memory_utilization` cao (0.95 - 0.98) va dieu chinh `max_num_seqs=1` de ngan VRAM phinh to trong luc decode.
 
 ## 4. Cau truc File JSON
-Moi mau trong file `test_set_small.json` co cau truc:
+Moi mau trong file `test_set_tasks_small.json` co cau truc:
 ```json
 {{
   "prompt_type": "qa|retrieval|general",
   "context_length_target": 8000,
   "text": "...",
   "expected_output": "...",
-  "actual_tokens": 7985
+  "actual_tokens": 7985,
+  "metadata": {{
+    "source": "vmlu_mqa_v1.5",
+    "domain": "STEM",
+    "subject": "math"
+  }}
 }}
 ```
 
@@ -469,6 +550,7 @@ Moi mau trong file `test_set_small.json` co cau truc:
     print(f"Tong so mau duoc tao: {len(test_set_small)}")
     print(f"File JSON: {OUTPUT_FILE}")
     print(f"File JSONL: {OUTPUT_FILE_JSONL}")
+    print(f"File Smoke JSON: {OUTPUT_FILE_SMOKE}")
     print(f"File Brief: {BRIEF_FILE}")
 
 if __name__ == "__main__":
