@@ -46,6 +46,14 @@ def parse_args():
     parser.add_argument("--mock_mode", action="store_true", help="Ép buộc chạy ở chế độ giả lập (Mock Mode) không cần GPU")
     return parser.parse_args()
 
+# Header CSV mở rộng: thêm sample_id, output_path để ghép JSONL cho PPL backfill
+CSV_HEADER = [
+    "model", "kv_cache_type", "context_length",
+    "peak_memory_mb", "latency_ms_per_token",
+    "throughput_tokens_per_s", "perplexity", "status",
+    "sample_id", "output_path"
+]
+
 def setup_csv(output_path):
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     file_exists = os.path.isfile(output_path)
@@ -53,7 +61,7 @@ def setup_csv(output_path):
     with open(output_path, mode='a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         if not file_exists:
-            writer.writerow(["model", "kv_cache_type", "context_length", "peak_memory_mb", "latency_ms_per_token", "throughput_tokens_per_s", "perplexity", "status"])
+            writer.writerow(CSV_HEADER)
 
 def log_result(output_path, result_dict):
     with open(output_path, mode='a', newline='', encoding='utf-8') as f:
@@ -62,12 +70,29 @@ def log_result(output_path, result_dict):
             result_dict.get("model"),
             result_dict.get("kv_cache_type"),
             result_dict.get("context_length"),
-            result_dict.get("peak_memory_mb"),
-            result_dict.get("latency_ms_per_token"),
-            result_dict.get("throughput_tokens_per_s"),
-            result_dict.get("perplexity", "N/A"),
-            result_dict.get("status", "OK")
+            result_dict.get("peak_memory_mb", ""),
+            result_dict.get("latency_ms_per_token", ""),
+            result_dict.get("throughput_tokens_per_s", ""),
+            result_dict.get("perplexity", ""),
+            result_dict.get("status", "OK"),
+            result_dict.get("sample_id", ""),
+            result_dict.get("output_path", ""),
         ])
+
+def persist_generated_texts(jsonl_path, records):
+    """
+    Lưu generated_text vào file JSONL để phục vụ backfill PPL offline.
+
+    Mỗi dòng JSONL chứa:
+      - sample_id, prompt_text, generated_text, generated_tokens
+      - model, dataset, context_length, kv_cache_type, kv_cache_dtype
+      - max_new_tokens, temperature, top_p, top_k, seed
+      - status, error_message
+    """
+    Path(jsonl_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(jsonl_path, mode='a', encoding='utf-8') as f:
+        for record in records:
+            f.write(json.dumps(record, ensure_ascii=False) + '\n')
 
 def load_dataset_samples(path: str) -> list[dict]:
     with open(path, "r", encoding="utf-8") as f:
@@ -185,6 +210,7 @@ def run_mock_benchmark(args):
     
     # Bước 5: Ghi Log CSV
     print(f"\n[5. Ghi Log CSV] Đang định dạng và lưu kết quả...")
+    sample_id = f"{args.model}__{args.kv_cache_type}__{args.context_length}__mock"
     result = {
         "model": args.model,
         "kv_cache_type": args.kv_cache_type,
@@ -193,7 +219,9 @@ def run_mock_benchmark(args):
         "latency_ms_per_token": round(latency, 2),
         "throughput_tokens_per_s": round(throughput, 2),
         "perplexity": perplexity,
-        "status": "MOCK_OK"
+        "status": "MOCK_OK",
+        "sample_id": sample_id,
+        "output_path": "",
     }
     
     log_result(args.output, result)
@@ -242,11 +270,13 @@ def run_real_benchmark(args):
                 "model": args.model,
                 "kv_cache_type": args.kv_cache_type,
                 "context_length": args.context_length,
-                "peak_memory_mb": 0.0,
-                "latency_ms_per_token": 0.0,
-                "throughput_tokens_per_s": 0.0,
-                "perplexity": "N/A",
-                "status": "DATASET_LOAD_ERROR"
+                "peak_memory_mb": "",
+                "latency_ms_per_token": "",
+                "throughput_tokens_per_s": "",
+                "perplexity": "",
+                "status": "DATASET_LOAD_ERROR",
+                "sample_id": "",
+                "output_path": "",
             }
             log_result(args.output, result)
             sys.exit(1)
@@ -269,6 +299,31 @@ def run_real_benchmark(args):
         throughput = total_generated_tokens / total_time if total_time > 0 else 0
         latency = (total_time / total_generated_tokens) * 1000 if total_generated_tokens > 0 else 0
         
+        # Persist generated_text vào JSONL cho backfill PPL
+        jsonl_path = args.output.replace(".csv", "_generated.jsonl")
+        jsonl_records = []
+        for i, out in enumerate(outputs):
+            sample_id = f"{args.model}__{args.kv_cache_type}__{args.context_length}__s{i}"
+            jsonl_records.append({
+                "sample_id": sample_id,
+                "prompt_text": prompts[i],
+                "generated_text": out.outputs[0].text,
+                "generated_tokens": len(out.outputs[0].token_ids),
+                "model": args.model,
+                "dataset": args.dataset,
+                "context_length": args.context_length,
+                "kv_cache_type": args.kv_cache_type,
+                "kv_cache_dtype": kv_cache_dtype,
+                "max_new_tokens": args.max_new_tokens,
+                "temperature": 0.0,
+                "top_p": 1.0,
+                "top_k": -1,
+                "seed": None,
+                "status": "OK",
+                "error_message": None,
+            })
+        persist_generated_texts(jsonl_path, jsonl_records)
+        
         result = {
             "model": args.model,
             "kv_cache_type": args.kv_cache_type,
@@ -276,33 +331,41 @@ def run_real_benchmark(args):
             "peak_memory_mb": round(peak_vram_mb, 2),
             "latency_ms_per_token": round(latency, 2),
             "throughput_tokens_per_s": round(throughput, 2),
-            "perplexity": "N/A", # Sẽ cần chạy 1 pipeline khác để đo PPL riêng
-            "status": "OK"
+            "perplexity": "",  # Sẽ backfill PPL offline sau
+            "status": "OK",
+            "sample_id": f"{args.model}__{args.kv_cache_type}__{args.context_length}",
+            "output_path": jsonl_path,
         }
         
     except torch.cuda.OutOfMemoryError as e:
         print(f"LỖI OOM KHI CHẠY MỐC {args.context_length} tokens!")
+        # Cột số để trống, ghi OOM vào cột status
         result = {
             "model": args.model,
             "kv_cache_type": args.kv_cache_type,
             "context_length": args.context_length,
-            "peak_memory_mb": "OOM",
-            "latency_ms_per_token": "OOM",
-            "throughput_tokens_per_s": "OOM",
-            "perplexity": "N/A",
-            "status": "OOM"
+            "peak_memory_mb": "",
+            "latency_ms_per_token": "",
+            "throughput_tokens_per_s": "",
+            "perplexity": "",
+            "status": "OOM",
+            "sample_id": "",
+            "output_path": "",
         }
     except Exception as e:
         print(f"Lỗi không xác định: {e}")
+        # Cột số để trống, ghi chi tiết lỗi vào cột status
         result = {
             "model": args.model,
             "kv_cache_type": args.kv_cache_type,
             "context_length": args.context_length,
-            "peak_memory_mb": "ERROR",
-            "latency_ms_per_token": "ERROR",
-            "throughput_tokens_per_s": "ERROR",
-            "perplexity": "ERROR",
-            "status": f"ERROR: {e}"
+            "peak_memory_mb": "",
+            "latency_ms_per_token": "",
+            "throughput_tokens_per_s": "",
+            "perplexity": "",
+            "status": f"ERROR: {e}",
+            "sample_id": "",
+            "output_path": "",
         }
         
     log_result(args.output, result)

@@ -101,6 +101,15 @@ def parse_args():
 # ============================================================
 # 3. Hàm tiện ích ghi CSV
 # ============================================================
+# Header CSV mở rộng: thêm sample_id, output_path để ghép JSONL cho PPL backfill
+CSV_HEADER = [
+    "model", "kv_cache_type", "context_length",
+    "peak_memory_mb", "latency_ms_per_token",
+    "throughput_tokens_per_s", "perplexity", "status",
+    "sample_id", "output_path"
+]
+
+
 def setup_csv(output_path):
     """Tạo file CSV với header nếu chưa tồn tại."""
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
@@ -108,11 +117,7 @@ def setup_csv(output_path):
     with open(output_path, mode='a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         if not file_exists:
-            writer.writerow([
-                "model", "kv_cache_type", "context_length",
-                "peak_memory_mb", "latency_ms_per_token",
-                "throughput_tokens_per_s", "perplexity", "status"
-            ])
+            writer.writerow(CSV_HEADER)
 
 
 def log_result(output_path, result_dict):
@@ -123,12 +128,37 @@ def log_result(output_path, result_dict):
             result_dict.get("model"),
             result_dict.get("kv_cache_type"),
             result_dict.get("context_length"),
-            result_dict.get("peak_memory_mb"),
-            result_dict.get("latency_ms_per_token"),
-            result_dict.get("throughput_tokens_per_s"),
-            result_dict.get("perplexity", "N/A"),
-            result_dict.get("status", "OK")
+            result_dict.get("peak_memory_mb", ""),
+            result_dict.get("latency_ms_per_token", ""),
+            result_dict.get("throughput_tokens_per_s", ""),
+            result_dict.get("perplexity", ""),
+            result_dict.get("status", "OK"),
+            result_dict.get("sample_id", ""),
+            result_dict.get("output_path", ""),
         ])
+
+
+def persist_generated_texts(jsonl_path, records):
+    """
+    Lưu generated_text vào file JSONL để phục vụ backfill PPL offline.
+
+    Mỗi dòng JSONL chứa:
+      - sample_id: khóa ổn định để ghép lại với CSV
+      - prompt_text: đoạn prompt gốc (để sau đổi cách tính PPL prompt+completion)
+      - generated_text: văn bản model sinh ra
+      - generated_tokens: số token đã sinh
+      - model, dataset, context_length, kv_cache_type, kv_cache_dtype
+      - max_new_tokens, temperature, top_p, top_k
+      - status, error_message
+
+    Args:
+        jsonl_path: Đường dẫn file JSONL đầu ra.
+        records: Danh sách dict chứa thông tin cần ghi.
+    """
+    Path(jsonl_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(jsonl_path, mode='a', encoding='utf-8') as f:
+        for record in records:
+            f.write(json.dumps(record, ensure_ascii=False) + '\n')
 
 
 # ============================================================
@@ -177,47 +207,13 @@ class VRAMMonitor:
 
 
 # ============================================================
-# 5. Tính Perplexity (PPL) thật từ Loss của mô hình
-#    PPL = exp(average_negative_log_likelihood)
+# 5. Tính Perplexity (PPL)
+#    LƯU Ý: PPL cần được tính OFFLINE bằng model tham chiếu BF16.
+#    Hàm compute_perplexity() cũ đã bị XÓA vì tính PPL trên chính
+#    model bị nén là sai nguyên lý (self-evaluation bias).
+#    Thay vào đó, script sẽ lưu generated_text vào JSONL để
+#    backfill PPL sau bằng script compute_ppl_offline.py.
 # ============================================================
-def compute_perplexity(llm, prompts, sampling_params):
-    """
-    Tính Perplexity gần đúng dựa trên log-probabilities từ vLLM.
-
-    Returns:
-        Giá trị PPL trung bình trên tất cả các prompts.
-        Trả về "N/A" nếu không tính được.
-    """
-    try:
-        # Yêu cầu vLLM trả về log_probs cho mỗi token sinh ra
-        ppl_params = SamplingParams(
-            max_tokens=1,
-            temperature=0.0,
-            prompt_logprobs=1  # Lấy log-prob của các token trong prompt
-        )
-        outputs = llm.generate(prompts[:2], ppl_params)  # Chạy 2 mẫu để tính PPL
-
-        total_log_prob = 0.0
-        total_tokens = 0
-        for output in outputs:
-            if output.prompt_logprobs:
-                for token_logprob in output.prompt_logprobs:
-                    if token_logprob is not None:
-                        # Lấy log-prob cao nhất (token thực tế)
-                        for token_id, logprob_obj in token_logprob.items():
-                            total_log_prob += logprob_obj.logprob
-                            total_tokens += 1
-                            break  # Chỉ lấy token đầu tiên (token thực tế)
-
-        if total_tokens > 0:
-            avg_neg_log_likelihood = -total_log_prob / total_tokens
-            ppl = math.exp(avg_neg_log_likelihood)
-            return round(ppl, 2)
-        else:
-            return "N/A"
-    except Exception as e:
-        print(f"  [WARN] Khong tinh duoc PPL: {e}")
-        return "N/A"
 
 
 # ============================================================
@@ -294,6 +290,9 @@ def run_real_benchmark(args):
     print(f"[4/5] Bat dau Inference ({args.max_new_tokens} tokens/mau)...")
     sampling_params = SamplingParams(max_tokens=args.max_new_tokens, temperature=0.0)
 
+    # Đường dẫn JSONL lưu generated_text cho backfill PPL
+    jsonl_path = args.output.replace(".csv", "_generated.jsonl")
+
     try:
         # Bật VRAM Monitor trước khi chạy Inference
         vram_monitor.start()
@@ -329,11 +328,36 @@ def run_real_benchmark(args):
         print(f"     * Latency:        {round(latency, 2)} ms/token")
         print(f"     * Throughput:     {round(throughput, 2)} tokens/s")
 
-        # --- Tính PPL ---
-        print("[5/5] Tinh Perplexity (PPL)...")
-        ppl = compute_perplexity(llm, prompts, sampling_params)
-        print(f"     * PPL:            {ppl}")
+        # --- Bước 5: Persist generated_text vào JSONL cho backfill PPL ---
+        print("[5/5] Luu generated_text vao JSONL de backfill PPL sau...")
+        kv_dtype = KV_CACHE_DTYPE_MAP.get(args.kv_cache_type, "auto")
+        jsonl_records = []
+        for i, out in enumerate(outputs):
+            sample_id = f"{args.model}__{args.kv_cache_type}__{args.context_length}__s{i}"
+            generated_text = out.outputs[0].text
+            gen_tokens = len(out.outputs[0].token_ids)
+            jsonl_records.append({
+                "sample_id": sample_id,
+                "prompt_text": prompts[i],
+                "generated_text": generated_text,
+                "generated_tokens": gen_tokens,
+                "model": args.model,
+                "dataset": args.dataset,
+                "context_length": args.context_length,
+                "kv_cache_type": args.kv_cache_type,
+                "kv_cache_dtype": kv_dtype,
+                "max_new_tokens": args.max_new_tokens,
+                "temperature": 0.0,
+                "top_p": 1.0,
+                "top_k": -1,
+                "seed": None,
+                "status": "OK",
+                "error_message": None,
+            })
+        persist_generated_texts(jsonl_path, jsonl_records)
+        print(f"     * Da luu {len(jsonl_records)} mau vao: {jsonl_path}")
 
+        # Ghi 1 dòng tổng hợp vào CSV (PPL để trống, sẽ backfill sau)
         result = {
             "model": args.model,
             "kv_cache_type": args.kv_cache_type,
@@ -341,36 +365,44 @@ def run_real_benchmark(args):
             "peak_memory_mb": round(final_peak, 2),
             "latency_ms_per_token": round(latency, 2),
             "throughput_tokens_per_s": round(throughput, 2),
-            "perplexity": ppl,
-            "status": "OK"
+            "perplexity": "",  # Sẽ backfill PPL offline sau
+            "status": "OK",
+            "sample_id": f"{args.model}__{args.kv_cache_type}__{args.context_length}",
+            "output_path": jsonl_path,
         }
 
     except torch.cuda.OutOfMemoryError:
         vram_monitor.stop()
         print("  LOI: CUDA Out of Memory (OOM)!")
+        # Cột số để trống, ghi OOM vào cột status
         result = {
             "model": args.model,
             "kv_cache_type": args.kv_cache_type,
             "context_length": args.context_length,
-            "peak_memory_mb": "OOM",
-            "latency_ms_per_token": "OOM",
-            "throughput_tokens_per_s": "OOM",
-            "perplexity": "N/A",
-            "status": "OOM"
+            "peak_memory_mb": "",
+            "latency_ms_per_token": "",
+            "throughput_tokens_per_s": "",
+            "perplexity": "",
+            "status": "OOM",
+            "sample_id": "",
+            "output_path": "",
         }
 
     except Exception as e:
         vram_monitor.stop()
         print(f"  LOI khong xac dinh: {e}")
+        # Cột số để trống, ghi chi tiết lỗi vào cột status
         result = {
             "model": args.model,
             "kv_cache_type": args.kv_cache_type,
             "context_length": args.context_length,
-            "peak_memory_mb": "ERROR",
-            "latency_ms_per_token": "ERROR",
-            "throughput_tokens_per_s": "ERROR",
-            "perplexity": "ERROR",
-            "status": f"ERROR: {e}"
+            "peak_memory_mb": "",
+            "latency_ms_per_token": "",
+            "throughput_tokens_per_s": "",
+            "perplexity": "",
+            "status": f"ERROR: {e}",
+            "sample_id": "",
+            "output_path": "",
         }
 
     # --- Ghi kết quả ---
