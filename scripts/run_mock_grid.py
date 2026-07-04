@@ -1,0 +1,61 @@
+import subprocess
+import time
+import os
+
+MODELS = [
+    "vilm/vinallama-7b-chat",
+    "Qwen/Qwen2.5-7B-Instruct",
+    "meta-llama/Meta-Llama-3.1-8B-Instruct",
+    "ura-hcmut/URA-LLaMa-3-8B",
+    "Viet-Mistral/Vistral-7B-Chat"
+]
+
+KV_CACHE_TYPES = ["FP16", "FP8", "HQQ", "PolarQuant", "TurboQuant"]
+CONTEXT_LENGTHS = [4000, 8000, 16000]
+OUTPUT_CSV = "results/raw_benchmark_log.csv"
+
+def main():
+
+    print(f"Tổng số cấu hình sẽ chạy: {len(MODELS) * len(KV_CACHE_TYPES) * len(CONTEXT_LENGTHS)}")
+    print(f"Dữ liệu sẽ được append liên tục vào {OUTPUT_CSV}\n")
+    
+    time.sleep(2)
+
+    count = 1
+    total = len(MODELS) * len(KV_CACHE_TYPES) * len(CONTEXT_LENGTHS)
+    
+    for model in MODELS:
+        for kv_type in KV_CACHE_TYPES:
+            for ctx in CONTEXT_LENGTHS:
+                print(f"\n[{count}/{total}] Đang chạy: Model={model} | Method={kv_type} | Context={ctx}")
+                
+                cmd = [
+                    "python", "scripts/run_baseline.py",
+                    "--model", model,
+                    "--kv_cache_type", kv_type,
+                    "--context_length", str(ctx),
+                    "--output", OUTPUT_CSV,
+                    "--mock_mode"
+                ]
+                
+                # Chạy process con và chờ kết quả
+                try:
+                    env = os.environ.copy()
+                    env["PYTHONUTF8"] = "1"
+                    result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace', env=env)
+                    if result.returncode == 0:
+                        print("   Đã ghi nhận log thành công.")
+                    else:
+                        print(f"   Cảnh báo: Có lỗi xảy ra trong quá trình chạy (Return code: {result.returncode})")
+                        print(result.stderr)
+                except Exception as e:
+                    print(f"   Lỗi hệ thống khi gọi script: {e}")
+                
+                count += 1
+                
+
+    print(f"Dữ liệu CSV đã sẵn sàng tại: {OUTPUT_CSV}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 Bạn là senior data engineering reviewer kiêm technical writer. Hãy tạo file báo cáo tiến độ cho Data Team tại:
 
 ```text
@@ -291,4 +292,100 @@ Commit message đề xuất:
 
 ```text
 docs(data): add Data Team progress report
+=======
+Bạn hãy kiểm tra xem benchmark result hiện tại có thể backfill PPL và output quality hay không.
+
+## Mục tiêu
+
+Xác định liệu các kết quả benchmark đã chạy xong có đủ dữ liệu để tính lại PPL và quality flags mà không cần chạy lại benchmark generation hay không.
+
+## Việc cần làm
+
+1. Kiểm tra các file kết quả benchmark hiện có trong thư mục `results/`.
+
+2. Xác định các CSV/log có chứa generated text hay không. Tìm các cột có thể là:
+
+* `generated_text`
+* `output`
+* `response`
+* `completion`
+* `generated_output`
+* `model_output`
+
+3. Nếu có generated text:
+
+* Viết hoặc đề xuất script `scripts/backfill_ppl_quality.py`.
+* Script này đọc CSV kết quả cũ.
+* Load BF16 reference model/tokenizer.
+* Tính PPL bằng `scripts/utils_ppl.py`.
+* Tính quality flags bằng `scripts/utils_generation_quality.py`.
+* Ghi ra file mới, không ghi đè file gốc mặc định.
+
+Tên output đề xuất:
+
+```text
+results/backfilled_ppl_quality.csv
+```
+
+4. Nếu không có generated text:
+
+* Báo cáo rõ là không thể tính PPL cho benchmark cũ.
+* Giải thích rằng PPL cần token/text output.
+* Đề xuất chạy lại benchmark với logging generated text được bật.
+
+5. Kiểm tra `run_baseline.py` hiện tại có lưu generated text vào CSV không.
+
+Nếu chưa lưu generated text, hãy đề xuất thêm một trong hai cách:
+
+* lưu toàn bộ `generated_text` vào raw CSV nếu dung lượng chấp nhận được;
+* hoặc lưu vào file JSONL riêng, CSV chỉ lưu `sample_id` và `output_path`.
+
+## Yêu cầu script backfill nếu có thể
+
+Nếu benchmark cũ có generated text, hãy implement script:
+
+```bash
+python scripts/backfill_ppl_quality.py \
+  --input results/<old_result>.csv \
+  --output results/<old_result>_with_ppl_quality.csv \
+  --reference_model <path_or_hf_model_id> \
+  --text_column generated_text
+```
+
+Script cần:
+
+* Không sửa `scripts/test/run_real_benchmark.py`.
+* Không ghi đè input nếu chưa có flag `--overwrite`.
+* Không crash nếu một dòng lỗi.
+* Numeric lỗi để blank.
+* Status lỗi ghi vào `ppl_status` hoặc `ppl_error`.
+* Log progress theo số dòng đã xử lý.
+* Có thể resume hoặc skip dòng đã có `ppl_status=OK` nếu output đã tồn tại.
+
+## Format báo cáo
+
+Trả lời theo format:
+
+```markdown
+# Backfill Feasibility Report
+
+## 1. Existing result files inspected
+| File | Has generated text? | Text column | Can backfill? |
+|---|---:|---|---|
+
+## 2. Decision
+...
+
+## 3. If backfill is possible
+- Script added:
+- Command to run:
+- Output file:
+
+## 4. If backfill is not possible
+- Missing data:
+- Required rerun changes:
+
+## 5. Recommended next action
+...
+>>>>>>> Stashed changes
 ```
