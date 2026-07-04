@@ -6,11 +6,11 @@ File này là "Công nhân thực thi" — chạy đo đạc cho ĐÚNG 1 cấu 
 (1 Model + 1 KV Cache Type + 1 Context Length). Được gọi bởi
 run_real_grid.py (Quản đốc) hoặc chạy lẻ từ dòng lệnh.
 
-Kết quả ghi vào: ../../results/real_benchmark_log.csv
+Kết quả ghi vào: ../../results/template_log_real_run.csv
 
 Cách chạy lẻ:
     python scripts/test/run_real_benchmark.py \
-        --model "vilm/vinallama-7b-chat" \
+        --model "sail/Sailor2-8B-Chat" \
         --kv_cache_type FP16 \
         --context_length 8000
 
@@ -44,7 +44,7 @@ except ImportError as e:
 # 2. Danh sách Model và Cấu hình
 # ============================================================
 SUPPORTED_MODELS = [
-    "vilm/vinallama-7b-chat",
+    "sail/Sailor2-8B-Chat",
     "Qwen/Qwen2.5-7B-Instruct",
     "meta-llama/Meta-Llama-3.1-8B-Instruct",
     "ura-hcmut/URA-LLaMa-3-8B",
@@ -67,7 +67,7 @@ def parse_args():
         description="Real GPU Benchmark - KV Cache Compression trên Vietnamese LLMs"
     )
     parser.add_argument(
-        "--model", type=str, default="vilm/vinallama-7b-chat",
+        "--model", type=str, default="sail/Sailor2-8B-Chat",
         choices=SUPPORTED_MODELS, help="Ten mo hinh can benchmark"
     )
     parser.add_argument(
@@ -88,7 +88,7 @@ def parse_args():
         help="So token toi da can sinh (Decode phase)"
     )
     parser.add_argument(
-        "--output", type=str, default="../../results/real_benchmark_log.csv",
+        "--output", type=str, default="../../results/template_log_real_run.csv",
         help="Duong dan luu ket qua CSV"
     )
     parser.add_argument(
@@ -240,7 +240,15 @@ def run_real_benchmark(args):
     try:
         with open(args.dataset, "r", encoding="utf-8") as f:
             data = json.load(f)
-        prompts = [item["text"] for item in data[:args.num_samples]]
+            
+        if isinstance(data, dict) and "samples" in data:
+            samples = data["samples"]
+        elif isinstance(data, list):
+            samples = data
+        else:
+            raise ValueError("Invalid dataset format. Expected list or dict with 'samples' key.")
+            
+        prompts = [item["text"] for item in samples[:args.num_samples]]
         print(f"  -> Da nap {len(prompts)} mau van ban.")
     except FileNotFoundError:
         print(f"  LOI: Khong tim thay file {args.dataset}")

@@ -1,6 +1,6 @@
 """
 Script tạo file Jupyter Notebook phân tích kết quả Benchmark THỰC TẾ.
-Đọc file ../../results/real_benchmark_log.csv và vẽ biểu đồ so sánh.
+Đọc file ../../results/template_log_real_run.csv và vẽ biểu đồ so sánh.
 
 Cách chạy:
     python scripts/test/generate_real_analysis.py
@@ -24,7 +24,7 @@ def main():
                     "so sánh hiệu năng của 5 phương pháp KV Cache (FP16, FP8, HQQ, PolarQuant, TurboQuant)\n",
                     "trên 5 mô hình LLM tiếng Việt ở 3 mốc ngữ cảnh (4K, 8K, 16K).\n",
                     "\n",
-                    "**Nguồn dữ liệu:** `../../results/real_benchmark_log.csv`\n",
+                    "**Nguồn dữ liệu:** `../../results/template_log_real_run.csv`\n",
                     "\n",
                     "---"
                 ]
@@ -75,7 +75,7 @@ def main():
                     "plt.rcParams.update({'figure.dpi': 120, 'font.size': 12})\n",
                     "\n",
                     "# Nap du lieu thuc te\n",
-                    "df = pd.read_csv('../../results/real_benchmark_log.csv')\n",
+                    "df = pd.read_csv('../../results/template_log_real_run.csv')\n",
                     "df['peak_memory_mb'] = pd.to_numeric(df['peak_memory_mb'], errors='coerce')\n",
                     "df['latency_ms_per_token'] = pd.to_numeric(df['latency_ms_per_token'], errors='coerce')\n",
                     "df['throughput_tokens_per_s'] = pd.to_numeric(df['throughput_tokens_per_s'], errors='coerce')\n",
