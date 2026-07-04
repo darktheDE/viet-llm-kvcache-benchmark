@@ -18,7 +18,7 @@
 
 ### Tự Động Hóa Quá Trình Benchmark với `scripts/run_mock_grid.py`
 - Xây dựng thành công hệ thống chạy quét (Grid Search) đa tiến trình để đo đạc tự động tất cả các kịch bản thực nghiệm kết hợp giữa:
-  - **5 Mô hình tiếng Việt tiêu biểu:** VinaLLaMA-7B, Qwen2.5-7B, Llama-3.1-8B, URA-LLaMa-3-8B, Vistral-7B-Chat.
+  - **5 Mô hình tiếng Việt tiêu biểu:** Sailor2-8B, Qwen2.5-7B, Llama-3.1-8B, URA-LLaMa-3-8B, Vistral-7B-Chat.
   - **5 Phương pháp KV Cache:** FP16, FP8, HQQ, PolarQuant, TurboQuant.
   - **3 Mốc độ dài ngữ cảnh:** 4000, 8000, 16000 tokens.
 

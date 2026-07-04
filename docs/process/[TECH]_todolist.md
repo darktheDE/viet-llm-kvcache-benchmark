@@ -20,7 +20,7 @@ conda activate dbml\_benchmark
 
 * pip install vllm pynvml transformers pandas  
 * **Bước 3:** Viết cấu trúc nền tảng cho file đo đạc `scripts/run_baseline.py`. Script phải tự động ghi nhận Peak VRAM của GPU thông qua thư viện `pynvml` hoặc `torch.cuda.max_memory_allocated()` trong suốt pha Prefill và Decode.  
-* **Bước 4:** Chạy kiểm thử đo đạc thực tế mốc không nén (Full KV Cache BF16) với mô hình `vilm/vinallama-7b-chat` sử dụng bộ dữ liệu `datasets/test_set_small.json`. Ghi nhận thử nghiệm kết quả đầu ra vào file CSV cục bộ.
+* **Bước 4:** Chạy kiểm thử đo đạc thực tế mốc không nén (Full KV Cache BF16) với mô hình `sail/Sailor2-8B-Chat` sử dụng bộ dữ liệu `datasets/test_set_small.json`. Ghi nhận thử nghiệm kết quả đầu ra vào file CSV cục bộ.
 
 #### **4\. Kết quả đầu ra (Expected Output)**
 

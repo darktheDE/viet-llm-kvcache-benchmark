@@ -40,7 +40,7 @@ Tổng thể các mục tiêu hướng tới việc mô tả toàn diện tính 
 Nghiên cứu này chỉ tập trung vào các mô hình ngôn ngữ lớn tiếng Việt ở chế độ suy luận, không bao gồm huấn luyện từ đầu hay đề xuất một thuật toán nén mới. 
 
 *   **Các mốc đối sánh:** Full KV Cache làm baseline và bốn phương pháp nén: TurboQuant, RaBit-Q, PolarQuant, và HQQ.
-*   **Mô hình thử nghiệm:** Các mô hình thuần Việt (như VinaLLaMA, URA-LLaMa) và các biến thể adapted tiếng Việt khác (như Qwen, Llama).
+*   **Mô hình thử nghiệm:** Các mô hình hỗ trợ tiếng Việt (như Sailor2-8B, URA-LLaMa) và các biến thể adapted tiếng Việt khác (như Qwen, Llama).
 *   **Dữ liệu đánh giá:** Các benchmark tiếng Việt và các prompt dài phản ánh các tình huống xử lý ngôn ngữ thực tế.
 *   **Giới hạn:** Nghiên cứu không mở rộng sang bài toán đa phương thức, không đi sâu vào fine-tuning quy mô lớn, và cũng không xem xét toàn bộ pipeline triển khai hệ thống. Trọng tâm của bài báo là đánh giá thực nghiệm các phương pháp nén KV Cache trong bối cảnh tiếng Việt.
 

@@ -3,7 +3,7 @@ import time
 import os
 
 MODELS = [
-    "vilm/vinallama-7b-chat",
+    "sail/Sailor2-8B-Chat",
     "Qwen/Qwen2.5-7B-Instruct",
     "meta-llama/Meta-Llama-3.1-8B-Instruct",
     "ura-hcmut/URA-LLaMa-3-8B",
@@ -16,7 +16,7 @@ CONTEXT_LENGTHS = [4000, 8000, 16000]
 def main():
 
     print(f"Tổng số cấu hình sẽ chạy: {len(MODELS) * len(KV_CACHE_TYPES) * len(CONTEXT_LENGTHS)}")
-    print("Dữ liệu sẽ được append liên tục vào results/template_log.csv\n")
+    print("Dữ liệu sẽ được append liên tục vào results/template_log_demo_run.csv\n")
     
     time.sleep(2)
 
@@ -33,6 +33,7 @@ def main():
                     "--model", model,
                     "--kv_cache_type", kv_type,
                     "--context_length", str(ctx),
+                    "--output", "results/template_log_demo_run.csv",
                     "--mock_mode"
                 ]
                 
@@ -52,7 +53,7 @@ def main():
                 count += 1
                 
 
-    print("Dữ liệu CSV đã sẵn sàng tại: results/template_log.csv")
+    print("Dữ liệu CSV đã sẵn sàng tại: results/template_log_demo_run.csv")
 
 
 if __name__ == "__main__":

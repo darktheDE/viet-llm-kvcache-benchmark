@@ -26,7 +26,7 @@ except ImportError:
     print("WARNING: Không tìm thấy thư viện vLLM, pynvml hoặc PyTorch. Chuyển sang MOCK_MODE (Chế độ giả lập).")
 
 SUPPORTED_MODELS = [
-    "vilm/vinallama-7b-chat",
+    "sail/Sailor2-8B-Chat",
     "Qwen/Qwen2.5-7B-Instruct",
     "meta-llama/Meta-Llama-3.1-8B-Instruct",
     "ura-hcmut/URA-LLaMa-3-8B",
@@ -35,14 +35,14 @@ SUPPORTED_MODELS = [
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Benchmark KV Cache Compression on Vietnamese LLMs")
-    parser.add_argument("--model", type=str, default="vilm/vinallama-7b-chat", 
+    parser.add_argument("--model", type=str, default="sail/Sailor2-8B-Chat", 
                         help="Tên mô hình cần benchmark", choices=SUPPORTED_MODELS)
     parser.add_argument("--dataset", type=str, default="datasets/test_set_small.json", help="Đường dẫn đến tập dữ liệu")
     parser.add_argument("--context_length", type=int, default=8000, help="Độ dài ngữ cảnh tối đa (Max Model Len)")
     parser.add_argument("--kv_cache_type", type=str, default="FP16", 
                         choices=["FP16", "FP8", "HQQ", "PolarQuant", "TurboQuant"], help="Phương pháp nén KV Cache")
     parser.add_argument("--max_new_tokens", type=int, default=128, help="Số token tối đa cần sinh (Decode)")
-    parser.add_argument("--output", type=str, default="results/template_log.csv", help="Đường dẫn lưu kết quả CSV")
+    parser.add_argument("--output", type=str, default="results/template_log_real_run.csv", help="Đường dẫn lưu kết quả CSV")
     parser.add_argument("--mock_mode", action="store_true", help="Ép buộc chạy ở chế độ giả lập (Mock Mode) không cần GPU")
     return parser.parse_args()
 

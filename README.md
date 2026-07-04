@@ -66,7 +66,7 @@ The benchmark pipeline consists of three core stages:
 
 ### Models
 We evaluate the methods across **4 to 6 Vietnamese LLMs** (including foundational and instruction-tuned variants):
-*   `VinaLLaMA-7B` (or equivalent foundational Vietnamese models)
+*   `Sailor2-8B` (SEA-optimized multilingual model by Sea AI Lab, Qwen2.5-based)
 *   `Qwen-VN` (Vietnamese adapted variants)
 *   `Llama-VN` (Vietnamese adapted variants)
 *   `URA-LLaMa-3-8B` (Vietnamese LLM developed by ura-hcmut)
@@ -252,7 +252,7 @@ To run a baseline measurement with uncompressed Full KV Cache on a selected mode
 
 ```bash
 python scripts/run_baseline.py \
-    --model "vilm/vinallama-7b-chat" \
+    --model "sail/Sailor2-8B-Chat" \
     --dataset "datasets/test_set_small.json" \
     --context_length 8000 \
     --max_new_tokens 128 \
