@@ -1,4 +1,4 @@
-# BÁO CÁO ĐÁNH GIÁ TÀI LIỆU DỰ ÁN & ĐỀ XUẤT QUY CHUẨN WORKFLOW
+﻿# BÁO CÁO ĐÁNH GIÁ TÀI LIỆU DỰ ÁN & ĐỀ XUẤT QUY CHUẨN WORKFLOW
 
 Dự án: **Benchmarking TurboQuant and KV Cache Compression Methods on Vietnamese LLMs**
 Môn học: **Big Data Applications: Machine Learning at Scale (DBML434077)**
@@ -37,7 +37,7 @@ Qua quá trình thực hiện tìm kiếm và kiểm chứng thông tin (Groundi
     *   *Vấn đề:* TurboQuant và PolarQuant yêu cầu các nhân CUDA/Triton tùy biến để tích hợp vào vLLM. Phiên bản vLLM và CUDA trên RunPod/Vast.ai phải hoàn toàn tương thích với repo `turboquant-vllm`. Việc cài đặt bản build từ source của các kernel này rất dễ gặp lỗi xung đột compiler.
     *   *Giải pháp:* Cần yêu cầu team Kỹ thuật chạy thử nghiệm việc compile các kernel này ngay từ tuần đầu tiên trên môi trường Cloud GPU để tránh tắc nghẽn ở các tuần sau.
 2.  **Nguy cơ Out-Of-Memory (OOM) ở mốc ngữ cảnh lớn (16k - 32k tokens):**
-    *   *Vấn đề:* Với mô hình 7B/8B (như Llama-3.1-8B hoặc Qwen2.5-7B) chạy trên 1 GPU 24GB VRAM (như RTX 4090), khi context length tăng lên 32k, KV Cache sẽ phình to rất nhanh. Kể cả khi có nén, pha prefill cho prompt dài 32k vẫn tiêu tốn rất nhiều kích thước activation memory.
+    *   *Vấn đề:* Với mô hình 7B/8B (như qwen3:8b hoặc Qwen2.5-7B) chạy trên 1 GPU 24GB VRAM (như RTX 4090), khi context length tăng lên 32k, KV Cache sẽ phình to rất nhanh. Kể cả khi có nén, pha prefill cho prompt dài 32k vẫn tiêu tốn rất nhiều kích thước activation memory.
     *   *Giải pháp:* Team Tech cần cấu hình vLLM một cách phòng thủ (ví dụ: bật FlashAttention-2, giảm `max_num_seqs=1`, sử dụng `--gpu-memory-utilization 0.95` và chia block size phù hợp).
 3.  **Độ dài của Báo cáo tiếng Việt (>= 30 trang):**
     *   *Vấn đề:* Đề tài benchmark thường tập trung sâu vào số liệu thực nghiệm. Để viết được $\ge 30$ trang báo cáo tiếng Việt mà không bị loãng, nhóm cần bổ sung rất nhiều hình vẽ chi tiết, giải thích sâu về toán học lượng tử hóa vector, phân tích từng case study bị lỗi ( gibberish, repetition loops) và so sánh chi tiết giữa các mô hình.

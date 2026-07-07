@@ -1,4 +1,4 @@
-# SPRINT 02
+﻿# SPRINT 02
 
 ### TASK 1: PHÁT TRIỂN MÃ NGUỒN (TECHNICAL & EXPERIMENT)
 
@@ -53,24 +53,24 @@ Xây dựng và hoàn thiện tệp mã nguồn Python `scripts/run_baseline.py`
 
 ### TASK 2: THỰC THI CHẠY THỬ NGHIỆM (TECHNICAL & EXPERIMENT)
 
-*   **Title:** `[EXP] Thực thi Benchmark đa cấu hình trên mô hình Sailor2-8B và Qwen2.5-7B`
+*   **Title:** `[EXP] Thực thi Benchmark đa cấu hình trên mô hình gemma4:e4b và Qwen2.5-7B`
 *   **Module:** Phase 2: Thực nghiệm – chạy benchmark trên nhiều model
 *   **Sprint:** Sprint 2 (Week 3-4)
 *   **Team / Role:** Technical & Experiment (Tran Minh Khanh, Nguyen Van Quang Duy - Support)
 *   **Priority:** High
 
 #### 1. Mô tả chi tiết Task (Description)
-Nhận bàn giao script từ Task 1 và bộ dữ liệu từ team Data. Thực hiện chạy thử nghiệm lưới (Grid Search) lặp lại trên máy chủ Cloud GPU. Đo đạc các mốc so sánh gồm: Full KV Cache (Baseline), FP8, HQQ, PolarQuant, và TurboQuant trên hai dòng mô hình mục tiêu chính là Sailor2-8B và Qwen2.5-7B ở các mốc ngữ cảnh 4k, 8k, 16k.
+Nhận bàn giao script từ Task 1 và bộ dữ liệu từ team Data. Thực hiện chạy thử nghiệm lưới (Grid Search) lặp lại trên máy chủ Cloud GPU. Đo đạc các mốc so sánh gồm: Full KV Cache (Baseline), FP8, HQQ, PolarQuant, và TurboQuant trên hai dòng mô hình mục tiêu chính là gemma4:e4b và Qwen2.5-7B ở các mốc ngữ cảnh 4k, 8k, 16k.
 
 #### 2. Tài liệu đọc tham khảo (References)
-*   *Mô hình sử dụng:* Hugging Face Repos của [sail/Sailor2-8B-Chat](https://huggingface.co/sail/Sailor2-8B-Chat) và [Qwen/Qwen2.5-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct).
+*   *Mô hình sử dụng:* Hugging Face Repos của [gemma4:e4b](https://huggingface.co/gemma4:e4b) và [Qwen/Qwen2.5-7B-Instruct-1M](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-1M).
 
 #### 3. Từng bước thực hiện chi tiết (Step-by-Step)
 *   **Bước 1:** Chuẩn bị sẵn không gian đĩa cứng trên máy chủ để tải tự động các trọng số của hai mô hình mục tiêu (mỗi mô hình chiếm khoảng 14GB - 16GB).
 *   **Bước 2:** Viết một script shell (`scripts/run_grid_experiments.sh`) để tự động hóa việc lặp qua tất cả cấu hình nhằm tránh thao tác thủ công:
     ```bash
     # Ví dụ vòng lặp chạy thực nghiệm
-    for model in "sail/Sailor2-8B-Chat" "Qwen/Qwen2.5-7B-Instruct"; do
+    for model in "gemma4:e4b" "Qwen/Qwen2.5-7B-Instruct-1M"; do
       for kv_type in "BF16" "FP8" "HQQ" "PolarQuant" "TurboQuant"; do
         for ctx in 4000 8000 16000; do
           python scripts/run_baseline.py --model $model --kv_cache_type $kv_type --context_length $ctx

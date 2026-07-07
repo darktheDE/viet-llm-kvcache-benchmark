@@ -65,11 +65,12 @@ The benchmark pipeline consists of three core stages:
 ## Benchmark Scope
 
 ### Models
-We evaluate the methods across **4 to 6 Vietnamese LLMs** (including foundational and instruction-tuned variants):
-*   `Sailor2-8B` (SEA-optimized multilingual model by Sea AI Lab, Qwen2.5-based)
-*   `Qwen-VN` (Vietnamese adapted variants)
-*   `Llama-VN` (Vietnamese adapted variants)
-*   `URA-LLaMa-3-8B` (Vietnamese LLM developed by ura-hcmut)
+We evaluate the methods across **5 Vietnamese/multilingual LLMs** (including foundational and instruction-tuned variants):
+*   `gemma4:e4b` (Ollama alias for Qwen2.5 7B, multilingual long-context baseline)
+*   `qwen3:8b` (Ollama alias for Qwen3 8B, newer multilingual long-context baseline)
+*   `llama3.2:3b` (Ollama alias for Llama 3.2 3B, lightweight compact baseline)
+*   `arcee-ai/Arcee-VyLinh` (Vietnamese LLM developed by ura-hcmut, 128k context baseline)
+*   `Qwen/Qwen2.5-7B-Instruct-1M` (long-context Qwen2.5 7B upper-bound baseline)
 
 ### Compression Methods
 *   **Baseline:** Full KV Cache (uncompressed, BF16/FP16)
@@ -252,7 +253,7 @@ To run a baseline measurement with uncompressed Full KV Cache on a selected mode
 
 ```bash
 python scripts/run_baseline.py \
-    --model "sail/Sailor2-8B-Chat" \
+    --model "gemma4:e4b" \
     --dataset "datasets/test_set_small.json" \
     --context_length 8000 \
     --max_new_tokens 128 \

@@ -1,4 +1,4 @@
-# Hướng dẫn Phát triển (Development Guidelines)
+﻿# Hướng dẫn Phát triển (Development Guidelines)
 
 Tài liệu này đóng vai trò là cẩm nang phát triển và tài liệu onboarding kỹ thuật cho dự án **Vietnamese LLM KV Cache Benchmarking**. Nó chi tiết hóa việc thiết lập môi trường, chiến lược phân nhánh Git, các quy ước lập trình, quy trình kiểm thử và các tiêu chuẩn đảm bảo chất lượng.
 
@@ -140,7 +140,7 @@ Trước khi gửi Pull Request (PR), hãy đảm bảo thay đổi của bạn 
 Để chạy thử một đợt đánh giá cục bộ sử dụng baseline không nén (Full KV Cache):
 ```bash
 python scripts/run_baseline.py \
-    --model "VinAI/PhoGPT-7B-Instruct" \
+    --model "gemma4:e4b" \
     --dataset "datasets/test_set_small.json" \
     --context_length 8000 \
     --max_new_tokens 128 \

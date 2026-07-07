@@ -16,11 +16,11 @@ import os
 import sys
 
 MODELS = [
-    "sail/Sailor2-8B-Chat",
-    "Qwen/Qwen2.5-7B-Instruct",
-    "meta-llama/Meta-Llama-3.1-8B-Instruct",
-    "ura-hcmut/URA-LLaMa-3-8B",
-    "Viet-Mistral/Vistral-7B-Chat"
+    "gemma4:e4b",
+    "qwen3:8b",
+    "llama3.2:3b",
+    "arcee-ai/Arcee-VyLinh",
+    "Qwen/Qwen2.5-7B-Instruct-1M",
 ]
 
 KV_CACHE_TYPES = ["FP16", "FP8", "HQQ", "PolarQuant", "TurboQuant"]
@@ -61,6 +61,9 @@ def main():
                     "--num_samples", "5",
                     "--max_new_tokens", "128",
                 ]
+                hf_token = os.getenv("HF_TOKEN") or os.getenv("HUGGING_FACE_HUB_TOKEN")
+                if hf_token:
+                    cmd.extend(["--hf_token", hf_token])
 
                 try:
                     env = os.environ.copy()

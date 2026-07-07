@@ -1,4 +1,4 @@
-# Dataset Brief: Vietnamese Long-Context Test Suite
+﻿# Dataset Brief: Vietnamese Long-Context Test Suite
 
 Tài liệu này đặc tả chi tiết bộ dữ liệu thử nghiệm dài ngữ cảnh (4k, 8k, 16k tokens) phục vụ quá trình đánh giá (benchmark) hiệu năng và chất lượng nén KV Cache của các mô hình tiếng Việt.
 
@@ -56,7 +56,7 @@ Cấu trúc dạng **JSON Object** ở mức cao nhất, dùng cho việc kiểm
   "description": "Small cleaned Vietnamese long-context test set for LLM benchmark.",
   "mode": "full",
   "tokenizer": {
-    "name_or_path": "Qwen/Qwen2.5-7B-Instruct",
+    "name_or_path": "Qwen/Qwen2.5-7B-Instruct-1M",
     "token_count_method": "transformers AutoTokenizer encode length"
   },
   "samples": [

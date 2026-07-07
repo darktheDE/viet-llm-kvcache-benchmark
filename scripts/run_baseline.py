@@ -26,16 +26,35 @@ except ImportError:
     print("WARNING: Không tìm thấy thư viện vLLM, pynvml hoặc PyTorch. Chuyển sang MOCK_MODE (Chế độ giả lập).")
 
 SUPPORTED_MODELS = [
-    "sail/Sailor2-8B-Chat",
-    "Qwen/Qwen2.5-7B-Instruct",
-    "meta-llama/Meta-Llama-3.1-8B-Instruct",
-    "ura-hcmut/URA-LLaMa-3-8B",
-    "Viet-Mistral/Vistral-7B-Chat"
+    "gemma4:e4b",
+    "qwen3:8b",
+    "llama3.2:3b",
+    "arcee-ai/Arcee-VyLinh",
+    "Qwen/Qwen2.5-7B-Instruct-1M",
 ]
+
+OLLAMA_TO_HF_MODEL = {
+    "gemma4:e4b": "google/gemma-2b-it",
+    "qwen3:8b": "Qwen/Qwen3-8B",
+    "llama3.2:3b": "meta-llama/Llama-3.2-3B-Instruct",
+    "arcee-ai/Arcee-VyLinh": "arcee-ai/Arcee-VyLinh",
+}
+
+
+def resolve_model_for_vllm(model_name: str) -> str:
+    """Map Ollama aliases to Hugging Face repos for vLLM execution.
+
+    Args:
+        model_name: Ollama alias or Hugging Face model repository.
+
+    Returns:
+        Hugging Face model repository usable by vLLM.
+    """
+    return OLLAMA_TO_HF_MODEL.get(model_name, model_name)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Benchmark KV Cache Compression on Vietnamese LLMs")
-    parser.add_argument("--model", type=str, default="sail/Sailor2-8B-Chat", 
+    parser.add_argument("--model", type=str, default="gemma4:e4b", 
                         help="Tên mô hình cần benchmark", choices=SUPPORTED_MODELS)
     parser.add_argument("--dataset", type=str, default="datasets/test_set_small.json", help="Đường dẫn đến tập dữ liệu")
     parser.add_argument("--context_length", type=int, default=8000, help="Độ dài ngữ cảnh tối đa (Max Model Len)")
@@ -248,7 +267,7 @@ def run_real_benchmark(args):
         # Khởi tạo vLLM. 
         # Tối ưu hóa VRAM: gpu_memory_utilization cao, max_num_seqs nhỏ
         llm = LLM(
-            model=args.model,
+            model=resolve_model_for_vllm(args.model),
             kv_cache_dtype=kv_cache_dtype,
             max_model_len=args.context_length,
             gpu_memory_utilization=0.98,

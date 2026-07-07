@@ -1,4 +1,4 @@
-# KIẾN TRÚC HỆ THỐNG TỔNG THỂ (OVERALL SYSTEM ARCHITECTURE)
+﻿# KIẾN TRÚC HỆ THỐNG TỔNG THỂ (OVERALL SYSTEM ARCHITECTURE)
 
 Hệ thống benchmark được chia làm **4 tầng chức năng chính** hoạt động theo mô hình luồng dữ liệu một chiều (Pipeline-driven):
 
@@ -16,7 +16,7 @@ Hệ thống benchmark được chia làm **4 tầng chức năng chính** hoạ
 |                     TẦNG 2: THỰC THI SUY LUẬN & NÉN (LLM SERVING)                 |
 |   +---------------------------------------------------------------------------+   |
 |   |  Inference Engine (vLLM / SGLang with PagedAttention)                     |   |
-|   |  - Model Loader: [Sailor2-8B] / [Qwen2.5-7B] / [Llama-3.1-8B] (BF16)      |   |
+|   |  - Model Loader: [gemma4:e4b] / [Qwen2.5-7B] / [qwen3:8b] (BF16)      |   |
 |   +---------------------------------------------------------------------------+   |
 |                                                              |                    |
 |   +----------------------------------------------------------v----------------+   |
