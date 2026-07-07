@@ -10,11 +10,11 @@ This repository contains the official implementation, datasets, experimental con
 
 *   **Primary Goal:** Establish a reproducible empirical benchmark for memory footprint (Peak VRAM), inference latency (TTFT and ITL), decoding throughput (tokens/s), and output quality (Perplexity - PPL, downstream task metrics) across context lengths (4k, 8k, 16k, 32k) for Vietnamese LLMs.
 *   **Evaluation Models:**
-    1.  `VinAI/PhoGPT-7B5-Instruct` (Pure Vietnamese adaptation with ALiBi attention)
-    2.  `Qwen/Qwen2.5-7B-Instruct` (Adapted multilingual baseline with long context support)
-    3.  `meta-llama/Meta-Llama-3.1-8B-Instruct` (Global standard baseline)
-    4.  `ura-hcmut/URA-LLaMa-3-8B` (Vietnamese continual pre-trained model)
-    5.  `Viet-Mistral/Vistral-7B-Chat` (High-performing cross-lingual model)
+    1.  `gemma4:e4b` (Ollama alias for Qwen2.5 7B, multilingual long-context baseline)
+    2.  `qwen3:8b` (Ollama alias for Qwen3 8B, newer multilingual long-context baseline)
+    3.  `llama3.2:3b` (Ollama alias for Llama 3.2 3B, lightweight compact baseline)
+    4.  `arcee-ai/Arcee-VyLinh` (Vietnamese LLM developed by ura-hcmut, 128k context baseline)
+    5.  `Qwen/Qwen2.5-7B-Instruct-1M` (long-context Qwen2.5 7B upper-bound baseline)
 *   **Compression Methods:**
     *   **Baseline:** Full KV Cache (uncompressed, BF16/FP16)
     *   **FP8:** 8-bit floating point standard baseline
@@ -37,7 +37,7 @@ This repository contains the official implementation, datasets, experimental con
 
 ## Testing & Execution
 - **Run Baseline:** Use `scripts/run_baseline.py` for testing Full KV Cache performance.
-  - Example: `python scripts/run_baseline.py --model "sail/Sailor2-8B-Chat" --dataset "datasets/test_set_small.json" --context_length 8000 --max_new_tokens 128 --output "results/baseline.csv"`
+  - Example: `python scripts/run_baseline.py --model "gemma4:e4b" --dataset "datasets/test_set_small.json" --context_length 8000 --max_new_tokens 128 --output "results/baseline.csv"`
 - Always test locally before creating Pull Requests.
 
 ---
@@ -98,7 +98,7 @@ This repository contains the official implementation, datasets, experimental con
 ### Benchmark Running & Logging
 *   **Run baseline (Full KV Cache):**
     ```bash
-    python scripts/run_baseline.py --model "VinAI/PhoGPT-7B-Instruct" --dataset "datasets/test_set_small.json" --context_length 8000 --max_new_tokens 128 --output "results/phogpt_baseline.csv"
+    python scripts/run_baseline.py --model "gemma4:e4b" --dataset "datasets/test_set_small.json" --context_length 16000 --max_new_tokens 128 --output "results/qwen25_baseline.csv"
     ```
 *   **Run Mock Baseline (For validation without GPU):**
     ```bash

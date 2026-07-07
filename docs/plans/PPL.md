@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+﻿# Kế hoạch Tái cấu trúc luồng Đo đạc PPL & Ghi Log (PPL & Quality Logging Refactor)
+=======
 # Kế hoạch Tái cấu trúc PPL & Quality Logging
+>>>>>>> main
 
 Tài liệu này ghi lại trạng thái hiện tại của task **PPL & Quality Logging Refactor**, các phần đã triển khai, cách dùng script mới, và các vấn đề còn tồn đọng.
 
@@ -190,11 +194,11 @@ Mỗi record JSONL chứa tối thiểu:
 
 ```json
 {
-  "sample_id": "sail/Sailor2-8B-Chat__FP16__8000__s0",
+  "sample_id": "gemma4:e4b__FP16__8000__s0",
   "prompt_text": "Văn bản đầu vào gốc...",
   "generated_text": "Văn bản model sinh ra...",
   "generated_tokens": 128,
-  "model": "sail/Sailor2-8B-Chat",
+  "model": "gemma4:e4b",
   "dataset": "datasets/test_set_small.json",
   "context_length": 8000,
   "kv_cache_type": "FP16",

@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import json
@@ -48,7 +48,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", default="datasets/test_set_small.json", help="Output JSON path.")
     parser.add_argument(
         "--tokenizer-name",
-        default="Qwen/Qwen2.5-7B-Instruct",
+        default="Qwen/Qwen2.5-7B-Instruct-1M",
         help="Preferred tokenizer name or path.",
     )
     parser.add_argument("--allow-smoke-test", action="store_true", help="Allow fewer/shorter samples.")

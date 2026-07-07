@@ -1,4 +1,4 @@
-# Báo cáo tiến độ Data Team
+﻿# Báo cáo tiến độ Data Team
 
 ## 1. Tóm tắt trạng thái
 
@@ -110,7 +110,7 @@ Artifact `datasets/test_set_small.json` hiện có:
 - `version`: `0.1.0`
 - `language`: `vi`
 - `mode`: `full`
-- tokenizer: `Qwen/Qwen2.5-7B-Instruct`
+- tokenizer: `Qwen/Qwen2.5-7B-Instruct-1M`
 - tổng số samples: `12`
 - source dataset chính trong artifact: `VTSNLP/vietnamese_curated_dataset`
 

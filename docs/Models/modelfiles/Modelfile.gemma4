@@ -1,0 +1,8 @@
+FROM gemma4:e4b
+
+# Mở rộng context window lên 32K để đủ cho benchmark ở mốc 4k/8k/16k token
+# Mặc định Ollama chỉ set 2048 hoặc 4096 — PHẢI khai báo tường minh num_ctx
+PARAMETER num_ctx 32768
+
+# Tắt hệ thống nhắc (system prompt) để không chiếm token của context budget
+SYSTEM ""

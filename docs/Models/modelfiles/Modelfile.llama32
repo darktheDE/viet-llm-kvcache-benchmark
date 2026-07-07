@@ -1,0 +1,7 @@
+FROM llama3.2:3b
+
+# Mở rộng context window lên 32K để đủ cho benchmark ở mốc 4k/8k/16k token
+# Llama 3.2 3B hỗ trợ native 128K nhưng Ollama cần khai báo tường minh
+PARAMETER num_ctx 32768
+
+SYSTEM ""

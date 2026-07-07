@@ -1,4 +1,4 @@
-{
+﻿{
   "dataset_name": "vietnamese_long_context_test_set_small",
   "version": "0.1.0",
   "language": "vi",
@@ -6,7 +6,7 @@
   "description": "Small cleaned Vietnamese long-context test set for LLM benchmark.",
   "mode": "smoke_test",
   "tokenizer": {
-    "name_or_path": "Qwen/Qwen2.5-7B-Instruct",
+    "name_or_path": "Qwen/Qwen2.5-7B-Instruct-1M",
     "token_count_method": "transformers AutoTokenizer encode length"
   },
   "samples": [

@@ -10,9 +10,9 @@ Kết quả ghi vào: ../../results/template_log_real_run.csv
 
 Cách chạy lẻ:
     python scripts/test/run_real_benchmark.py \
-        --model "sail/Sailor2-8B-Chat" \
+        --model "gemma4:e4b" \
         --kv_cache_type FP16 \
-        --context_length 8000
+        --context_length 16000
 
 Cách chạy Grid (tự động 75 cấu hình):
     python scripts/test/run_real_grid.py
@@ -25,6 +25,7 @@ import time
 import os
 import sys
 import math
+import subprocess
 import threading
 from pathlib import Path
 
@@ -40,16 +41,72 @@ except ImportError as e:
     print("Hay cai dat: pip install vllm pynvml torch")
     sys.exit(1)
 
+try:
+    from huggingface_hub import login as hf_login
+except ImportError:
+    hf_login = None
+
 # ============================================================
 # 2. Danh sách Model và Cấu hình
 # ============================================================
 SUPPORTED_MODELS = [
-    "sail/Sailor2-8B-Chat",
-    "Qwen/Qwen2.5-7B-Instruct",
-    "meta-llama/Meta-Llama-3.1-8B-Instruct",
-    "ura-hcmut/URA-LLaMa-3-8B",
-    "Viet-Mistral/Vistral-7B-Chat"
+    "gemma4:e4b",
+    "qwen3:8b",
+    "llama3.2:3b",
+    "arcee-ai/Arcee-VyLinh",
+    "Qwen/Qwen2.5-7B-Instruct-1M",
 ]
+
+OLLAMA_TO_HF_MODEL = {
+    "gemma4:e4b": "google/gemma-2b-it",
+    "qwen3:8b": "Qwen/Qwen3-8B",
+    "llama3.2:3b": "meta-llama/Llama-3.2-3B-Instruct",
+    "arcee-ai/Arcee-VyLinh": "arcee-ai/Arcee-VyLinh",
+}
+
+
+def resolve_model_for_vllm(model_name):
+    """Map Ollama aliases to Hugging Face repos for vLLM runs.
+
+    Args:
+        model_name: Ollama model alias or Hugging Face repo id.
+
+    Returns:
+        Hugging Face repo id used by vLLM.
+    """
+    return OLLAMA_TO_HF_MODEL.get(model_name, model_name)
+
+
+def configure_model_access(model_name, hf_token=None, pull_ollama=False):
+    """Prepare Hugging Face token and optional Ollama pull on rented machines.
+
+    Args:
+        model_name: User-facing model alias or Hugging Face repo id.
+        hf_token: Optional Hugging Face token. If omitted, HF_TOKEN or
+            HUGGING_FACE_HUB_TOKEN from the environment is used.
+        pull_ollama: Whether to run `ollama pull` for Ollama aliases.
+
+    Returns:
+        Hugging Face repo id resolved for vLLM.
+    """
+    token = hf_token or os.getenv("HF_TOKEN") or os.getenv("HUGGING_FACE_HUB_TOKEN")
+    if token:
+        os.environ["HF_TOKEN"] = token
+        os.environ["HUGGING_FACE_HUB_TOKEN"] = token
+        if hf_login is not None:
+            hf_login(token=token, add_to_git_credential=False)
+        print("  -> Hugging Face token da duoc nap tu --hf_token/HF_TOKEN.")
+
+    if pull_ollama and model_name in OLLAMA_TO_HF_MODEL:
+        try:
+            subprocess.run(["ollama", "pull", model_name], check=True, timeout=1800)
+            print(f"  -> Ollama model da san sang: {model_name}")
+        except FileNotFoundError:
+            print("  -> Khong tim thay lenh ollama; bo qua buoc ollama pull.")
+        except Exception as exc:
+            print(f"  -> Canh bao: ollama pull that bai: {exc}")
+
+    return resolve_model_for_vllm(model_name)
 
 # Ánh xạ tên phương pháp nén -> tham số kv_cache_dtype của vLLM
 KV_CACHE_DTYPE_MAP = {
@@ -67,7 +124,7 @@ def parse_args():
         description="Real GPU Benchmark - KV Cache Compression trên Vietnamese LLMs"
     )
     parser.add_argument(
-        "--model", type=str, default="sail/Sailor2-8B-Chat",
+        "--model", type=str, default="gemma4:e4b",
         choices=SUPPORTED_MODELS, help="Ten mo hinh can benchmark"
     )
     parser.add_argument(
@@ -97,7 +154,15 @@ def parse_args():
     )
     parser.add_argument(
         "--hf_token", type=str, default=None,
+<<<<<<< HEAD
+        help="Hugging Face access token; mac dinh doc tu HF_TOKEN/HUGGING_FACE_HUB_TOKEN"
+    )
+    parser.add_argument(
+        "--pull_ollama", action="store_true",
+        help="Neu model la alias Ollama, chay `ollama pull` truoc khi benchmark"
+=======
         help="HuggingFace access token cho model gated (hoac dat env HF_TOKEN)"
+>>>>>>> main
     )
     return parser.parse_args()
 
@@ -273,16 +338,28 @@ def run_real_benchmark(args):
     try:
         # Reset peak memory tracking của PyTorch
         torch.cuda.reset_peak_memory_stats()
+        vllm_model = configure_model_access(
+            args.model,
+            hf_token=args.hf_token,
+            pull_ollama=args.pull_ollama,
+        )
+        print(f"  -> vLLM repo: {vllm_model}")
 
         llm = LLM(
-            model=args.model,
+            model=vllm_model,
             kv_cache_dtype=kv_dtype,
             max_model_len=args.context_length,
             gpu_memory_utilization=0.98,
-            max_num_batched_tokens=4096,
+            # max_num_batched_tokens phải >= max_model_len; nếu không vLLM sẽ lỗi
+            # khi xử lý các prompt dài ở mốc 8K/16K.
+            max_num_batched_tokens=max(args.context_length, 4096),
             max_num_seqs=2,
             trust_remote_code=True,
+<<<<<<< HEAD
+            hf_token=os.getenv("HF_TOKEN") or os.getenv("HUGGING_FACE_HUB_TOKEN"),
+=======
             hf_token=hf_token,
+>>>>>>> main
         )
         print(f"  -> Mo hinh da san sang tren GPU.")
     except Exception as e:

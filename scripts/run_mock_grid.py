@@ -3,11 +3,11 @@ import time
 import os
 
 MODELS = [
-    "sail/Sailor2-8B-Chat",
-    "Qwen/Qwen2.5-7B-Instruct",
-    "meta-llama/Meta-Llama-3.1-8B-Instruct",
-    "ura-hcmut/URA-LLaMa-3-8B",
-    "Viet-Mistral/Vistral-7B-Chat"
+    "gemma4:e4b",
+    "qwen3:8b",
+    "llama3.2:3b",
+    "arcee-ai/Arcee-VyLinh",
+    "Qwen/Qwen2.5-7B-Instruct-1M",
 ]
 
 KV_CACHE_TYPES = ["FP16", "FP8", "HQQ", "PolarQuant", "TurboQuant"]
