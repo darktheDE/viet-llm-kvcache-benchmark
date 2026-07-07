@@ -50,6 +50,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="If output_csv exists, reuse it and skip rows with ppl_status=OK.",
     )
+    parser.add_argument("--hf_token", type=str, default=None, help="HuggingFace access token cho model gated (hoac dat env HF_TOKEN)")
     parser.add_argument("--progress_every", type=int, default=10)
     return parser.parse_args()
 
@@ -236,6 +237,7 @@ def main() -> None:
         tokenizer_name=args.reference_tokenizer,
         device=args.device,
         dtype=args.dtype,
+        hf_token=args.hf_token,
     )
 
     def score_record(record: dict[str, Any]) -> dict[str, Any]:

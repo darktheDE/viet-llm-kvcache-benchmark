@@ -10,6 +10,7 @@ Cách chạy:
     python scripts/test/run_real_grid.py
 """
 
+import argparse
 import subprocess
 import time
 import os
@@ -29,7 +30,23 @@ OUTPUT_CSV = "results/template_log_real_run.csv"
 SCRIPT_PATH = "scripts/test/run_real_benchmark.py"
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Grid Search orchestrator - chay tu dong 75 cau hinh benchmark"
+    )
+    parser.add_argument(
+        "--hf_token", type=str, default=None,
+        help="HuggingFace access token cho model gated (hoac dat env HF_TOKEN)"
+    )
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
+
+    # Resolve HF token: CLI arg -> env HF_TOKEN -> env HUGGING_FACE_HUB_TOKEN
+    hf_token = args.hf_token or os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+
     total = len(MODELS) * len(KV_CACHE_TYPES) * len(CONTEXT_LENGTHS)
     print("=" * 60)
     print("  REAL GPU BENCHMARK - GRID SEARCH (75 cau hinh)")
@@ -37,6 +54,8 @@ def main():
     print(f"Tong so cau hinh: {total}")
     print(f"Output CSV: {OUTPUT_CSV}")
     print(f"Models: {len(MODELS)} | Methods: {len(KV_CACHE_TYPES)} | Contexts: {len(CONTEXT_LENGTHS)}")
+    if hf_token:
+        print(f"HF Token: *** (co su dung)")
     print("=" * 60 + "\n")
 
     count = 1
@@ -61,10 +80,14 @@ def main():
                     "--num_samples", "5",
                     "--max_new_tokens", "128",
                 ]
+                if hf_token:
+                    cmd.extend(["--hf_token", hf_token])
 
                 try:
                     env = os.environ.copy()
                     env["PYTHONUTF8"] = "1"
+                    if hf_token:
+                        env["HF_TOKEN"] = hf_token
 
                     result = subprocess.run(
                         cmd,

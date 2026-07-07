@@ -225,11 +225,21 @@ def load_reference_model(
     tokenizer_name: str | None = None,
     device: str = "cuda",
     dtype: str = "bf16",
+    hf_token: str | None = None,
 ) -> tuple[Any, Any, Any]:
-    """Load the BF16/FP reference model used for offline PPL scoring."""
+    """Load the BF16/FP reference model used for offline PPL scoring.
 
+    Args:
+        hf_token: HuggingFace access token for gated models.
+                   Falls back to env HF_TOKEN / HUGGING_FACE_HUB_TOKEN.
+    """
+
+    import os as _os
     import torch as real_torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
+
+    # Resolve HF token: arg -> env HF_TOKEN -> env HUGGING_FACE_HUB_TOKEN
+    _token = hf_token or _os.environ.get("HF_TOKEN") or _os.environ.get("HUGGING_FACE_HUB_TOKEN")
 
     dtype_map = {
         "bf16": real_torch.bfloat16,
@@ -241,6 +251,7 @@ def load_reference_model(
         tokenizer_name or model_name,
         use_fast=True,
         trust_remote_code=True,
+        token=_token,
     )
     if getattr(tokenizer, "pad_token_id", None) is None:
         tokenizer.pad_token = tokenizer.eos_token or tokenizer.unk_token
@@ -251,12 +262,14 @@ def load_reference_model(
             torch_dtype=torch_dtype,
             device_map="auto",
             trust_remote_code=True,
+            token=_token,
         )
     else:
         reference_model = AutoModelForCausalLM.from_pretrained(
             model_name,
             torch_dtype=torch_dtype,
             trust_remote_code=True,
+            token=_token,
         )
         reference_model.to(device)
 
