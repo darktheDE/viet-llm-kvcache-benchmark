@@ -12,8 +12,17 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
         sys.stderr.reconfigure(encoding='utf-8', errors='replace')
     except AttributeError:
         pass
-import random
 from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.utils_generation_quality import (
+    aggregate_quality_metrics,
+    analyze_generated_text,
+    skipped_quality_metrics,
+)
 
 # Thử import vLLM và pynvml. Nếu không có (chạy local/không GPU) thì chuyển sang Mock Mode.
 try:
@@ -63,14 +72,18 @@ def parse_args():
     parser.add_argument("--max_new_tokens", type=int, default=128, help="Số token tối đa cần sinh (Decode)")
     parser.add_argument("--output", type=str, default="results/template_log_real_run.csv", help="Đường dẫn lưu kết quả CSV")
     parser.add_argument("--mock_mode", action="store_true", help="Ép buộc chạy ở chế độ giả lập (Mock Mode) không cần GPU")
+    parser.add_argument("--hf_token", type=str, default=None, help="HuggingFace access token cho model gated (hoac dat env HF_TOKEN)")
     return parser.parse_args()
 
 # Header CSV mở rộng: thêm sample_id, output_path để ghép JSONL cho PPL backfill
 CSV_HEADER = [
     "model", "kv_cache_type", "context_length",
     "peak_memory_mb", "latency_ms_per_token",
-    "throughput_tokens_per_s", "perplexity", "status",
-    "sample_id", "output_path"
+    "throughput_tokens_per_s", "perplexity", "ppl_loss",
+    "ppl_tokens", "ppl_status", "ppl_error", "status",
+    "sample_id", "output_path", "repetition_flag",
+    "gibberish_flag", "repeated_ngram_ratio", "special_char_ratio",
+    "output_length", "quality_warning"
 ]
 
 def setup_csv(output_path):
@@ -82,21 +95,37 @@ def setup_csv(output_path):
         if not file_exists:
             writer.writerow(CSV_HEADER)
 
+def _output_header(output_path):
+    if os.path.isfile(output_path) and os.path.getsize(output_path) > 0:
+        with open(output_path, mode='r', newline='', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            try:
+                return next(reader)
+            except StopIteration:
+                return CSV_HEADER
+    return CSV_HEADER
+
+def _csv_value(value):
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return value
+
 def log_result(output_path, result_dict):
+    header = _output_header(output_path)
     with open(output_path, mode='a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
-        writer.writerow([
-            result_dict.get("model"),
-            result_dict.get("kv_cache_type"),
-            result_dict.get("context_length"),
-            result_dict.get("peak_memory_mb", ""),
-            result_dict.get("latency_ms_per_token", ""),
-            result_dict.get("throughput_tokens_per_s", ""),
-            result_dict.get("perplexity", ""),
-            result_dict.get("status", "OK"),
-            result_dict.get("sample_id", ""),
-            result_dict.get("output_path", ""),
-        ])
+        writer.writerow([_csv_value(result_dict.get(column, "")) for column in header])
+
+def ppl_pending_fields(status="PENDING_OFFLINE", error=""):
+    return {
+        "perplexity": "",
+        "ppl_loss": "",
+        "ppl_tokens": "",
+        "ppl_status": status,
+        "ppl_error": error,
+    }
 
 def persist_generated_texts(jsonl_path, records):
     """
@@ -175,11 +204,14 @@ def run_mock_benchmark(args):
             "model": args.model,
             "kv_cache_type": args.kv_cache_type,
             "context_length": args.context_length,
-            "peak_memory_mb": 0.0,
-            "latency_ms_per_token": 0.0,
-            "throughput_tokens_per_s": 0.0,
-            "perplexity": "N/A",
-            "status": "DATASET_LOAD_ERROR"
+            "peak_memory_mb": "",
+            "latency_ms_per_token": "",
+            "throughput_tokens_per_s": "",
+            "status": "DATASET_LOAD_ERROR",
+            "sample_id": "",
+            "output_path": "",
+            **ppl_pending_fields("SKIPPED_ERROR", str(e)),
+            **skipped_quality_metrics("skipped_error"),
         }
         log_result(args.output, result)
         print(f"  -> Đã ghi nhận lỗi load dataset vào: {args.output}")
@@ -220,12 +252,10 @@ def run_mock_benchmark(args):
         latency += 2.5 # Nén có thể tốn thêm tí time giả định
         
     throughput = 1000 / latency
-    perplexity = round(random.uniform(5.0, 8.0), 2)
-    
     print(f"  -> Inference hoàn tất! pynvml đã ghi nhận các chỉ số hệ thống:")
     print(f"     * Peak VRAM: {round(peak_vram, 2)} MB")
     print(f"     * Latency:   {round(latency, 2)} ms/token")
-    print(f"     * PPL:       {perplexity}")
+    print(f"     * PPL:       skipped in mock mode")
     
     # Bước 5: Ghi Log CSV
     print(f"\n[5. Ghi Log CSV] Đang định dạng và lưu kết quả...")
@@ -237,10 +267,11 @@ def run_mock_benchmark(args):
         "peak_memory_mb": round(peak_vram, 2),
         "latency_ms_per_token": round(latency, 2),
         "throughput_tokens_per_s": round(throughput, 2),
-        "perplexity": perplexity,
         "status": "MOCK_OK",
         "sample_id": sample_id,
         "output_path": "",
+        **ppl_pending_fields("SKIPPED_MOCK"),
+        **skipped_quality_metrics("skipped_mock"),
     }
     
     log_result(args.output, result)
@@ -261,10 +292,15 @@ def run_real_benchmark(args):
         # HQQ và PolarQuant có thể yêu cầu plugin hoặc cấu hình biến môi trường riêng
     }
     kv_cache_dtype = dtype_mapping.get(args.kv_cache_type, "auto")
-    
+
+    # Resolve HF token: CLI arg -> env HF_TOKEN -> env HUGGING_FACE_HUB_TOKEN
+    hf_token = args.hf_token or os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    if hf_token:
+        os.environ["HF_TOKEN"] = hf_token
+
     print(f"Đang tải mô hình {args.model} với kv_cache_dtype={kv_cache_dtype}...")
     try:
-        # Khởi tạo vLLM. 
+        # Khởi tạo vLLM.
         # Tối ưu hóa VRAM: gpu_memory_utilization cao, max_num_seqs nhỏ
         llm = LLM(
             model=resolve_model_for_vllm(args.model),
@@ -273,7 +309,8 @@ def run_real_benchmark(args):
             gpu_memory_utilization=0.98,
             max_num_batched_tokens=4096, # Tránh lỗi phân mảnh Qwen
             max_num_seqs=2,
-            trust_remote_code=True
+            trust_remote_code=True,
+            hf_token=hf_token,
         )
         
         # Thiết lập SamplingParams
@@ -292,10 +329,11 @@ def run_real_benchmark(args):
                 "peak_memory_mb": "",
                 "latency_ms_per_token": "",
                 "throughput_tokens_per_s": "",
-                "perplexity": "",
                 "status": "DATASET_LOAD_ERROR",
                 "sample_id": "",
                 "output_path": "",
+                **ppl_pending_fields("SKIPPED_ERROR", str(e)),
+                **skipped_quality_metrics("skipped_error"),
             }
             log_result(args.output, result)
             sys.exit(1)
@@ -321,12 +359,16 @@ def run_real_benchmark(args):
         # Persist generated_text vào JSONL cho backfill PPL
         jsonl_path = args.output.replace(".csv", "_generated.jsonl")
         jsonl_records = []
+        quality_records = []
         for i, out in enumerate(outputs):
             sample_id = f"{args.model}__{args.kv_cache_type}__{args.context_length}__s{i}"
+            generated_text = out.outputs[0].text
+            quality = analyze_generated_text(generated_text)
+            quality_records.append(quality)
             jsonl_records.append({
                 "sample_id": sample_id,
                 "prompt_text": prompts[i],
-                "generated_text": out.outputs[0].text,
+                "generated_text": generated_text,
                 "generated_tokens": len(out.outputs[0].token_ids),
                 "model": args.model,
                 "dataset": args.dataset,
@@ -340,6 +382,7 @@ def run_real_benchmark(args):
                 "seed": None,
                 "status": "OK",
                 "error_message": None,
+                **quality,
             })
         persist_generated_texts(jsonl_path, jsonl_records)
         
@@ -350,10 +393,11 @@ def run_real_benchmark(args):
             "peak_memory_mb": round(peak_vram_mb, 2),
             "latency_ms_per_token": round(latency, 2),
             "throughput_tokens_per_s": round(throughput, 2),
-            "perplexity": "",  # Sẽ backfill PPL offline sau
             "status": "OK",
             "sample_id": f"{args.model}__{args.kv_cache_type}__{args.context_length}",
             "output_path": jsonl_path,
+            **ppl_pending_fields(),
+            **aggregate_quality_metrics(quality_records),
         }
         
     except torch.cuda.OutOfMemoryError as e:
@@ -366,10 +410,11 @@ def run_real_benchmark(args):
             "peak_memory_mb": "",
             "latency_ms_per_token": "",
             "throughput_tokens_per_s": "",
-            "perplexity": "",
             "status": "OOM",
             "sample_id": "",
             "output_path": "",
+            **ppl_pending_fields("OOM", str(e)),
+            **skipped_quality_metrics("skipped_error"),
         }
     except Exception as e:
         print(f"Lỗi không xác định: {e}")
@@ -381,10 +426,11 @@ def run_real_benchmark(args):
             "peak_memory_mb": "",
             "latency_ms_per_token": "",
             "throughput_tokens_per_s": "",
-            "perplexity": "",
             "status": f"ERROR: {e}",
             "sample_id": "",
             "output_path": "",
+            **ppl_pending_fields("ERROR", str(e)),
+            **skipped_quality_metrics("skipped_error"),
         }
         
     log_result(args.output, result)

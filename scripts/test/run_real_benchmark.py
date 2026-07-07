@@ -154,11 +154,15 @@ def parse_args():
     )
     parser.add_argument(
         "--hf_token", type=str, default=None,
+<<<<<<< HEAD
         help="Hugging Face access token; mac dinh doc tu HF_TOKEN/HUGGING_FACE_HUB_TOKEN"
     )
     parser.add_argument(
         "--pull_ollama", action="store_true",
         help="Neu model la alias Ollama, chay `ollama pull` truoc khi benchmark"
+=======
+        help="HuggingFace access token cho model gated (hoac dat env HF_TOKEN)"
+>>>>>>> main
     )
     return parser.parse_args()
 
@@ -321,6 +325,15 @@ def run_real_benchmark(args):
 
     # --- Bước 3: Tải Model qua vLLM ---
     kv_dtype = KV_CACHE_DTYPE_MAP.get(args.kv_cache_type, "auto")
+
+    # Resolve HF token: CLI arg -> env HF_TOKEN -> env HUGGING_FACE_HUB_TOKEN
+    hf_token = args.hf_token or os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    if hf_token:
+        os.environ["HF_TOKEN"] = hf_token
+        print(f"  -> Su dung HuggingFace token (gated model).")
+    else:
+        print(f"  -> Khong co HF token. Neu model bi gated, se bao loi.")
+
     print(f"[3/5] Tai mo hinh vao GPU voi kv_cache_dtype={kv_dtype}...")
     try:
         # Reset peak memory tracking của PyTorch
@@ -342,7 +355,11 @@ def run_real_benchmark(args):
             max_num_batched_tokens=max(args.context_length, 4096),
             max_num_seqs=2,
             trust_remote_code=True,
+<<<<<<< HEAD
             hf_token=os.getenv("HF_TOKEN") or os.getenv("HUGGING_FACE_HUB_TOKEN"),
+=======
+            hf_token=hf_token,
+>>>>>>> main
         )
         print(f"  -> Mo hinh da san sang tren GPU.")
     except Exception as e:
