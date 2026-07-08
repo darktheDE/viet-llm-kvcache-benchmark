@@ -3,11 +3,11 @@ import time
 import os
 
 MODELS = [
-    "gemma4:e4b",
-    "qwen3:8b",
-    "llama3.2:3b",
-    "arcee-ai/Arcee-VyLinh",
-    "Qwen/Qwen2.5-7B-Instruct-1M",
+    "gemma4:e4b-it-bf16",
+    "qwen3:8b-fp16",
+    "llama3.1:8b-instruct-fp16",
+    "mistral:7b-instruct-v0.3-fp16",
+    "qwen2.5:7b-instruct-fp16",
 ]
 
 KV_CACHE_TYPES = ["FP16", "FP8", "HQQ", "PolarQuant", "TurboQuant"]

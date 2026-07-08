@@ -1,35 +1,47 @@
 # Thông tin Tổng quan các Mô hình (Model View)
 
-Dự án đánh giá kỹ thuật nén KV Cache tập trung vào 5 đại diện xuất sắc (bao gồm các hệ ngôn ngữ và kích thước từ 3B đến 8B), với sự chú trọng đặc biệt vào khả năng xử lý **Tiếng Việt** trên các luồng ngữ cảnh siêu lớn (Long-context).
+Dự án đánh giá kỹ thuật nén KV Cache tập trung vào 5 đại diện xuất sắc (bao gồm các hệ ngôn ngữ và kích thước từ 7B đến 8B), với sự chú trọng đặc biệt vào khả năng xử lý **Tiếng Việt** trên các luồng ngữ cảnh siêu lớn (Long-context).
 
-Dưới đây là thông tin tổng quan của 5 mô hình được chọn để làm Benchmark:
+Tất cả 5 model đều chạy qua **Ollama** ở chế độ full precision (FP16/BF16) trên máy thuê GPU.
 
-## 1. `gemma4:e4b`
-*   **Hệ / Nguồn gốc:** Dòng mô hình đa ngôn ngữ (Multilingual), nền tảng Qwen2.5.
-*   **Vai trò trong Benchmark:** Baseline đa ngôn ngữ. Đây là mô hình tối ưu đặc biệt cho các ngôn ngữ Đông Nam Á (SEA-optimized), thay thế cho VinaLLaMA-7B cũ (do model cũ bị kẹt ở ngữ cảnh 4K).
-*   **Ngữ cảnh hỗ trợ (Native Context):** 32K ~ 128K tokens.
-*   **Điểm mạnh:** Giữ văn phong mượt mà khi sinh chữ ở chế độ Full KV Cache, đại diện cho nhóm mô hình có trọng số tham số khoảng 7B-8B.
+| # | Ollama Tag | HuggingFace Repo | Precision | Size |
+|---|---|---|---|---|
+| 1 | `gemma4:e4b-it-bf16` | google/gemma-3-4b-it | BF16 | ~16 GB |
+| 2 | `qwen3:8b-fp16` | Qwen/Qwen3-8B | FP16 | ~16 GB |
+| 3 | `llama3.1:8b-instruct-fp16` | meta-llama/Llama-3.1-8B-Instruct | FP16 | ~16 GB |
+| 4 | `mistral:7b-instruct-v0.3-fp16` | mistralai/Mistral-7B-Instruct-v0.3 | FP16 | ~14 GB |
+| 5 | `qwen2.5:7b-instruct-fp16` | Qwen/Qwen2.5-7B-Instruct | FP16 | ~15 GB |
 
-## 2. `qwen3:8b`
+---
+
+## 1. `gemma4:e4b-it-bf16`
+*   **Hệ / Nguồn gốc:** Google DeepMind, kiến trúc Gemma 3 (4B tham số).
+*   **Vai trò trong Benchmark:** Baseline đa ngôn ngữ nhẹ, đại diện cho kiến trúc Gemma thế hệ mới.
+*   **Ngữ cảnh hỗ trợ (Native Context):** 128K tokens.
+*   **Điểm mạnh:** Hỗ trợ tốt tiếng Việt, nhẹ hơn các model 7-8B khác nhờ kiến trúc 4B. Benchmark cho phép so sánh hiệu quả nén giữa model nhỏ hơn và các model 7-8B cùng nhóm.
+
+## 2. `qwen3:8b-fp16`
 *   **Hệ / Nguồn gốc:** Qwen Team (Alibaba Cloud).
 *   **Vai trò trong Benchmark:** Mô hình đo lường State-Of-The-Art (SOTA) quốc tế mới nhất trong phân khúc dưới 10B.
-*   **Ngữ cảnh hỗ trợ (Native Context):** 128K tokens (nhờ công nghệ RoPE scale cải tiến).
-*   **Điểm mạnh:** Đạt điểm rất cao trong khả năng giải luận, coding và hỗ trợ đa ngôn ngữ bao gồm tiếng Việt. Dùng để đối chiếu xem phương pháp nén (TurboQuant/PolarQuant) ảnh hưởng thế nào đến các kiến trúc SOTA nhất.
+*   **Ngữ cảnh hỗ trợ (Native Context):** 128K tokens (RoPE scale cải tiến).
+*   **Điểm mạnh:** Đạt điểm rất cao trong khả năng giải luận, coding và hỗ trợ đa ngôn ngữ bao gồm tiếng Việt. Dùng để đối chiếu xem phương pháp nén (TurboQuant/PolarQuant) ảnh hưởng thế nào đến kiến trúc SOTA.
 
-## 3. `llama3.2:3b`
-*   **Hệ / Nguồn gốc:** Meta Llama.
-*   **Vai trò trong Benchmark:** Baseline nhỏ gọn (Lightweight Compact Baseline).
+## 3. `llama3.1:8b-instruct-fp16`
+*   **Hệ / Nguồn gốc:** Meta AI, kiến trúc Llama 3.1.
+*   **Vai trò trong Benchmark:** Baseline phổ biến nhất thị trường mã nguồn mở.
 *   **Ngữ cảnh hỗ trợ (Native Context):** 128K tokens.
-*   **Điểm mạnh:** Với kích thước chỉ 3B tham số, nó tiêu thụ cực ít tài nguyên. Mô hình này giúp trả lời câu hỏi: *Việc nén KV Cache trên một mô hình vốn dĩ đã có trọng số (weights) rất nhỏ thì có khiến chất lượng bị phân rã (degradation) thảm hại hơn so với các mô hình 7B-8B hay không?*
+*   **Điểm mạnh:** Được fine-tune cho instruction-following, hỗ trợ tiếng Việt ở mức khá. Là model "chuẩn mực" để so sánh với các kỹ thuật nén vì được cộng đồng nghiên cứu sử dụng rộng rãi.
 
-## 4. `arcee-ai/Arcee-VyLinh`
-*   **Hệ / Nguồn gốc:** Phát triển bởi nhóm nghiên cứu URA (Đại học Bách Khoa TP.HCM - HCMUT), kế thừa kiến trúc Llama-3.
-*   **Vai trò trong Benchmark:** Đại diện mô hình "Thuần Việt" xuất sắc (Vietnamese LLM Baseline).
+## 4. `mistral:7b-instruct-v0.3-fp16`
+*   **Hệ / Nguồn gốc:** Mistral AI (Pháp).
+*   **Vai trò trong Benchmark:** Baseline kiến trúc Mistral với Sliding Window Attention (SWA).
+*   **Ngữ cảnh hỗ trợ (Native Context):** 32K tokens.
+*   **Điểm mạnh:** Kiến trúc GQA (Grouped Query Attention) giúp KV Cache tự nhiên nhỏ hơn. Benchmark sẽ cho thấy hiệu quả nén KV Cache trên kiến trúc đã được tối ưu GQA so với kiến trúc MHA truyền thống.
+
+## 5. `qwen2.5:7b-instruct-fp16`
+*   **Hệ / Nguồn gốc:** Qwen Team (Alibaba Cloud), phiên bản Qwen2.5.
+*   **Vai trò trong Benchmark:** Đại diện cho dòng Qwen2.5 7B instruction-tuned chuẩn.
 *   **Ngữ cảnh hỗ trợ (Native Context):** 128K tokens.
-*   **Điểm mạnh:** Tối ưu hóa sâu cho việc hỏi đáp, đọc hiểu văn bản tiếng Việt. Việc sử dụng Arcee-VyLinh giúp đề tài có tính thực tiễn cao cho các bài toán doanh nghiệp địa phương ở Việt Nam.
+*   **Điểm mạnh:** Rất mạnh về tiếng Việt nhờ được train trên tập dữ liệu đa ngôn ngữ khổng lồ. Là model Qwen thế hệ trước để đối chiếu với Qwen3 8B trong cùng benchmark.
 
-## 5. `Qwen/Qwen2.5-7B-Instruct-1M`
-*   **Hệ / Nguồn gốc:** Qwen Team (Alibaba Cloud).
-*   **Vai trò trong Benchmark:** Giới hạn trên của ngữ cảnh (Long-context Upper-bound Baseline).
-*   **Ngữ cảnh hỗ trợ (Native Context):** 1 Triệu (1M) tokens.
-*   **Điểm mạnh:** Khả năng nhồi nhét tài liệu khổng lồ (hàng chục cuốn sách) vào bộ nhớ. Đây là "khúc xương khó gặm" nhất cho mọi kỹ thuật nén, vì khi context lên tới 1M, kích thước KV Cache sẽ vượt cả kích thước Weights của chính mô hình. Thử nghiệm trên mô hình này sẽ cho thấy rõ ràng nhất hiệu quả tiết kiệm bộ nhớ (Peak VRAM) và tốc độ (ITL).
+

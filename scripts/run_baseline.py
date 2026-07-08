@@ -35,18 +35,19 @@ except ImportError:
     print("WARNING: Không tìm thấy thư viện vLLM, pynvml hoặc PyTorch. Chuyển sang MOCK_MODE (Chế độ giả lập).")
 
 SUPPORTED_MODELS = [
-    "gemma4:e4b",
-    "qwen3:8b",
-    "llama3.2:3b",
-    "arcee-ai/Arcee-VyLinh",
-    "Qwen/Qwen2.5-7B-Instruct-1M",
+    "gemma4:e4b-it-bf16",
+    "qwen3:8b-fp16",
+    "llama3.1:8b-instruct-fp16",
+    "mistral:7b-instruct-v0.3-fp16",
+    "qwen2.5:7b-instruct-fp16",
 ]
 
 OLLAMA_TO_HF_MODEL = {
-    "gemma4:e4b": "google/gemma-2b-it",
-    "qwen3:8b": "Qwen/Qwen3-8B",
-    "llama3.2:3b": "meta-llama/Llama-3.2-3B-Instruct",
-    "arcee-ai/Arcee-VyLinh": "arcee-ai/Arcee-VyLinh",
+    "gemma4:e4b-it-bf16": "google/gemma-3-4b-it",
+    "qwen3:8b-fp16": "Qwen/Qwen3-8B",
+    "llama3.1:8b-instruct-fp16": "meta-llama/Llama-3.1-8B-Instruct",
+    "mistral:7b-instruct-v0.3-fp16": "mistralai/Mistral-7B-Instruct-v0.3",
+    "qwen2.5:7b-instruct-fp16": "Qwen/Qwen2.5-7B-Instruct",
 }
 
 
@@ -63,7 +64,7 @@ def resolve_model_for_vllm(model_name: str) -> str:
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Benchmark KV Cache Compression on Vietnamese LLMs")
-    parser.add_argument("--model", type=str, default="gemma4:e4b", 
+    parser.add_argument("--model", type=str, default="gemma4:e4b-it-bf16",
                         help="Tên mô hình cần benchmark", choices=SUPPORTED_MODELS)
     parser.add_argument("--dataset", type=str, default="datasets/test_set_small.json", help="Đường dẫn đến tập dữ liệu")
     parser.add_argument("--context_length", type=int, default=8000, help="Độ dài ngữ cảnh tối đa (Max Model Len)")

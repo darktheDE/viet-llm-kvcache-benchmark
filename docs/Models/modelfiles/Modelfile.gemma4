@@ -1,4 +1,4 @@
-FROM gemma4:e4b
+FROM gemma4:e4b-it-bf16
 
 # Mở rộng context window lên 32K để đủ cho benchmark ở mốc 4k/8k/16k token
 # Mặc định Ollama chỉ set 2048 hoặc 4096 — PHẢI khai báo tường minh num_ctx

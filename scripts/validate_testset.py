@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import argparse
 import json
@@ -65,7 +65,7 @@ def load_tokenizer(data: Any):
         tokenizer_info = data.get("tokenizer") or {}
         tokenizer_name = tokenizer_info.get("name_or_path")
     if not tokenizer_name:
-        tokenizer_name = "Qwen/Qwen2.5-7B-Instruct-1M"
+        tokenizer_name = "Qwen/Qwen2.5-7B-Instruct"
         LOGGER.info("No tokenizer specified in dataset, falling back to default: %s", tokenizer_name)
     try:
         return AutoTokenizer.from_pretrained(tokenizer_name, use_fast=True)
