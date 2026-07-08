@@ -1,4 +1,4 @@
-FROM qwen3:8b
+FROM qwen3:8b-fp16
 
 # Mở rộng context window lên 32K để đủ cho benchmark ở mốc 4k/8k/16k token
 # Qwen3 hỗ trợ native 128K nhưng Ollama cần khai báo tường minh

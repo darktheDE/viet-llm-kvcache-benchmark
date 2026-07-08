@@ -5,10 +5,10 @@ Khi nạp văn bản lớn hơn 4K token vào Ollama hoặc các nền tảng ch
 Điều này khiến các phép thử nghiệm mốc ngữ cảnh lớn (8K, 16K, 32K) trở nên vô nghĩa nếu không cấu hình lại, vì mô hình không thực sự "đọc" được lượng token mà bạn muốn đo đạc.
 
 ### Khắc phục trên Ollama (Dùng Modelfile)
-Với các model alias của Ollama (`gemma4:e4b`, `qwen3:8b`, `llama3.2:3b`), bạn phải định nghĩa lại giới hạn bằng **Modelfile**:
+Với các model alias của Ollama (`gemma4:e4b-it-bf16`, `qwen3:8b-fp16`, `llama3.1:8b-instruct-fp16`, `mistral:7b-instruct-v0.3-fp16`, `qwen2.5:7b-instruct-fp16`), bạn phải định nghĩa lại giới hạn bằng **Modelfile**:
 ```dockerfile
 # Ví dụ Modelfile.gemma4
-FROM gemma4:e4b
+FROM gemma4:e4b-it-bf16
 
 # Buộc hệ thống cấp phát đủ context memory
 PARAMETER num_ctx 32768
@@ -40,7 +40,7 @@ python scripts/test/run_real_grid.py
 **Truyền trực tiếp qua tham số dòng lệnh**
 Nếu bạn chạy các script con lẻ tẻ, bạn cũng có thể gán nó vào flag `--hf_token`:
 ```bash
-python scripts/test/run_real_benchmark.py --model llama3.2:3b --context_length 16000 --hf_token "hf_xxxxxxxxxxx"
+python scripts/test/run_real_benchmark.py --model llama3.1:8b-instruct-fp16 --context_length 16000 --hf_token "hf_xxxxxxxxxxx"
 ```
 
 ### 2.2 Tải trước (Pre-pull) Model cho Ollama
@@ -48,6 +48,6 @@ Trong môi trường Cloud thuần (bare-metal) mới khởi tạo, các model c
 
 Script đã bổ sung chức năng `--pull_ollama` để tự động kéo model về trước khi thực thi đo đạc:
 ```bash
-python scripts/test/run_real_benchmark.py --model gemma4:e4b --pull_ollama
+python scripts/test/run_real_benchmark.py --model gemma4:e4b-it-bf16 --pull_ollama
 ```
-Tính năng này sẽ gọi tiến trình phụ `ollama pull gemma4:e4b` ngầm dưới background để chuẩn bị môi trường sẵn sàng trước khi nạp model vào vLLM.
+Tính năng này sẽ gọi tiến trình phụ `ollama pull gemma4:e4b-it-bf16` ngầm dưới background để chuẩn bị môi trường sẵn sàng trước khi nạp model vào vLLM.

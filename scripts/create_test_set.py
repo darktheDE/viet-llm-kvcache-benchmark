@@ -1,4 +1,4 @@
-﻿import os
+import os
 import json
 import random
 import re
@@ -18,8 +18,8 @@ BRIEF_FILE = os.path.join(DATASETS_DIR, "task_dataset_brief.md")
 # Fallback Tokenizer setup
 try:
     from transformers import AutoTokenizer
-    print("Loading tokenizer Qwen/Qwen2.5-7B-Instruct-1M...")
-    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B-Instruct-1M")
+    print("Loading tokenizer Qwen/Qwen2.5-7B-Instruct...")
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B-Instruct")
     def count_tokens(text):
         return len(tokenizer.encode(text))
 except Exception as e:
