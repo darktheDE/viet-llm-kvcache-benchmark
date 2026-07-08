@@ -58,7 +58,7 @@ SUPPORTED_MODELS = [
 ]
 
 OLLAMA_TO_HF_MODEL = {
-    "gemma4:e4b-it-bf16": "google/gemma-3-4b-it",
+    "gemma4:e4b-it-bf16": "google/gemma-4-E4B-it",
     "qwen3:8b-fp16": "Qwen/Qwen3-8B",
     "llama3.1:8b-instruct-fp16": "meta-llama/Llama-3.1-8B-Instruct",
     "mistral:7b-instruct-v0.3-fp16": "mistralai/Mistral-7B-Instruct-v0.3",

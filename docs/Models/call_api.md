@@ -504,7 +504,7 @@ def unload_model(model: str) -> None:
 
 | Model | Ollama Tag | Backend | Precision | HuggingFace Repo |
 |---|---|---|---|---|
-| Gemma 3 4B IT | `gemma4:e4b-it-bf16` | Ollama | BF16 | google/gemma-3-4b-it |
+| Gemma 4 E4B IT | `gemma4:e4b-it-bf16` | Ollama | BF16 | google/gemma-4-E4B-it |
 | Qwen3 8B | `qwen3:8b-fp16` | Ollama | FP16 | Qwen/Qwen3-8B |
 | Llama 3.1 8B Instruct | `llama3.1:8b-instruct-fp16` | Ollama | FP16 | meta-llama/Llama-3.1-8B-Instruct |
 | Mistral 7B Instruct v0.3 | `mistral:7b-instruct-v0.3-fp16` | Ollama | FP16 | mistralai/Mistral-7B-Instruct-v0.3 |

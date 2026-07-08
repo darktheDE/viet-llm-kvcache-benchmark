@@ -26,8 +26,9 @@ MODELS = [
 
 KV_CACHE_TYPES = ["FP16", "FP8", "HQQ", "PolarQuant", "TurboQuant"]
 CONTEXT_LENGTHS = [4000, 8000, 16000]
-OUTPUT_CSV = "../../results/template_log_real_run.csv"
-SCRIPT_PATH = "./run_real_benchmark.py"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_CSV = os.path.join(SCRIPT_DIR, "../../results/template_log_real_run.csv")
+SCRIPT_PATH = os.path.join(SCRIPT_DIR, "run_real_benchmark.py")
 
 
 def parse_args():
