@@ -53,17 +53,13 @@ except ImportError:
 # 2. Danh sách Model và Cấu hình
 # ============================================================
 SUPPORTED_MODELS = [
-    "qwen3:8b-fp16",
-    "llama3.1:8b-instruct-fp16",
-    "mistral:7b-instruct-v0.3-fp16",
-    "qwen2.5:7b-instruct-fp16",
+    "phi4:mini-reasoning",
+    "gemma3:4b-it",
 ]
 
 OLLAMA_TO_HF_MODEL = {
-    "qwen3:8b-fp16": "Qwen/Qwen3-8B",
-    "llama3.1:8b-instruct-fp16": "meta-llama/Llama-3.1-8B-Instruct",
-    "mistral:7b-instruct-v0.3-fp16": "mistralai/Mistral-7B-Instruct-v0.3",
-    "qwen2.5:7b-instruct-fp16": "Qwen/Qwen2.5-7B-Instruct",
+    "phi4:mini-reasoning": "microsoft/Phi-4-mini-reasoning",
+    "gemma3:4b-it": "google/gemma-3-4b-it",
 }
 
 

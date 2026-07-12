@@ -29,3 +29,15 @@ qwen2.5:7b-instruct-fp16,PolarQuant,16000,71978.12,16.0,62.5,,OK,qwen2.5:7b-inst
 qwen2.5:7b-instruct-fp16,TurboQuant,4000,70040.12,9.15,109.3,,OK,qwen2.5:7b-instruct-fp16__TurboQuant__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
 qwen2.5:7b-instruct-fp16,TurboQuant,8000,70356.12,12.19,82.05,,OK,qwen2.5:7b-instruct-fp16__TurboQuant__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
 qwen2.5:7b-instruct-fp16,TurboQuant,16000,71564.12,19.87,50.33,,OK,qwen2.5:7b-instruct-fp16__TurboQuant__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+phi4:mini-reasoning,FP16,4000,69562.12,6.49,154.02,,OK,phi4:mini-reasoning__FP16__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_extra_generated.jsonl
+phi4:mini-reasoning,FP16,8000,69780.12,9.26,107.99,,OK,phi4:mini-reasoning__FP16__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_extra_generated.jsonl
+phi4:mini-reasoning,FP16,16000,70790.12,16.88,59.23,,OK,phi4:mini-reasoning__FP16__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_extra_generated.jsonl
+phi4:mini-reasoning,FP8,4000,69996.12,5.34,187.36,,OK,phi4:mini-reasoning__FP8__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_extra_generated.jsonl
+phi4:mini-reasoning,FP8,8000,70194.12,6.92,144.51,,OK,phi4:mini-reasoning__FP8__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_extra_generated.jsonl
+phi4:mini-reasoning,FP8,16000,71204.12,11.28,88.65,,OK,phi4:mini-reasoning__FP8__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_extra_generated.jsonl
+phi4:mini-reasoning,PolarQuant,4000,70508.12,5.27,189.71,,OK,phi4:mini-reasoning__PolarQuant__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_extra_generated.jsonl
+phi4:mini-reasoning,PolarQuant,8000,70514.12,6.83,146.51,,OK,phi4:mini-reasoning__PolarQuant__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_extra_generated.jsonl
+phi4:mini-reasoning,PolarQuant,16000,71224.12,11.24,88.94,,OK,phi4:mini-reasoning__PolarQuant__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_extra_generated.jsonl
+gemma3:4b-it,FP16,4000,70104.12,7.15,139.88,,OK,gemma3:4b-it__FP16__4000,../../results/template_log_real_run_extra_generated.jsonl
+gemma3:4b-it,FP16,8000,70376.12,12.81,78.04,,OK,gemma3:4b-it__FP16__8000,../../results/template_log_real_run_extra_generated.jsonl
+gemma3:4b-it,FP16,16000,71342.12,12.06,82.9,,OK,gemma3:4b-it__FP16__16000,../../results/template_log_real_run_extra_generated.jsonl

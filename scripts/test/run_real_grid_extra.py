@@ -14,8 +14,8 @@ import os
 import sys
 
 MODELS = [
-    "llama3.1:8b-instruct-fp16",
-    "mistral:7b-instruct-v0.3-fp16",
+    "phi4:mini-reasoning",
+    "gemma3:4b-it",
 ]
 
 KV_CACHE_TYPES = ["FP16", "FP8", "HQQ", "PolarQuant", "TurboQuant"]
@@ -70,7 +70,6 @@ def main():
                     "--output", OUTPUT_CSV,
                     "--num_samples", "5",
                     "--max_new_tokens", "128",
-                    "--buffer", "8192",  # Buffer lon hon cho Mistral tokenizer
                     "--dataset", os.path.join(SCRIPT_DIR, "../../datasets/test_set_small.json"),
                 ]
                 if hf_token:
