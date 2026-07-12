@@ -5,7 +5,7 @@
 *   **Title:** `[TECH] Tối ưu hóa VRAM, Xử lý lỗi Corner Cases/OOM & Chạy bù các mốc thử nghiệm còn thiếu`
 *   **Module:** Infrastructure & Bug-fixing
 *   **Sprint:** Sprint 3 (Week 5-6)
-*   **Team / Role:** Technical & Experiment (Nguyen Van Quang Duy - Lead, Ho Viet Anh)
+*   **Team / Role:** Technical & Experiment (Ho Viet Anh) / Writing & Coordination (Nguyen Van Quang Duy - Technical Liaison)
 *   **Priority:** High
 
 #### 1. Mô tả chi tiết Task (Description)
@@ -73,7 +73,7 @@ Viết script Python tự động gom cụm tất cả các file CSV số liệu
 *   **Title:** `[RESEARCH] Biên soạn Báo cáo Phân tích Kết quả (Results & Discussion) & Nhận xét Mô hình`
 *   **Module:** Phase 3: Phân tích & xử lý số liệu
 *   **Sprint:** Sprint 3 (Week 5-6)
-*   **Team / Role:** Research & Scope (Nguyen Dang Quoc Anh - Lead, Phan Trong Phu)
+*   **Team / Role:** Research & Scope (Nguyen Dang Quoc Anh - Lead) / Writing & Coordination (Phan Trong Phu - Results Writing Support)
 *   **Priority:** High
 
 #### 1. Mô tả chi tiết Task (Description)

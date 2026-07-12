@@ -73,16 +73,16 @@ Tổng tiến độ dự án kéo dài **7 tuần**, chia làm **4 Phase** chạ
 | Thành viên | Vai trò trong dự án | Phase 1 (Prep) | Phase 2 (Exp) | Phase 3 (Analysis) | Phase 4 (Writing) |
 |---|---|:---:|:---:|:---:|:---:|
 | **Đỗ Kiến Hưng** | PM / Agile Coordinator | **R** / **A** | **A** | **A** | **R** / **A** |
-| **Phan Trọng Quí** | Joint Coordinator / Writing | **R** | **C** | **C** | **R** (Báo cáo) |
+| **Phan Trọng Quí** | Writing & Coordination / Joint Coordinator | **R** | **C** | **C** | **R** (Báo cáo) |
 | **Hồ Việt Anh** | Technical & Experiment | **R** (Cloud Setup) | **R** (gemma4:e4b) | **C** | **C** |
 | **Phạm Minh Quân** | Tech Lead / Optimizer | **R** (CUDA setup) | **R** (gemma4:e4b) | **C** | **C** |
 | **Trần Minh Khánh** | Tech runner | **C** | **R** (Qwen) | **C** | **C** |
-| **Nguyễn V. Q. Duy** | Quantization / Patching | **C** (vLLM config) | **R** (Qwen/Debug) | **C** | **C** |
+| **Nguyễn V. Q. Duy** | Writing & Coordination / Technical liaison | **C** (vLLM config) | **R** (Qwen/Debug) | **C** | **C** |
 | **Nguyễn Hồ Phát** | Data curator | **R** (NeMo Curator) | **A** | **R** | **C** |
 | **Huỳnh Hữu Huy** | Data / Prompts | **R** (Test suite) | **A** | **R** | **C** |
 | **Huỳnh Ngọc Thạch** | Metric plotting lead | **C** | **A** | **R** (Plotting) | **C** |
 | **N. Đăng Quốc Anh** | Research Owner / Idea lead | **R** (Đề cương) | **C** | **R** (Nhận xét) | **R** (Paper EN) |
-| **Phan Trọng Phú** | Paper Writer / Review | **R** (References) | **C** | **C** | **R** (Paper EN) |
+| **Phan Trọng Phú** | Writing & Coordination / Paper Writer & Review | **R** (References) | **C** | **C** | **R** (Paper EN) |
 
 *Chú thích:* **R** (Responsible - Người thực hiện), **A** (Accountable - Người chịu trách nhiệm/PM), **C** (Consulted - Người hỗ trợ/Tham vấn), **I** (Informed - Người nhận thông tin).
 

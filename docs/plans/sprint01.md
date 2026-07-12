@@ -32,9 +32,9 @@ Thiết lập toàn bộ hạ tầng cộng tác số cho dự án nhóm (Drive,
 *   File biên bản họp kickoff `minutes_template.md` lưu trữ trên Git.
 
 #### 5. Tiêu chuẩn hoàn thành (Definition of Done - DoD)
-*   [ ] 100% thành viên nhóm đã truy cập được Shared Drive và Github Repo.
-*   [ ] Toàn bộ task Sprint 1 đã được gán đúng người chịu trách nhiệm và deadline trên plane.so.
-*   [ ] Biên bản họp Kickoff Tuần 1 đã được ghi nhận đầy đủ chữ ký xác nhận vai trò của các thành viên.
+*   [x] 100% thành viên nhóm đã truy cập được Shared Drive và Github Repo.
+*   [x] Toàn bộ task Sprint 1 đã được gán đúng người chịu trách nhiệm và deadline trên plane.so.
+*   [x] Biên bản họp Kickoff Tuần 1 đã được ghi nhận đầy đủ chữ ký xác nhận vai trò của các thành viên.
 
 ---
 
@@ -43,7 +43,7 @@ Thiết lập toàn bộ hạ tầng cộng tác số cho dự án nhóm (Drive,
 *   **Title:** `[RESEARCH] Hoàn thiện Đề cương chi tiết (Proposal v2) & Đọc hiểu lý thuyết TurboQuant vs. PolarQuant`
 *   **Module:** Theoretical Framework & Literature Review
 *   **Sprint:** Sprint 1 (Week 1-2)
-*   **Team / Role:** Research & Scope (Nguyen Dang Quoc Anh - Lead, Phan Trong Phu)
+*   **Team / Role:** Research & Scope (Nguyen Dang Quoc Anh - Lead) / Writing & Coordination (Phan Trong Phu - Literature Review Support)
 *   **Priority:** High
 
 #### 1. Mô tả chi tiết Task (Description)
@@ -65,8 +65,8 @@ Xây dựng nền tảng lý thuyết vững chắc cho bài báo tiếng Anh (P
 *   Tệp tin `proposal/problem_definition.md` chứa định nghĩa toán học của bài toán nén KV Cache.
 
 #### 5. Tiêu chuẩn hoàn thành (Definition of Done - DoD)
-*   [ ] Đề cương Proposal v2 đã được viết bằng tiếng Anh chuẩn học thuật và lưu trên Overleaf/Git.
-*   [ ] Được giảng viên hướng dẫn (TS. Lê Ngọc Hiếu) duyệt thông qua định hướng lý thuyết và các câu hỏi nghiên cứu (RQ1-RQ4).
+*   [x] Đề cương Proposal v2 đã được viết bằng tiếng Anh chuẩn học thuật và lưu trên Overleaf/Git.
+*   [x] Được giảng viên hướng dẫn (TS. Lê Ngọc Hiếu) duyệt thông qua định hướng lý thuyết và các câu hỏi nghiên cứu (RQ1-RQ4).
 
 ---
 
@@ -98,9 +98,9 @@ Xây dựng pipeline tự động tải dữ liệu, làm sạch tiếng Việt 
 *   Tệp tin tài liệu hướng dẫn `datasets/dataset_brief.md` lưu trữ trên Git.
 
 #### 5. Tiêu chuẩn hoàn thành (Definition of Done - DoD)
-*   [ ] Bộ test-set nhỏ được đóng gói thành công ở định dạng JSON chuẩn không bị lỗi cú pháp.
-*   [ ] Detokenize thử nghiệm 100% các mẫu trong test-set đảm bảo hiển thị đúng phông chữ tiếng Việt có dấu.
-*   [ ] Team Technical xác nhận cấu trúc dữ liệu tương thích hoàn toàn với script benchmark đầu vào.
+*   [x] Bộ test-set nhỏ được đóng gói thành công ở định dạng JSON chuẩn không bị lỗi cú pháp.
+*   [x] Detokenize thử nghiệm 100% các mẫu trong test-set đảm bảo hiển thị đúng phông chữ tiếng Việt có dấu.
+*   [x] Team Technical xác nhận cấu trúc dữ liệu tương thích hoàn toàn với script benchmark đầu vào.
 
 ---
 
@@ -109,7 +109,7 @@ Xây dựng pipeline tự động tải dữ liệu, làm sạch tiếng Việt 
 *   **Title:** `[TECH] Khởi tạo Môi trường Cloud GPU, Cấu hình vLLM Engine & Đo thử nghiệm mốc BF16 Baseline`
 *   **Module:** Infrastructure & Inference Engine Setup
 *   **Sprint:** Sprint 1 (Week 1-2)
-*   **Team / Role:** Technical & Experiment (Pham Minh Quan - Lead, Tran Minh Khanh, Nguyen Van Quang Duy)
+*   **Team / Role:** Technical & Experiment (Pham Minh Quan - Lead, Tran Minh Khanh) / Writing & Coordination (Nguyen Van Quang Duy - Technical Liaison)
 *   **Priority:** High
 
 #### 1. Mô tả chi tiết Task (Description)
@@ -169,7 +169,7 @@ Thu thập dữ liệu sách, bài báo thời sự và các thảo luận mạn
 *   Bộ dữ liệu `datasets/test_set_small.json` được cập nhật thêm các mẫu thử có chứa tin tức thời sự nóng.
 
 #### 5. Tiêu chuẩn hoàn thành (Definition of Done - DoD)
-*   [ ] Cào và làm sạch thành công ít nhất 100 văn bản tiếng Việt thời sự mới.
+*   [x] Cào và làm sạch thành công ít nhất 100 văn bản tiếng Việt thời sự mới.
 *   [ ] Tích hợp thành công dữ liệu này vào tệp `test_set_small.json` mà không làm thay đổi cấu trúc schema cũ.
 
 ---
@@ -179,7 +179,7 @@ Thu thập dữ liệu sách, bài báo thời sự và các thảo luận mạn
 *   **Title:** `[TECH-ADD] Nghiên cứu cấu hình và tích hợp sớm nhân lượng tử hóa (TurboQuant/PolarQuant) vào vLLM`
 *   **Module:** Infrastructure & Inference Engine Setup
 *   **Sprint:** Sprint 1 (Week 1-2)
-*   **Team / Role:** Technical & Experiment (Nguyen Van Quang Duy - Lead, Pham Minh Quan)
+*   **Team / Role:** Technical & Experiment (Pham Minh Quan) / Writing & Coordination (Nguyen Van Quang Duy - Technical Liaison)
 *   **Priority:** High
 
 #### 1. Mô tả chi tiết Task (Description)

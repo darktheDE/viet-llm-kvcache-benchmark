@@ -307,15 +307,15 @@ This project is a collaborative effort by **Group 1**:
 |---|---|---|
 | **Do Kien Hung** | Writing & Coordination | Project Manager, Agile/Scrum Coordinator, Document Manager |
 | **Phan Trong Qui** | Writing & Coordination | Joint Coordinator, Documentation & Peer Review |
-| **Ho Viet Anh** | Technical & Experiment | Joint Coordination, Technical Setup, DataOps/DevOps Engineer |
+| **Ho Viet Anh** | Technical & Experiment | Technical Setup, DataOps/DevOps Engineer |
 | **Pham Minh Quan** | Technical & Experiment | Infrastructure Setup, Inference pipeline optimization |
 | **Tran Minh Khanh** | Technical & Experiment | Local GPU Environment, Baseline Runner |
-| **Nguyen Van Quang Duy** | Technical & Experiment | Quantization Setup (TurboQuant config & patching) |
+| **Nguyen Van Quang Duy** | Writing & Coordination | Technical documentation and cross-team technical liaison |
 | **Nguyen Ho Phat** | Data & Analysis | Dataset curator, NeMo Curator Preprocessing lead |
 | **Huynh Huu Huy** | Data & Analysis | Small test set curation, prompt formatting |
 | **Huynh Ngoc Thach** | Data & Analysis | Metric plotting script engineer |
 | **Nguyen Dang Quoc Anh** | Research & Scope | Literature review, theoretical framework definition, Project Owner |
-| **Phan Trong Phu** | Research & Scope | Reference indexing, paper draft structuring |
+| **Phan Trong Phu** | Writing & Coordination | Reference indexing, paper drafting and review |
 
 ---
 

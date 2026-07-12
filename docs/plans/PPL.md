@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-﻿# Kế hoạch Tái cấu trúc luồng Đo đạc PPL & Ghi Log (PPL & Quality Logging Refactor)
-=======
 # Kế hoạch Tái cấu trúc PPL & Quality Logging
->>>>>>> main
 
 Tài liệu này ghi lại trạng thái hiện tại của task **PPL & Quality Logging Refactor**, các phần đã triển khai, cách dùng script mới, và các vấn đề còn tồn đọng.
 
