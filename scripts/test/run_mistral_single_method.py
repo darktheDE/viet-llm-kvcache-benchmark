@@ -37,7 +37,7 @@ except ImportError:
 # Model Configuration
 MODEL_NAME = "mistral:7b-instruct-v0.3-fp16"
 HF_MODEL_REPO = "mistralai/Mistral-7B-Instruct-v0.3"
-MISTRAL_RATIO = 1.5  # Mistral tokenizer expansion factor for Vietnamese text
+MISTRAL_RATIO = 1.75  # Mistral tokenizer expansion factor for Vietnamese text
 
 KV_CACHE_DTYPE_MAP = {
     "FP16": "auto",
