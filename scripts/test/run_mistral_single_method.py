@@ -37,7 +37,7 @@ except ImportError:
 # Model Configuration
 MODEL_NAME = "mistral:7b-instruct-v0.3-fp16"
 HF_MODEL_REPO = "mistralai/Mistral-7B-Instruct-v0.3"
-MISTRAL_RATIO = 1.4  # Mistral tokenizer expansion factor for Vietnamese text
+MISTRAL_RATIO = 1.5  # Mistral tokenizer expansion factor for Vietnamese text
 
 KV_CACHE_DTYPE_MAP = {
     "FP16": "auto",
@@ -197,8 +197,8 @@ def main():
 
     # Đặt max_model_len đủ room cho context length lớn nhất (16000) nhân với expansion ratio
     max_ctx_length = 16000
-    max_len = int(max_ctx_length * MISTRAL_RATIO) + args.max_new_tokens + 512
-    print(f"  -> Loading model with max_model_len={max_len} (ctx=16000 x {MISTRAL_RATIO} + new={args.max_new_tokens} + buf=512)...")
+    max_len = int(max_ctx_length * MISTRAL_RATIO) + args.max_new_tokens + 2048
+    print(f"  -> Loading model with max_model_len={max_len} (ctx=16000 x {MISTRAL_RATIO} + new={args.max_new_tokens} + buf=2048)...")
 
     llm = None
     try:

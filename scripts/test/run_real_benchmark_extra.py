@@ -375,10 +375,10 @@ def run_real_benchmark(args):
         # max_model_len needs room for prompt tokens + generated tokens + buffer
         # Dataset token counts are measured with Qwen tokenizer; other models
         # may tokenize Vietnamese text into more tokens.
-        ratio = TOKEN_EXPANSION_RATIO.get(args.model, 1.3)
+        ratio = TOKEN_EXPANSION_RATIO.get(args.model, 1.35)
         estimated_max_prompt = int(args.context_length * ratio)
-        max_len = estimated_max_prompt + args.max_new_tokens + 512
-        print(f"  -> max_model_len={max_len} (ctx={args.context_length} x {ratio} + new={args.max_new_tokens} + buf=512)")
+        max_len = estimated_max_prompt + args.max_new_tokens + 2048
+        print(f"  -> max_model_len={max_len} (ctx={args.context_length} x {ratio} + new={args.max_new_tokens} + buf=2048)")
         llm = LLM(
             model=vllm_model,
             kv_cache_dtype=kv_dtype,
