@@ -207,7 +207,6 @@ def main():
             model=vllm_model,
             kv_cache_dtype=kv_dtype,
             max_model_len=max_len,
-            gpu_memory_util_organization=0.85, # Note: using gpu_memory_utilization, wait let me use correct param
             gpu_memory_utilization=0.85,
             max_num_batched_tokens=max(max_len, 4096),
             max_num_seqs=2,
