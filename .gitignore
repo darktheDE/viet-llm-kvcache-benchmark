@@ -20,3 +20,5 @@ datasets/vmlu_mqa_v1.5/
 # OS files
 .DS_Store
 Thumbs.db
+.env
+scripts/test/.env
