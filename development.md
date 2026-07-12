@@ -140,7 +140,7 @@ Trước khi gửi Pull Request (PR), hãy đảm bảo thay đổi của bạn 
 Để chạy thử một đợt đánh giá cục bộ sử dụng baseline không nén (Full KV Cache):
 ```bash
 python scripts/run_baseline.py \
-    --model "gemma4:e4b" \
+    --model "qwen3:8b-fp16" \
     --dataset "datasets/test_set_small.json" \
     --context_length 8000 \
     --max_new_tokens 128 \

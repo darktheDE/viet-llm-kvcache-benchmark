@@ -32,7 +32,7 @@ SCRIPT_PATH = os.path.join(SCRIPT_DIR, "run_real_benchmark.py")
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Grid Search orchestrator - chay tu dong 75 cau hinh benchmark"
+        description="Grid Search orchestrator - chay tu dong 60 cau hinh benchmark"
     )
     parser.add_argument(
         "--hf_token", type=str, default=None,
@@ -49,7 +49,7 @@ def main():
 
     total = len(MODELS) * len(KV_CACHE_TYPES) * len(CONTEXT_LENGTHS)
     print("=" * 60)
-    print("  REAL GPU BENCHMARK - GRID SEARCH (75 cau hinh)")
+    print("  REAL GPU BENCHMARK - GRID SEARCH (60 cau hinh)")
     print("=" * 60)
     print(f"Tong so cau hinh: {total}")
     print(f"Output CSV: {OUTPUT_CSV}")

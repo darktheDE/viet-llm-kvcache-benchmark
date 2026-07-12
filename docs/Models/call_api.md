@@ -103,7 +103,7 @@ curl http://127.0.0.1:11434/api/generate -d '{
 ```bash
 # Streaming (đo TTFT = thời gian nhận được chunk đầu tiên)
 curl http://127.0.0.1:11434/api/generate -d '{
-  "model": "gemma4:e4b-it-bf16",
+  "model": "qwen3:8b-fp16",
   "prompt": "Tom tat doan van sau: ...",
   "stream": true,
   "options": {
@@ -504,13 +504,12 @@ def unload_model(model: str) -> None:
 
 | Model | Ollama Tag | Backend | Precision | HuggingFace Repo |
 |---|---|---|---|---|
-| Gemma 4 E4B IT | `gemma4:e4b-it-bf16` | Ollama | BF16 | google/gemma-4-E4B-it |
 | Qwen3 8B | `qwen3:8b-fp16` | Ollama | FP16 | Qwen/Qwen3-8B |
 | Llama 3.1 8B Instruct | `llama3.1:8b-instruct-fp16` | Ollama | FP16 | meta-llama/Llama-3.1-8B-Instruct |
 | Mistral 7B Instruct v0.3 | `mistral:7b-instruct-v0.3-fp16` | Ollama | FP16 | mistralai/Mistral-7B-Instruct-v0.3 |
 | Qwen2.5 7B Instruct | `qwen2.5:7b-instruct-fp16` | Ollama | FP16 | Qwen/Qwen2.5-7B-Instruct |
 
-> **Lưu ý:** Tất cả 5 model đều chạy qua **Ollama** (không cần vLLM).
+> **Lưu ý:** Tất cả 4 model trong benchmark chính thức đều chạy qua **Ollama** (không cần vLLM). Gemma 4 không còn nằm trong scope benchmark hiện tại.
 > Để benchmark với vLLM, thay `BASE_URL` thành `http://127.0.0.1:8000` và dùng endpoint `/v1/chat/completions`.
 
 ---

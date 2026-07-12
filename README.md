@@ -65,12 +65,13 @@ The benchmark pipeline consists of three core stages:
 ## Benchmark Scope
 
 ### Models
-We evaluate the methods across **5 Vietnamese/multilingual LLMs** running via Ollama at full precision (FP16/BF16):
-*   `gemma4:e4b-it-bf16` (Gemma 3 4B IT BF16 — Google DeepMind, multilingual baseline)
+We evaluate the methods across **4 Vietnamese/multilingual LLMs** running via Ollama at full precision (FP16/BF16):
 *   `qwen3:8b-fp16` (Qwen3 8B FP16 — Alibaba, SOTA multilingual baseline)
 *   `llama3.1:8b-instruct-fp16` (Llama 3.1 8B Instruct FP16 — Meta AI, open-source baseline)
 *   `mistral:7b-instruct-v0.3-fp16` (Mistral 7B Instruct v0.3 FP16 — Mistral AI, GQA architecture baseline)
 *   `qwen2.5:7b-instruct-fp16` (Qwen2.5 7B Instruct FP16 — Alibaba, multilingual baseline)
+
+> **Scope note:** `gemma4:e4b-it-bf16` has been removed from the benchmark suite because the team determined it already ships with strong built-in optimization/compression behavior, making it a less fair comparison target for this study.
 
 ### Compression Methods
 *   **Baseline:** Full KV Cache (uncompressed, BF16/FP16)
@@ -253,11 +254,11 @@ To run a baseline measurement with uncompressed Full KV Cache on a selected mode
 
 ```bash
 python scripts/run_baseline.py \
-    --model "gemma4:e4b-it-bf16" \
+    --model "qwen3:8b-fp16" \
     --dataset "datasets/test_set_small.json" \
     --context_length 8000 \
     --max_new_tokens 128 \
-    --output "results/gemma4_baseline.csv"
+    --output "results/qwen3_baseline.csv"
 ```
 
 The script will automatically measure and append the following fields to your local results file:

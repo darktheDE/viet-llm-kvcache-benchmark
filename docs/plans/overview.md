@@ -18,30 +18,31 @@ Hệ thống Benchmark hoạt động theo một luồng Pipeline một chiều 
 
 ---
 
-## 2. Thông tin về 5 Mô hình được sử dụng
+## 2. Thông tin về 4 Mô hình được sử dụng
 
-Dự án đánh giá hiệu suất nén trên 5 mô hình ngôn ngữ (tập trung vào năng lực tiếng Việt):
+Dự án đánh giá hiệu suất nén trên 4 mô hình ngôn ngữ (tập trung vào năng lực tiếng Việt):
 
-1. **`gemma4:e4b-it-bf16`**: Mô hình Gemma 3 4B IT (Google DeepMind), chạy BF16 qua Ollama. Đại diện cho kiến trúc Gemma thế hệ mới, hỗ trợ 128K context. Làm baseline đa ngôn ngữ nhẹ nhất trong nhóm.
-2. **`qwen3:8b-fp16`**: SOTA model thế giới ở mức 8B tham số, chạy FP16. Hỗ trợ 128K context nhờ RoPE scale cải tiến. Được dùng làm thước đo chuẩn quốc tế.
-3. **`llama3.1:8b-instruct-fp16`**: Mô hình Llama 3.1 8B Instruct từ Meta AI, chạy FP16. Baseline phổ biến nhất thị trường mã nguồn mở. Hỗ trợ 128K context.
-4. **`mistral:7b-instruct-v0.3-fp16`**: Mô hình Mistral 7B Instruct v0.3 từ Mistral AI (Pháp), chạy FP16. Kiến trúc GQA (Grouped Query Attention) giúp KV Cache tự nhiên nhỏ hơn. Hỗ trợ 32K context.
-5. **`qwen2.5:7b-instruct-fp16`**: Mô hình Qwen2.5 7B Instruct (Alibaba), chạy FP16. Đại diện cho dòng Qwen2.5, hỗ trợ 128K context. Rất mạnh về tiếng Việt.
+> **Ghi chú phạm vi:** `gemma4:e4b-it-bf16` đã được loại khỏi benchmark chính thức vì nhóm đánh giá model này đã có mức tối ưu/nén sẵn cao, không còn phù hợp để làm đối chứng công bằng cho các kỹ thuật KV cache compression.
+
+1. **`qwen3:8b-fp16`**: SOTA model thế giới ở mức 8B tham số, chạy FP16. Hỗ trợ 128K context nhờ RoPE scale cải tiến. Được dùng làm thước đo chuẩn quốc tế.
+2. **`llama3.1:8b-instruct-fp16`**: Mô hình Llama 3.1 8B Instruct từ Meta AI, chạy FP16. Baseline phổ biến nhất thị trường mã nguồn mở. Hỗ trợ 128K context.
+3. **`mistral:7b-instruct-v0.3-fp16`**: Mô hình Mistral 7B Instruct v0.3 từ Mistral AI (Pháp), chạy FP16. Kiến trúc GQA (Grouped Query Attention) giúp KV Cache tự nhiên nhỏ hơn. Hỗ trợ 32K context.
+4. **`qwen2.5:7b-instruct-fp16`**: Mô hình Qwen2.5 7B Instruct (Alibaba), chạy FP16. Đại diện cho dòng Qwen2.5, hỗ trợ 128K context. Rất mạnh về tiếng Việt.
 
 ---
 
 ## 3. Step-by-Step Mô Phỏng Luồng Chạy Thực Tế
 
 Để xác nhận xem Plan có đi đúng hướng không, hãy tưởng tượng bạn gõ dòng lệnh sau vào Terminal:
-`python scripts/run_baseline.py --model gemma4:e4b-it-bf16 --context_length 8000 --kv_cache_type TurboQuant`
+`python scripts/run_baseline.py --model qwen3:8b-fp16 --context_length 8000 --kv_cache_type TurboQuant`
 
 Đây là chuyện gì sẽ diễn ra bên trong hệ thống:
 
 *   **Bước 1 (Nhận lệnh & Data):** Hệ thống nhận tham số `--context_length 8000`. Nó vào file `datasets/test_set_small.json`, bốc ra vài văn bản tiếng Việt dài đúng 8000 chữ.
-*   **Bước 2 (Tải Model):** Hệ thống tải `gemma4:e4b-it-bf16` (chạy BF16 ~16GB) nhét vào con Card RTX 4090.
+*   **Bước 2 (Tải Model):** Hệ thống tải `qwen3:8b-fp16` (chạy FP16 ~16GB) nhét vào con Card RTX 4090.
 *   **Bước 3 (Đọc & Nén - Trọng tâm):** Bắt đầu quá trình Inference. Mô hình đọc 8000 chữ đó. Lúc này, quá trình đọc sinh ra cực kỳ nhiều "bộ nhớ tạm" (KV Cache). Ngay lập tức, lệnh `--kv_cache_type TurboQuant` kích hoạt lõi CUDA của TurboQuant bên dưới vLLM, **bóp nghẹt cái đống "bộ nhớ tạm" đó từ 16-bit xuống còn 4-bit theo thời gian thực (real-time)** để tiết kiệm chỗ chứa.
 *   **Bước 4 (Giám sát):** Mã nguồn `run_baseline.py` của chúng ta (dùng `pynvml`) đứng ngoài quan sát và ghi nhận: *"À, nhờ có TurboQuant nén bộ nhớ tạm lại, nên lúc đọc 8000 chữ, GPU chỉ tốn tổng cộng 16GB VRAM (chứ không bị lố lên 30GB gây nổ card như bình thường). Thời gian nhả chữ là 30ms/token"*.
-*   **Bước 5 (Xuất Kết quả):** Các con số *(gemma4:e4b-it-bf16, TurboQuant, 8000, 16GB, 30ms)* được xuất thành 1 dòng trong file `results/template_log.csv`. Hoàn tất một vòng lặp đo đạc!
+*   **Bước 5 (Xuất Kết quả):** Các con số *(qwen3:8b-fp16, TurboQuant, 8000, 16GB, 30ms)* được xuất thành 1 dòng trong file `results/template_log.csv`. Hoàn tất một vòng lặp đo đạc!
 
 ---
 

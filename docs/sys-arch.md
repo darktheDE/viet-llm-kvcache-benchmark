@@ -16,7 +16,7 @@ Hệ thống benchmark được chia làm **4 tầng chức năng chính** hoạ
 |                     TẦNG 2: THỰC THI SUY LUẬN & NÉN (LLM SERVING)                 |
 |   +---------------------------------------------------------------------------+   |
 |   |  Inference Engine (vLLM / SGLang with PagedAttention)                     |   |
-|   |  - Model Loader: [gemma4:e4b-it-bf16] / [qwen3:8b-fp16] / [llama3.1:8b-instruct-fp16] / [mistral:7b-instruct-v0.3-fp16] / [qwen2.5:7b-instruct-fp16] (FP16/BF16) |   |
+|   |  - Model Loader: [qwen3:8b-fp16] / [llama3.1:8b-instruct-fp16] / [mistral:7b-instruct-v0.3-fp16] / [qwen2.5:7b-instruct-fp16] (FP16/BF16) |   |
 |   +---------------------------------------------------------------------------+   |
 |                                                              |                    |
 |   +----------------------------------------------------------v----------------+   |

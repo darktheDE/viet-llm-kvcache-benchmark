@@ -190,11 +190,11 @@ Mỗi record JSONL chứa tối thiểu:
 
 ```json
 {
-  "sample_id": "gemma4:e4b__FP16__8000__s0",
+  "sample_id": "qwen3:8b-fp16__FP16__8000__s0",
   "prompt_text": "Văn bản đầu vào gốc...",
   "generated_text": "Văn bản model sinh ra...",
   "generated_tokens": 128,
-  "model": "gemma4:e4b",
+  "model": "qwen3:8b-fp16",
   "dataset": "datasets/test_set_small.json",
   "context_length": 8000,
   "kv_cache_type": "FP16",

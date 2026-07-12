@@ -22,7 +22,7 @@ def main():
                     "\n",
                     "Notebook này phân tích dữ liệu đo đạc **thật** từ GPU Cloud (RunPod/Vast.ai),\n",
                     "so sánh hiệu năng của 5 phương pháp KV Cache (FP16, FP8, HQQ, PolarQuant, TurboQuant)\n",
-                    "trên 5 mô hình LLM tiếng Việt ở 3 mốc ngữ cảnh (4K, 8K, 16K).\n",
+                    "trên 4 mô hình LLM tiếng Việt ở 3 mốc ngữ cảnh (4K, 8K, 16K).\n",
                     "\n",
                     "**Nguồn dữ liệu:** `../../results/template_log_real_run.csv`\n",
                     "\n",
@@ -91,7 +91,7 @@ def main():
                 "metadata": {},
                 "source": [
                     "## 2. So sánh Peak VRAM theo từng phương pháp nén (Context 16K)\n",
-                    "Biểu đồ cột nhóm thể hiện mức ngốn VRAM của 5 mô hình ở mốc ngữ cảnh cực đại."
+                    "Biểu đồ cột nhóm thể hiện mức ngốn VRAM của 4 mô hình ở mốc ngữ cảnh cực đại."
                 ]
             },
             {
