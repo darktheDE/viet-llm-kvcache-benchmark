@@ -13,7 +13,6 @@ import sys
 KV_CACHE_TYPES = ["FP16", "FP8", "HQQ", "PolarQuant", "TurboQuant"]
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_CSV = os.path.join(SCRIPT_DIR, "../../results/template_log_real_run.csv")
 WORKER_PATH = os.path.join(SCRIPT_DIR, "run_mistral_single_method.py")
 
 
@@ -31,6 +30,14 @@ def parse_args():
         "--pull_ollama", action="store_true", default=False,
         help="Chay ollama pull truoc khi benchmark"
     )
+    parser.add_argument(
+        "--output", type=str, default=None,
+        help="Duong dan file output CSV (mac dinh la template_log_real_run_mistral.csv)"
+    )
+    parser.add_argument(
+        "--dataset", type=str, default=None,
+        help="Duong dan den file dataset JSON (mac dinh la test_set_small.json)"
+    )
     return parser.parse_args()
 
 
@@ -39,12 +46,31 @@ def main():
 
     hf_token = args.hf_token or os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
 
+    # Xac dinh output_csv tu argument hoac mac dinh sang file moi de tranh ghi de file cu
+    if args.output:
+        output_csv = args.output
+    else:
+        output_csv = os.path.join(SCRIPT_DIR, "../../results/template_log_real_run_mistral.csv")
+
+    if not os.path.isabs(output_csv):
+        output_csv = os.path.abspath(output_csv)
+
+    # Xac dinh dataset tu argument hoac mac dinh
+    if args.dataset:
+        dataset_path = args.dataset
+    else:
+        dataset_path = os.path.join(SCRIPT_DIR, "../../datasets/test_set_small.json")
+
+    if not os.path.isabs(dataset_path):
+        dataset_path = os.path.abspath(dataset_path)
+
     total = len(KV_CACHE_TYPES)
     print("=" * 60)
     print("  OPTIMIZED MISTRAL GRID SEARCH - LOAD ONCE PER METHOD")
     print("=" * 60)
     print(f"Tong so methods: {total} (Moi method se chay 3 contexts: 4k, 8k, 16k)")
-    print(f"Output CSV: {OUTPUT_CSV}")
+    print(f"Output CSV: {output_csv}")
+    print(f"Dataset:    {dataset_path}")
     if hf_token:
         print(f"HF Token: *** (co su dung)")
     print("=" * 60 + "\n")
@@ -61,9 +87,9 @@ def main():
         cmd = [
             sys.executable, WORKER_PATH,
             "--kv_cache_type", kv_type,
-            "--output", OUTPUT_CSV,
+            "--output", output_csv,
             "--num_samples", str(args.num_samples),
-            "--dataset", os.path.join(SCRIPT_DIR, "../../datasets/test_set_small.json"),
+            "--dataset", dataset_path,
         ]
         if hf_token:
             cmd.extend(["--hf_token", hf_token])
@@ -106,7 +132,7 @@ def main():
     print(f"  Hoan tat: {success_count}/{total} methods")
     print(f"  That bai: {error_count}/{total} methods")
     print(f"  Tong thoi gian: {elapsed}s ({round(elapsed/60, 1)} phut)")
-    print(f"  Ket qua CSV: {OUTPUT_CSV}")
+    print(f"  Ket qua CSV: {output_csv}")
     print("=" * 60)
 
 
