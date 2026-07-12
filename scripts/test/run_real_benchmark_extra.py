@@ -116,6 +116,15 @@ KV_CACHE_DTYPE_MAP = {
     "TurboQuant_3bit": "turboquant_3bit_nc",  # Extra: 3-bit TurboQuant variant
 }
 
+# Tỷ lệ mở rộng token theo model family.
+# Dataset đếm token bằng Qwen tokenizer; các tokenizer khác có thể
+# tạo ra nhiều token hơn cho cùng đoạn text tiếng Việt.
+# Ratio được dùng để tính max_model_len khi khởi tạo vLLM.
+TOKEN_EXPANSION_RATIO = {
+    "phi4:mini-reasoning": 1.3,    # Phi-4 tokenizer ~30% nhiều hơn Qwen
+    "gemma3:4b-it": 1.2,           # Gemma3 tokenizer ~20% nhiều hơn Qwen
+}
+
 
 def parse_args():
     """Phân tích tham số dòng lệnh."""
@@ -364,9 +373,12 @@ def run_real_benchmark(args):
         print(f"  -> vLLM repo: {vllm_model}")
 
         # max_model_len needs room for prompt tokens + generated tokens + buffer
-        # Sample actual_tokens may exceed target context_length due to tokenizer differences
-        max_len = args.context_length + args.max_new_tokens + 8192
-        print(f"  -> max_model_len={max_len} (ctx={args.context_length} + new={args.max_new_tokens} + buf=4096)")
+        # Dataset token counts are measured with Qwen tokenizer; other models
+        # may tokenize Vietnamese text into more tokens.
+        ratio = TOKEN_EXPANSION_RATIO.get(args.model, 1.3)
+        estimated_max_prompt = int(args.context_length * ratio)
+        max_len = estimated_max_prompt + args.max_new_tokens + 512
+        print(f"  -> max_model_len={max_len} (ctx={args.context_length} x {ratio} + new={args.max_new_tokens} + buf=512)")
         llm = LLM(
             model=vllm_model,
             kv_cache_dtype=kv_dtype,
