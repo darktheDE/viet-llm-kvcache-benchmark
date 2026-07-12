@@ -35,15 +35,13 @@
 ### 3. Danh sách các Vietnamese LLMs & Tập Dữ liệu đã được kiểm chứng (Để đối chiếu)
 
 #### 3.1. Các mô hình tiếng Việt xuất sắc
-1.  **`gemma4:e4b` (8 Billion parameters):**
-    *   *Lý do:* Mô hình đa ngôn ngữ Đông Nam Á do Sea AI Lab phát triển, dựa trên kiến trúc Qwen2.5 và được huấn luyện tiếp trên ~500B tokens cho 15 ngôn ngữ SEA (bao gồm tiếng Việt). Hỗ trợ context length lên tới 32K tokens, đáp ứng đầy đủ yêu cầu benchmark ở các mốc 4k, 8k, 16k. Thay thế VinaLLaMA-7B (chỉ hỗ trợ 4K context).
-2.  **`Qwen/Qwen2.5-7B-Instruct-1M` (hoặc bản tinh chỉnh tiếng Việt `Qwen2.5-7B-Instruct-vietnamese`):**
+1.  **`Qwen/Qwen2.5-7B-Instruct-1M` (hoặc bản tinh chỉnh tiếng Việt `Qwen2.5-7B-Instruct-vietnamese`):**
     *   *Lý do:* Qwen2.5 là dòng mô hình mã nguồn mở hàng đầu hiện nay, hỗ trợ tiếng Việt cực kỳ tốt và có cửa sổ ngữ cảnh hỗ trợ lên tới 128k tokens. Đây là mô hình lý tưởng để đo đạc sự thay đổi khi kéo dài ngữ cảnh từ 4k lên 32k.
-3.  **`qwen3:8b`:**
+2.  **`qwen3:8b`:**
     *   *Lý do:* Đã được kiểm chứng đạt điểm số rất cao trên benchmark VMLU tiếng Việt. Hỗ trợ ngữ cảnh dài mặc định lên tới 128k tokens nhờ kiến trúc RoPE điều chỉnh.
-4.  **`arcee-ai/Arcee-VyLinh`:**
+3.  **`arcee-ai/Arcee-VyLinh`:**
     *   *Lý do:* Bản thích ứng tiếng Việt dựa trên Mistral-7B, văn phong tiếng Việt rất mượt mà. Mặc dù giới hạn ngữ cảnh gốc là 8k, mô hình này rất thích hợp để làm đối chứng xem khi nén vượt ngưỡng thì chất lượng suy giảm ra sao.
-5.  **`llama3.2:3b` (3 Billion parameters):**
+4.  **`llama3.2:3b` (3 Billion parameters):**
     *   *Lý do:* Mô hình nhẹ 3B tham số từ Meta, dựa trên kiến trúc Llama 3.2. Được dùng làm baseline compact để kiểm tra hiệu quả nén KV Cache trên mô hình nhỏ, phù hợp cho môi trường tài nguyên hạn chế.
 
 #### 3.2. Tập dữ liệu cào bổ sung & Nguồn đóng gói sẵn (News & Social Media)

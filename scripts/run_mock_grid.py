@@ -3,7 +3,6 @@ import time
 import os
 
 MODELS = [
-    "gemma4:e4b-it-bf16",
     "qwen3:8b-fp16",
     "llama3.1:8b-instruct-fp16",
     "mistral:7b-instruct-v0.3-fp16",

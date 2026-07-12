@@ -14,7 +14,7 @@ Bộ công cụ benchmark thực tế (Real Mode) gồm **3 file Python** và **
 | File | Vai trò | Mô tả |
 |:---|:---|:---|
 | `scripts/test/run_real_benchmark.py` | Công nhân thực thi | Chạy đo đạc cho **1 cấu hình** (1 Model + 1 Method + 1 Context). Gọi trực tiếp vLLM để tải model thật, chạy inference thật, đo VRAM thật. |
-| `scripts/test/run_real_grid.py` | Quản đốc phân việc | Chạy vòng lặp Grid Search tự động gọi `run_real_benchmark.py` cho **75 cấu hình** (5×5×3). Có timeout 10 phút/cấu hình. |
+| `scripts/test/run_real_grid.py` | Quản đốc phân việc | Chạy vòng lặp Grid Search tự động gọi `run_real_benchmark.py` cho **60 cấu hình** (4×5×3). Có timeout 10 phút/cấu hình. |
 | `scripts/test/generate_real_analysis.py` | Sinh Notebook | Tạo file `results/real_benchmark_analysis.ipynb` chứa code vẽ 6 biểu đồ phân tích. |
 | `results/real_benchmark_analysis.ipynb` | Notebook phân tích | Đọc `real_benchmark_log.csv` và vẽ biểu đồ so sánh Peak VRAM, Latency, Throughput, PPL. |
 
@@ -29,7 +29,7 @@ Bộ công cụ benchmark thực tế (Real Mode) gồm **3 file Python** và **
 | **Đo Latency thật?** | Không. Dùng công thức `30.5 + ctx/1000`. | Có. Dùng `time.time()` bấm giờ thực tế khi inference. |
 | **Đo PPL thật?** | Không. Dùng `random.uniform(5, 8)`. | Có. Dùng `prompt_logprobs` của vLLM để tính PPL theo công thức $\exp(-\frac{1}{N}\sum\log P)$. |
 | **Yêu cầu phần cứng** | Laptop văn phòng bình thường. | GPU >= 24GB VRAM (RTX 3090/4090/L4). |
-| **Thời gian chạy** | ~3 phút cho 75 cấu hình. | ~5-10 tiếng cho 75 cấu hình (tùy model). |
+| **Thời gian chạy** | ~2-3 phút cho 60 cấu hình. | ~4-8 tiếng cho 60 cấu hình (tùy model). |
 | **File CSV output** | `results/template_log.csv` (status: MOCK_OK) | `results/real_benchmark_log.csv` (status: OK/OOM) |
 
 ---
@@ -60,7 +60,7 @@ Bộ công cụ benchmark thực tế (Real Mode) gồm **3 file Python** và **
 
 ### B. `run_real_grid.py` — Quản đốc
 
-- Quét qua ma trận: **5 Models × 5 Methods × 3 Contexts = 75 cấu hình**.
+- Quét qua ma trận: **4 Models × 5 Methods × 3 Contexts = 60 cấu hình**.
 - Gọi `run_real_benchmark.py` qua `subprocess.run()` với `timeout=600s` (10 phút).
 - In báo cáo tổng kết cuối cùng: số cấu hình thành công / OOM / lỗi khác.
 

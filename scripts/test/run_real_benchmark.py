@@ -10,11 +10,11 @@ Kết quả ghi vào: ../../results/template_log_real_run.csv
 
 Cách chạy lẻ:
     python scripts/test/run_real_benchmark.py \
-        --model "gemma4:e4b-it-bf16" \
+        --model "qwen3:8b-fp16" \
         --kv_cache_type FP16 \
         --context_length 16000
 
-Cách chạy Grid (tự động 75 cấu hình):
+Cách chạy Grid (tự động 60 cấu hình):
     python scripts/test/run_real_grid.py
 """
 
@@ -124,7 +124,7 @@ def parse_args():
         description="Real GPU Benchmark - KV Cache Compression trên Vietnamese LLMs"
     )
     parser.add_argument(
-        "--model", type=str, default="gemma4:e4b",
+        "--model", type=str, default="qwen3:8b-fp16",
         choices=SUPPORTED_MODELS, help="Ten mo hinh can benchmark"
     )
     parser.add_argument(

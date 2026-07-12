@@ -5,10 +5,10 @@ Khi nạp văn bản lớn hơn 4K token vào Ollama hoặc các nền tảng ch
 Điều này khiến các phép thử nghiệm mốc ngữ cảnh lớn (8K, 16K, 32K) trở nên vô nghĩa nếu không cấu hình lại, vì mô hình không thực sự "đọc" được lượng token mà bạn muốn đo đạc.
 
 ### Khắc phục trên Ollama (Dùng Modelfile)
-Với các model alias của Ollama (`gemma4:e4b-it-bf16`, `qwen3:8b-fp16`, `llama3.1:8b-instruct-fp16`, `mistral:7b-instruct-v0.3-fp16`, `qwen2.5:7b-instruct-fp16`), bạn phải định nghĩa lại giới hạn bằng **Modelfile**:
+Với các model alias của Ollama trong benchmark chính thức (`qwen3:8b-fp16`, `llama3.1:8b-instruct-fp16`, `mistral:7b-instruct-v0.3-fp16`, `qwen2.5:7b-instruct-fp16`), bạn phải định nghĩa lại giới hạn bằng **Modelfile**:
 ```dockerfile
-# Ví dụ Modelfile.gemma4
-FROM gemma4:e4b-it-bf16
+# Ví dụ Modelfile.qwen3
+FROM qwen3:8b-fp16
 
 # Buộc hệ thống cấp phát đủ context memory
 PARAMETER num_ctx 32768
@@ -48,6 +48,6 @@ Trong môi trường Cloud thuần (bare-metal) mới khởi tạo, các model c
 
 Script đã bổ sung chức năng `--pull_ollama` để tự động kéo model về trước khi thực thi đo đạc:
 ```bash
-python scripts/test/run_real_benchmark.py --model gemma4:e4b-it-bf16 --pull_ollama
+python scripts/test/run_real_benchmark.py --model qwen3:8b-fp16 --pull_ollama
 ```
-Tính năng này sẽ gọi tiến trình phụ `ollama pull gemma4:e4b-it-bf16` ngầm dưới background để chuẩn bị môi trường sẵn sàng trước khi nạp model vào vLLM.
+Tính năng này sẽ gọi tiến trình phụ `ollama pull qwen3:8b-fp16` ngầm dưới background để chuẩn bị môi trường sẵn sàng trước khi nạp model vào vLLM.

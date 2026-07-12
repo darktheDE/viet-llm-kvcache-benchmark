@@ -10,11 +10,11 @@ This repository contains the official implementation, datasets, experimental con
 
 *   **Primary Goal:** Establish a reproducible empirical benchmark for memory footprint (Peak VRAM), inference latency (TTFT and ITL), decoding throughput (tokens/s), and output quality (Perplexity - PPL, downstream task metrics) across context lengths (4k, 8k, 16k, 32k) for Vietnamese LLMs.
 *   **Evaluation Models:**
-    1.  `gemma4:e4b-it-bf16` (Gemma 3 4B IT BF16, Google DeepMind, multilingual baseline)
-    2.  `qwen3:8b-fp16` (Qwen3 8B FP16, Alibaba, SOTA multilingual baseline)
-    3.  `llama3.1:8b-instruct-fp16` (Llama 3.1 8B Instruct FP16, Meta AI, open-source baseline)
-    4.  `mistral:7b-instruct-v0.3-fp16` (Mistral 7B Instruct v0.3 FP16, Mistral AI, GQA baseline)
-    5.  `qwen2.5:7b-instruct-fp16` (Qwen2.5 7B Instruct FP16, Alibaba, multilingual baseline)
+    1.  `qwen3:8b-fp16` (Qwen3 8B FP16, Alibaba, SOTA multilingual baseline)
+    2.  `llama3.1:8b-instruct-fp16` (Llama 3.1 8B Instruct FP16, Meta AI, open-source baseline)
+    3.  `mistral:7b-instruct-v0.3-fp16` (Mistral 7B Instruct v0.3 FP16, Mistral AI, GQA baseline)
+    4.  `qwen2.5:7b-instruct-fp16` (Qwen2.5 7B Instruct FP16, Alibaba, multilingual baseline)
+*   **Scope Note:** `gemma4:e4b-it-bf16` is intentionally excluded from the active benchmark suite because it is already heavily optimized/compressed, which would distort fairness in cross-method KV cache comparisons.
 *   **Compression Methods:**
     *   **Baseline:** Full KV Cache (uncompressed, BF16/FP16)
     *   **FP8:** 8-bit floating point standard baseline
@@ -37,7 +37,7 @@ This repository contains the official implementation, datasets, experimental con
 
 ## Testing & Execution
 - **Run Baseline:** Use `scripts/run_baseline.py` for testing Full KV Cache performance.
-  - Example: `python scripts/run_baseline.py --model "gemma4:e4b-it-bf16" --dataset "datasets/test_set_small.json" --context_length 8000 --max_new_tokens 128 --output "results/baseline.csv"`
+  - Example: `python scripts/run_baseline.py --model "qwen3:8b-fp16" --dataset "datasets/test_set_small.json" --context_length 8000 --max_new_tokens 128 --output "results/baseline.csv"`
 - Always test locally before creating Pull Requests.
 
 ---
@@ -98,7 +98,7 @@ This repository contains the official implementation, datasets, experimental con
 ### Benchmark Running & Logging
 *   **Run baseline (Full KV Cache):**
     ```bash
-    python scripts/run_baseline.py --model "gemma4:e4b" --dataset "datasets/test_set_small.json" --context_length 16000 --max_new_tokens 128 --output "results/qwen25_baseline.csv"
+    python scripts/run_baseline.py --model "qwen2.5:7b-instruct-fp16" --dataset "datasets/test_set_small.json" --context_length 16000 --max_new_tokens 128 --output "results/qwen25_baseline.csv"
     ```
 *   **Run Mock Baseline (For validation without GPU):**
     ```bash
