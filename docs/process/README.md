@@ -12,4 +12,5 @@ Thư mục này chứa tài liệu ghi nhận kết quả hoàn thành các task
 | **[tech_report_task1&2.md](tech_report_task1%262.md)** | Quan-min211 \<minhquan021105@gmail.com\> | Báo cáo chi tiết kết quả benchmark cho Task 1 và Task 2 (đối chiếu các mốc baseline BF16). |
 | **[tech_test.md](tech_test.md)** | Quan-min211 \<minhquan021105@gmail.com\> | Báo cáo kiểm thử kỹ thuật trên GPU Cloud thực tế. |
 | **[thach_analytics_plotting_process.md](thach_analytics_plotting_process.md)** | HuynhThach1606 \<23133072@student.hcmute.edu.vn\> | Nhật ký tiến trình phân tích kết quả dữ liệu và quy trình dựng code vẽ biểu đồ Pareto. |
-| **[project_review_2026-07-12.md](project_review_2026-07-12.md)** | Codex | Biên bản review mã nguồn, đối chiếu DoD Sprint, cập nhật tiến độ và đánh giá mức hoàn thiện dự án ngày 12/07/2026. |
+| **[project_review_2026-07-12.md](project_review_2026-07-12.md)** | Do Kien Hung \<kienhung.do1105@gmail.com\> | Biên bản review mã nguồn, đối chiếu DoD Sprint, cập nhật tiến độ và đánh giá mức hoàn thiện dự án ngày 12/07/2026. |
+| **[project_review_2026-07-13.md](project_review_2026-07-13.md)** | Do Kien Hung \<kienhung.do1105@gmail.com\> | Nhật ký tiến trình và review trạng thái triển khai, xử lý sự cố tràn context 16k của Mistral ngày 13/07/2026. |

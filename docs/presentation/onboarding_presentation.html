@@ -1,5 +1,6 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,9 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
 
     <style>
         /* ===========================================
@@ -64,7 +67,8 @@
         /* ===========================================
            VIEWPORT FITTING: MANDATORY BASE STYLES
            =========================================== */
-        html, body {
+        html,
+        body {
             height: 100%;
             overflow: hidden;
         }
@@ -91,8 +95,11 @@
         .slide::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
                 linear-gradient(rgba(0, 245, 212, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 245, 212, 0.03) 1px, transparent 1px);
             background-size: 50px 50px;
@@ -128,7 +135,9 @@
         }
 
         /* Typography Styles */
-        h1, h2, h3 {
+        h1,
+        h2,
+        h3 {
             font-family: var(--font-display);
             font-weight: 700;
             line-height: 1.1;
@@ -159,7 +168,9 @@
         /* Global UI Elements */
         .progress-bar {
             position: fixed;
-            top: 0; left: 0; height: 4px;
+            top: 0;
+            left: 0;
+            height: 4px;
             background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
             width: 0%;
             z-index: 100;
@@ -178,7 +189,8 @@
         }
 
         .nav-dot {
-            width: 10px; height: 10px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid transparent;
@@ -302,7 +314,7 @@
             opacity: 0;
             transform: translateY(20px);
             transition: opacity var(--duration-normal) var(--ease-out-expo),
-                        transform var(--duration-normal) var(--ease-out-expo);
+                transform var(--duration-normal) var(--ease-out-expo);
         }
 
         .slide.visible .reveal {
@@ -310,10 +322,21 @@
             transform: translateY(0);
         }
 
-        .reveal.delay-1 { transition-delay: 0.15s; }
-        .reveal.delay-2 { transition-delay: 0.3s; }
-        .reveal.delay-3 { transition-delay: 0.45s; }
-        .reveal.delay-4 { transition-delay: 0.6s; }
+        .reveal.delay-1 {
+            transition-delay: 0.15s;
+        }
+
+        .reveal.delay-2 {
+            transition-delay: 0.3s;
+        }
+
+        .reveal.delay-3 {
+            transition-delay: 0.45s;
+        }
+
+        .reveal.delay-4 {
+            transition-delay: 0.6s;
+        }
 
         /* Specific Title Slide Styles */
         .title-slide {
@@ -396,6 +419,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="progress-bar"></div>
@@ -406,8 +430,10 @@
         <div class="slide-content">
             <span class="badge reveal">DỰ ÁN NGHIÊN CỨU CUỐI KỲ - DBML434077</span>
             <h1 class="reveal delay-1">Benchmarking TurboQuant & KV Cache Compression</h1>
-            <p class="subtitle reveal delay-2">Đánh giá thực nghiệm các phương pháp nén KV Cache trên mô hình ngôn ngữ lớn tiếng Việt</p>
-            <p class="reveal delay-3" style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: var(--small-size);">
+            <p class="subtitle reveal delay-2">Đánh giá thực nghiệm các phương pháp nén KV Cache trên mô hình ngôn ngữ
+                lớn tiếng Việt</p>
+            <p class="reveal delay-3"
+                style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: var(--small-size);">
                 GROUP 1 | ONBOARDING & KẾ HOẠCH TRIỂN KHAI CHI TIẾT
             </p>
         </div>
@@ -419,15 +445,21 @@
             <h2 class="slide-title reveal">Bối cảnh dự án <span class="number">01 / 09</span></h2>
             <div class="grid-layout">
                 <ul class="bullet-list reveal delay-1">
-                    <li><strong>Memory Bottleneck:</strong> Trong suy luận LLM, bộ nhớ <strong>Key-Value (KV) Cache</strong> tăng tuyến tính theo chiều dài context, gây nghẽn VRAM nghiêm trọng.</li>
-                    <li><strong>Các giải pháp nén mới:</strong> Các thuật toán Post-Training Quantization (PTQ) như <strong>TurboQuant, PolarQuant, HQQ</strong> giúp giảm tải VRAM hiệu quả.</li>
-                    <li><strong>Khoảng trống nghiên cứu:</strong> Hầu hết các benchmark hiện tại chỉ tập trung vào tiếng Anh; chưa có đánh giá hệ thống trên tiếng Việt (vốn có cấu trúc token hóa và âm tiết khác biệt).</li>
-                    <li><strong>Mục tiêu:</strong> Xây dựng bộ benchmark thực nghiệm, tìm ra ranh giới <strong>Pareto tối ưu</strong> giữa dung lượng bộ nhớ tiết kiệm và chất lượng đầu ra.</li>
+                    <li><strong>Memory Bottleneck:</strong> Trong suy luận LLM, bộ nhớ <strong>Key-Value (KV)
+                            Cache</strong> tăng tuyến tính theo chiều dài context, gây nghẽn VRAM nghiêm trọng.</li>
+                    <li><strong>Các giải pháp nén mới:</strong> Các thuật toán Post-Training Quantization (PTQ) như
+                        <strong>TurboQuant, PolarQuant, HQQ</strong> giúp giảm tải VRAM hiệu quả.</li>
+                    <li><strong>Khoảng trống nghiên cứu:</strong> Hầu hết các benchmark hiện tại chỉ tập trung vào tiếng
+                        Anh; chưa có đánh giá hệ thống trên tiếng Việt (vốn có cấu trúc token hóa và âm tiết khác biệt).
+                    </li>
+                    <li><strong>Mục tiêu:</strong> Xây dựng bộ benchmark thực nghiệm, tìm ra ranh giới <strong>Pareto
+                            tối ưu</strong> giữa dung lượng bộ nhớ tiết kiệm và chất lượng đầu ra.</li>
                 </ul>
                 <div class="card reveal delay-2" style="border-left: 4px solid var(--accent-purple);">
                     <h3 class="card-title" style="color: var(--accent-purple);">Giá trị bài nghiên cứu</h3>
                     <p class="card-desc" style="font-size: var(--body-size); margin-top: 10px;">
-                        Kết quả benchmark sẽ đưa ra các khuyến nghị cấu hình nén tối ưu cho doanh nghiệp khi triển khai (deploy) LLMs tiếng Việt trên các phần cứng biên/giới hạn VRAM.
+                        Kết quả benchmark sẽ đưa ra các khuyến nghị cấu hình nén tối ưu cho doanh nghiệp khi triển khai
+                        (deploy) LLMs tiếng Việt trên các phần cứng biên/giới hạn VRAM.
                     </p>
                 </div>
             </div>
@@ -441,19 +473,23 @@
             <div class="grid-cards reveal delay-1">
                 <div class="card">
                     <h3 class="card-title">RQ1: Hiệu năng thực tế</h3>
-                    <p class="card-desc">TurboQuant có thực sự làm giảm dung lượng VRAM (Peak VRAM) và cải thiện độ trễ sinh từ (ITL, Throughput) trên tiếng Việt so với baseline không?</p>
+                    <p class="card-desc">TurboQuant có thực sự làm giảm dung lượng VRAM (Peak VRAM) và cải thiện độ trễ
+                        sinh từ (ITL, Throughput) trên tiếng Việt so với baseline không?</p>
                 </div>
                 <div class="card">
                     <h3 class="card-title">RQ2: Chất lượng ngôn ngữ</h3>
-                    <p class="card-desc">Chất lượng ngôn ngữ tiếng Việt (Perplexity - PPL) bị suy giảm ở mức độ nào dưới các mốc nén (4-bit, 3-bit) trên các tập dữ liệu khác nhau?</p>
+                    <p class="card-desc">Chất lượng ngôn ngữ tiếng Việt (Perplexity - PPL) bị suy giảm ở mức độ nào dưới
+                        các mốc nén (4-bit, 3-bit) trên các tập dữ liệu khác nhau?</p>
                 </div>
                 <div class="card">
                     <h3 class="card-title">RQ3: Scaling Context</h3>
-                    <p class="card-desc">Mối quan hệ đánh đổi (trade-off) giữa hiệu năng phần cứng và chất lượng đầu ra biến thiên thế nào khi context scale từ 4k lên 32k tokens?</p>
+                    <p class="card-desc">Mối quan hệ đánh đổi (trade-off) giữa hiệu năng phần cứng và chất lượng đầu ra
+                        biến thiên thế nào khi context scale từ 4k lên 32k tokens?</p>
                 </div>
                 <div class="card">
                     <h3 class="card-title">RQ4: Pareto Boundary</h3>
-                    <p class="card-desc">Phương pháp nén nào (TurboQuant, PolarQuant, HQQ, FP8) tạo ra đường biên Pareto tối ưu ổn định nhất cho việc deploy thực tế?</p>
+                    <p class="card-desc">Phương pháp nén nào (TurboQuant, PolarQuant, HQQ, FP8) tạo ra đường biên Pareto
+                        tối ưu ổn định nhất cho việc deploy thực tế?</p>
                 </div>
             </div>
         </div>
@@ -507,29 +543,35 @@
         <div class="slide-content">
             <h2 class="slide-title reveal">Kiến trúc Hệ thống Benchmark <span class="number">04 / 09</span></h2>
             <ul class="bullet-list reveal delay-1" style="margin-bottom: 1.5rem;">
-                <li><strong>Pipeline một chiều:</strong> Dữ liệu thô qua xử lý -> Chạy Serving -> Giám sát chỉ số -> Tổng hợp và trực quan hóa Pareto.</li>
-                <li><strong>Inference Engine:</strong> vLLM / SGLang tích hợp PagedAttention, nạp động các nhân Triton/CUDA tùy biến của TurboQuant/PolarQuant.</li>
+                <li><strong>Pipeline một chiều:</strong> Dữ liệu thô qua xử lý -> Chạy Serving -> Giám sát chỉ số ->
+                    Tổng hợp và trực quan hóa Pareto.</li>
+                <li><strong>Inference Engine:</strong> vLLM / SGLang tích hợp PagedAttention, nạp động các nhân
+                    Triton/CUDA tùy biến của TurboQuant/PolarQuant.</li>
             </ul>
 
             <div class="arch-flow reveal delay-2">
                 <div class="arch-node active">
                     <h4>Tầng 1: Data Prep</h4>
-                    <p style="font-size: 11px; color: var(--text-secondary);">NeMo Curator cleaning & context bucketizer (4k-32k)</p>
+                    <p style="font-size: 11px; color: var(--text-secondary);">NeMo Curator cleaning & context bucketizer
+                        (4k-32k)</p>
                 </div>
                 <span class="arch-arrow">→</span>
                 <div class="arch-node active">
                     <h4>Tầng 2: LLM Serving</h4>
-                    <p style="font-size: 11px; color: var(--text-secondary);">vLLM Model Loader + Triton/CUDA Compression Kernels</p>
+                    <p style="font-size: 11px; color: var(--text-secondary);">vLLM Model Loader + Triton/CUDA
+                        Compression Kernels</p>
                 </div>
                 <span class="arch-arrow">→</span>
                 <div class="arch-node active">
                     <h4>Tầng 3: Monitoring</h4>
-                    <p style="font-size: 11px; color: var(--text-secondary);">pynvml VRAM hook + TTFT/ITL timers + Perplexity API</p>
+                    <p style="font-size: 11px; color: var(--text-secondary);">pynvml VRAM hook + TTFT/ITL timers +
+                        Perplexity API</p>
                 </div>
                 <span class="arch-arrow">→</span>
                 <div class="arch-node active">
                     <h4>Tầng 4: Analysis</h4>
-                    <p style="font-size: 11px; color: var(--text-secondary);">CSV aggregator + Pandas stats + Pareto Plotter</p>
+                    <p style="font-size: 11px; color: var(--text-secondary);">CSV aggregator + Pandas stats + Pareto
+                        Plotter</p>
                 </div>
             </div>
         </div>
@@ -559,7 +601,8 @@
                     </p>
                 </div>
                 <div class="card">
-                    <h3 class="card-title" style="font-size: var(--body-size);">Sprint 3 (Tuần 5-6): Main Exp & Plots</h3>
+                    <h3 class="card-title" style="font-size: var(--body-size);">Sprint 3 (Tuần 5-6): Main Exp & Plots
+                    </h3>
                     <p class="card-desc" style="font-size: 12px;">
                         • Duy tối ưu hóa VRAM tránh lỗi OOM ở context dài.<br>
                         • Chạy nén: FP8, HQQ, PolarQuant, TurboQuant.<br>
@@ -568,7 +611,8 @@
                     </p>
                 </div>
                 <div class="card">
-                    <h3 class="card-title" style="font-size: var(--body-size);">Sprint 4 (Tuần 7): Handover & Polish</h3>
+                    <h3 class="card-title" style="font-size: var(--body-size);">Sprint 4 (Tuần 7): Handover & Polish
+                    </h3>
                     <p class="card-desc" style="font-size: 12px;">
                         • Tổng hợp Báo cáo tiếng Việt (>=30 trang).<br>
                         • Thiết kế Slide thuyết trình (15-25 slides).<br>
@@ -586,15 +630,21 @@
             <h2 class="slide-title reveal">Phân bổ nhân sự (RACI Matrix) <span class="number">06 / 09</span></h2>
             <div class="grid-layout">
                 <ul class="bullet-list reveal delay-1">
-                    <li><strong>Writing & Coordination:</strong> Đỗ Kiến Hưng (Lead/PM), Phan Trọng Quí. Điều phối tiến độ, biên tập báo cáo tiếng Việt và slide thuyết trình.</li>
-                    <li><strong>Technical & Experiment:</strong> Phạm Minh Quân (Lead), Hồ Việt Anh, Trần Minh Khánh, Nguyễn Van Quang Duy (Quantization & Helpdesk xử lý OOM/CUDA).</li>
-                    <li><strong>Data & Analysis:</strong> Nguyễn Hồ Phát (Lead), Huỳnh Hữu Huy (curate test set), Huỳnh Ngọc Thạch (viết script plotting vẽ Pareto curves).</li>
-                    <li><strong>Research & Scope:</strong> Nguyễn Đăng Quốc Anh (Lead/Idea), Phan Trọng Phú. Viết Paper tiếng Anh trên Overleaf, chuẩn hóa references.</li>
+                    <li><strong>Writing & Coordination:</strong> Đỗ Kiến Hưng (Lead/PM), Phan Trọng Quí, Phan Trọng Phú,
+                        Nguyễn Văn Quảng Duy. Điều phối tiến độ, biên dịch, soát lỗi, biên tập báo cáo tiếng Việt, tiếng
+                        Anh và slide thuyết trình.</li>
+                    <li><strong>Technical & Experiment:</strong> Phạm Minh Quân (Lead), Hồ Việt Anh, Trần Minh Khánh.
+                        Quản trị môi trường GPU Cloud, tối ưu hóa pipeline, chạy thực nghiệm và xử lý lỗi bộ nhớ.</li>
+                    <li><strong>Data & Analysis:</strong> Nguyễn Hồ Phát (Lead), Huỳnh Hữu Huy (curate test set), Huỳnh
+                        Ngọc Thạch (viết script plotting vẽ Pareto curves).</li>
+                    <li><strong>Research:</strong> Nguyễn Đăng Quốc Anh (Idea). Chịu trách nhiệm ý tưởng cốt lõi, mạch
+                        nghiên cứu và thiết lập khung lý thuyết.</li>
                 </ul>
                 <div class="card reveal delay-2" style="border-left: 4px solid var(--accent-cyan);">
                     <h3 class="card-title">Agile Management</h3>
                     <p class="card-desc">
-                        Mọi thành viên cập nhật tiến độ công việc trực tiếp trên <strong>app.plane.so</strong> theo từng Sprint. Các cuộc họp được lên lịch qua Google Calendar của nhóm.
+                        Mọi thành viên cập nhật tiến độ công việc trực tiếp trên <strong>app.plane.so</strong> theo từng
+                        Sprint. Các cuộc họp được lên lịch qua Google Calendar của nhóm.
                     </p>
                 </div>
             </div>
@@ -606,20 +656,24 @@
         <div class="slide-content">
             <h2 class="slide-title reveal">Workflow quản lý tài liệu <span class="number">07 / 09</span></h2>
             <ul class="bullet-list reveal delay-1" style="margin-bottom: 1.5rem;">
-                <li><strong>Notion (Trung tâm Tri thức):</strong> Nơi đọc và lưu trữ thông tin lý thuyết, biên bản họp. Link Notion được nhúng vào thẻ task Plane.</li>
-                <li><strong>Plane.so (Quản lý Task):</strong> Chỉ ghi checklist ngắn, mô tả DoD và link tài liệu Notion/Git liên quan. Tránh viết tài liệu dài lên Plane.</li>
+                <li><strong>Notion (Trung tâm Tri thức):</strong> Nơi đọc và lưu trữ thông tin lý thuyết, biên bản họp.
+                    Link Notion được nhúng vào thẻ task Plane.</li>
+                <li><strong>Plane.so (Quản lý Task):</strong> Chỉ ghi checklist ngắn, mô tả DoD và link tài liệu
+                    Notion/Git liên quan. Tránh viết tài liệu dài lên Plane.</li>
             </ul>
             <div class="grid-cards reveal delay-2">
                 <div class="card">
                     <h3 class="card-title" style="font-size: var(--body-size);">GitHub (Code & Technical)</h3>
                     <p class="card-desc" style="font-size: 12px;">
-                        Chỉ chứa code, configs, requirements.txt và các tài liệu kỹ thuật viết trực tiếp bằng Markdown/LaTeX. Tuyệt đối không đẩy file Word, Excel, PPTX lên Git.
+                        Chỉ chứa code, configs, requirements.txt và các tài liệu kỹ thuật viết trực tiếp bằng
+                        Markdown/LaTeX. Tuyệt đối không đẩy file Word, Excel, PPTX lên Git.
                     </p>
                 </div>
                 <div class="card">
                     <h3 class="card-title" style="font-size: var(--body-size);">Google Drive (Heavy Storage)</h3>
                     <p class="card-desc" style="font-size: 12px;">
-                        Lưu trữ bản thảo báo cáo cuối kỳ (.docx), slide (.pptx) và các file dữ liệu thô dung lượng lớn. PM chốt phiên bản theo tuần (Draft_v1, Draft_v2).
+                        Lưu trữ bản thảo báo cáo cuối kỳ (.docx), slide (.pptx) và các file dữ liệu thô dung lượng lớn.
+                        PM chốt phiên bản theo tuần (Draft_v1, Draft_v2).
                     </p>
                 </div>
             </div>
@@ -635,14 +689,16 @@
                     <h3 class="card-title">1. Rủi ro phần cứng & Chi phí</h3>
                     <p class="card-desc" style="font-size: var(--body-size); line-height: 1.5;">
                         • **Nguy cơ:** Server vật lý không có GPU hoặc driver không tương thích vLLM.<br>
-                        • **Khắc phục:** Thuê Cloud GPU (RTX 4090/3090, Vast.ai/RunPod). Chi phí chỉ khoảng $0.2 - $0.4/giờ (~130k-250k VNĐ cho cả dự án).
+                        • **Khắc phục:** Thuê Cloud GPU (RTX 4090/3090, Vast.ai/RunPod). Chi phí chỉ khoảng $0.2 -
+                        $0.4/giờ (~130k-250k VNĐ cho cả dự án).
                     </p>
                 </div>
                 <div class="card reveal delay-2">
                     <h3 class="card-title">2. Lỗi CUDA OOM ở context dài</h3>
                     <p class="card-desc" style="font-size: var(--body-size); line-height: 1.5;">
                         • **Nguy cơ:** Mô hình lớn ở context 16k-32k gây sập bộ nhớ GPU.<br>
-                        • **Khắc phục:** Duy cấu hình FlashAttention-2, giảm block size từ 16 xuống 8, giảm max_num_seqs=1 để tránh phân mảnh bộ nhớ.
+                        • **Khắc phục:** Duy cấu hình FlashAttention-2, giảm block size từ 16 xuống 8, giảm
+                        max_num_seqs=1 để tránh phân mảnh bộ nhớ.
                     </p>
                 </div>
             </div>
@@ -655,14 +711,21 @@
             <h2 class="slide-title reveal">Definition of Done (DoD) <span class="number">09 / 09</span></h2>
             <div class="grid-layout">
                 <ul class="bullet-list reveal delay-1">
-                    <li><strong>Mã nguồn sạch:</strong> Upload đầy đủ lên GitHub, chạy tự động qua `run_baseline.py`, có file requirements.txt cài đặt nhanh.</li>
-                    <li><strong>Báo cáo cuối kỳ:</strong> Báo cáo tiếng Việt $\ge 30$ trang định dạng chuẩn, Slide thuyết trình 15-25 slides.</li>
-                    <li><strong>Bài báo tiếng Anh:</strong> Bản thảo $\ge 6$ trang (IEEE Conference) không lỗi biên dịch LaTeX trên Overleaf.</li>
-                    <li><strong>Diễn tập nhóm:</strong> Họp review nội bộ, chạy thử slide, phân vai và thống nhất kịch bản trả lời Q&A.</li>
+                    <li><strong>Mã nguồn sạch:</strong> Upload đầy đủ lên GitHub, chạy tự động qua `run_baseline.py`, có
+                        file requirements.txt cài đặt nhanh.</li>
+                    <li><strong>Báo cáo cuối kỳ:</strong> Báo cáo tiếng Việt $\ge 30$ trang định dạng chuẩn, Slide
+                        thuyết trình 15-25 slides.</li>
+                    <li><strong>Bài báo tiếng Anh:</strong> Bản thảo $\ge 6$ trang (IEEE Conference) không lỗi biên dịch
+                        LaTeX trên Overleaf.</li>
+                    <li><strong>Diễn tập nhóm:</strong> Họp review nội bộ, chạy thử slide, phân vai và thống nhất kịch
+                        bản trả lời Q&A.</li>
                 </ul>
-                <div class="card reveal delay-2" style="border-color: var(--accent-cyan); background: rgba(0, 245, 212, 0.05); text-align: center;">
-                    <h3 class="card-title" style="justify-content: center; color: var(--accent-cyan);">BẮT ĐẦU SPRINT 1!</h3>
-                    <p class="card-desc" style="font-size: var(--body-size); margin-top: 10px; color: var(--text-primary);">
+                <div class="card reveal delay-2"
+                    style="border-color: var(--accent-cyan); background: rgba(0, 245, 212, 0.05); text-align: center;">
+                    <h3 class="card-title" style="justify-content: center; color: var(--accent-cyan);">BẮT ĐẦU SPRINT 1!
+                    </h3>
+                    <p class="card-desc"
+                        style="font-size: var(--body-size); margin-top: 10px; color: var(--text-primary);">
                         Việt Anh khởi tạo GPU Cloud và viết khung run_baseline.py.<br>
                         Phát tiền xử lý và đóng gói test_set_small.json.<br>
                         Quốc Anh soạn thảo Proposal v2 trên Overleaf.
@@ -700,7 +763,7 @@
                 this.setupKeyboardNav();
                 this.setupTouchNav();
                 this.setupScrollSnapListener();
-                
+
                 // Show first slide animations immediately
                 setTimeout(() => {
                     this.slides[0].classList.add('visible');
@@ -758,10 +821,10 @@
 
             scrollToSlide(index) {
                 if (index < 0 || index >= this.slides.length || this.isTransitioning) return;
-                
+
                 this.isTransitioning = true;
                 this.currentSlide = index;
-                
+
                 this.slides[index].scrollIntoView({ behavior: 'smooth' });
                 this.updateUI(index);
 
@@ -801,7 +864,7 @@
 
             setupTouchNav() {
                 let startY = 0;
-                
+
                 document.addEventListener('touchstart', (e) => {
                     startY = e.touches[0].clientY;
                 }, { passive: true });
@@ -830,4 +893,5 @@
         });
     </script>
 </body>
+
 </html>

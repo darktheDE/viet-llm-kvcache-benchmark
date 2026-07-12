@@ -1,4 +1,4 @@
-﻿# BẢN KẾ HOẠCH TỔNG THỂ (MASTER PLAN)
+# BẢN KẾ HOẠCH TỔNG THỂ (MASTER PLAN)
 ## Dự án: Benchmarking TurboQuant and KV Cache Compression Methods on Vietnamese LLMs
 **Môn học:** Ứng dụng dữ liệu lớn: học máy ở quy mô lớn (DBML434077) - HCM-UTE  
 **Quản lý tiến độ:** Đỗ Kiến Hưng (Writing & Coordination Lead / Project Manager)
@@ -34,29 +34,29 @@ Tổng tiến độ dự án kéo dài **7 tuần**, chia làm **4 Phase** chạ
 ### PHASE 2A: THIẾT LẬP PIPELINE CHUẨN & CHẠY THỬ baseline (Tuần 3)
 *   **Mục tiêu:** Xây dựng script đo đạc tự động tích hợp các metrics bổ sung nâng cao và chạy kiểm thử thành công trên 1 mô hình nền tảng BF16 (Full KV Cache).
 *   **Nhiệm vụ chi tiết:**
-    *   *Kỹ thuật (Minh Quân, Minh Khánh, Quang Duy):* Hoàn thiện script đo đạc `scripts/run_baseline.py` ghi nhận tự động các chỉ số: Peak VRAM (Prefill/Decode), TTFT, ITL, Throughput, Perplexity, và các chỉ số bổ sung (**KV Cache Compression Ratio, GPU Memory Efficiency Index, Base vs Dynamic VRAM**).
+    *   *Kỹ thuật (Minh Quân, Minh Khánh, Quang Duy):* Hoàn thiện script đo đạc `scripts/run_baseline.py` và sau đó là kịch bản chạy thật `run_real_benchmark.py` ghi nhận tự động các chỉ số: Peak VRAM (đo động qua pynvml background sampler), Latency, Throughput và xuất tệp văn bản sinh ra.
     *   *Điều phối & Quản lý (Kiến Hưng):* Tạo trước biểu mẫu CSV ghi nhận kết quả `results/template_log.csv` để thống nhất cấu trúc lưu trữ số liệu.
     *   *Dữ liệu (Hồ Phát, Hữu Huy):* Viết tài liệu hướng dẫn sử dụng dữ liệu `datasets/dataset_brief.md` để bàn giao cho team kỹ thuật.
 
 ### PHASE 2B: CHẠY THỰC NGHIỆM ĐỒNG LOẠT (Tuần 4 - Tuần 5)
-*   **Mục tiêu:** Thu thập toàn bộ số liệu thực nghiệm trên 4 dòng mô hình mục tiêu đối với tất cả các mốc thuật toán nén trên Cloud GPU.
+*   **Mục tiêu:** Thu thập toàn bộ số liệu thực nghiệm trên 4 dòng mô hình mục tiêu đối với tất cả các mốc thuật toán nén trên Cloud GPU (A100 80GB).
 *   **Nhiệm vụ chi tiết:**
     *   *Kỹ thuật & Thử nghiệm (Nhóm phân vai 1-2 mô hình/người):*
         *   **Cặp 1 (Việt Anh, Minh Quân):** Chạy thực nghiệm trên các mô hình `qwen3:8b-fp16` và `llama3.1:8b-instruct-fp16`.
-        *   **Cặp 2 (Minh Khánh, Quang Duy):** Chạy thực nghiệm trên các mô hình `mistral:7b-instruct-v0.3-fp16` và `qwen2.5:7b-instruct-fp16`.
-        *   **Hỗ trợ chung (Duy - Infrastructure):** Đảm nhận vai trò xử lý lỗi (bug-fixing), tối ưu hóa bộ nhớ và giám sát việc chạy thử nghiệm các mốc nén KV cache: FP8, HQQ, PolarQuant, TurboQuant (mốc Full) và TurboQuant (mốc tắt QJL) trên Cloud GPU.
-    *   *Đo đạc & Ghi kết quả (Toàn bộ team kỹ thuật):* Ghi nhận số liệu chính xác (gồm cả các metrics nâng cao) vào các file kết quả CSV riêng biệt của từng mô hình theo đúng template chuẩn.
+        *   **Cặp 2 (Minh Khánh, Quang Duy):** Chạy thực nghiệm trên các mô hình `mistral:7b-instruct-v0.3-fp16` và `qwen2.5:7b-instruct-fp16` (áp dụng script optimized `run_mistral_optimized.py` để tối ưu nạp model).
+        *   **Hỗ trợ chung (Duy - Infrastructure):** Đảm nhận vai trò xử lý lỗi (bug-fixing), tối ưu hóa bộ nhớ và giám sát việc chạy thử nghiệm các mốc nén KV cache: FP8, HQQ, PolarQuant, TurboQuant trên Cloud GPU A100.
+    *   *Đo đạc & Ghi kết quả (Toàn bộ team kỹ thuật):* Ghi nhận số liệu chính xác vào các file kết quả CSV riêng biệt của từng mô hình, sau đó chạy tính toán Perplexity offline bằng `compute_all_ppl.py` để điền ngược (backfill) kết quả PPL và các cảnh báo chất lượng tiếng Việt (`repetition_flag`, `gibberish_flag`, `repeated_ngram_ratio`, `special_char_ratio`).
 
 ### PHASE 3: TỔNG HỢP SỐ LIỆU & VẼ BIỂU ĐỒ TRỰC QUAN (Tuần 6)
-*   **Mục tiêu:** Merge dữ liệu, thực hiện tính toán thống kê và vẽ các đường cong đánh đổi Pareto tối ưu bao gồm cả các metrics bổ sung.
+*   **Mục tiêu:** Merge dữ liệu, thực hiện tính toán thống kê và vẽ các đường cong đánh đổi Pareto tối ưu.
 *   **Nhiệm vụ chi tiết:**
-    *   *Phân tích (Ngọc Thạch - Phân tích chính, Hồ Phát, Hữu Huy):* Viết script Python `scripts/plot_results.py` để đọc dữ liệu từ các file CSV, tính toán trung bình/độ lệch chuẩn.
+    *   *Phân tích (Ngọc Thạch - Phân tích chính, Hồ Phát, Hữu Huy):* Viết script Python `scripts/plot_results.py` để đọc dữ liệu từ các file CSV kết quả đã backfill, tính toán trung bình/độ lệch chuẩn và gộp thành file tổng hợp `all_results_compiled.csv` / `all_results_summary.csv`.
     *   *Trực quan hóa (Ngọc Thạch):* Xuất ra các biểu đồ trực quan lưu vào thư mục `results/plots/`:
-        *   Biểu đồ 1: Memory (VRAM) vs. Context Length.
-        *   Biểu đồ 2: Latency/Throughput vs. Context Length.
-        *   Biểu đồ 3: Perplexity vs. Compression Methods (Trade-off Pareto curves).
-        *   Biểu đồ 4: **KV Cache Compression Ratio & GPU Memory Efficiency vs. Context Length**.
-    *   *Nghiên cứu (Quốc Anh, Trọng Phú):* Phân tích sự suy giảm chất lượng và hiệu suất bộ nhớ dựa trên các chỉ số bổ sung, rút ra nhận xét về sự nhạy cảm của tiếng Việt khi nén sâu.
+        *   Biểu đồ 1: Peak VRAM vs. Context Length.
+        *   Biểu đồ 2: Latency vs. Context Length.
+        *   Biểu đồ 3: Throughput vs. Context Length.
+        *   Biểu đồ 4 (Pareto Frontier): **Sự đánh đổi Perplexity (trục Y) vs Peak VRAM tiêu thụ (trục X)** để đánh giá hiệu quả của TurboQuant.
+    *   *Nghiên cứu (Quốc Anh, Trọng Phú):* Phân tích sự suy giảm chất lượng và hiệu suất bộ nhớ dựa trên biểu đồ Pareto, rút ra nhận xét về sự nhạy cảm của tiếng Việt khi nén sâu.
 
 ### PHASE 4: HOÀN THIỆN VĂN BẢN, VIẾT BÁO CÁO & PAPER (Tuần 7)
 *   **Mục tiêu:** Hoàn thiện 100% tài liệu bàn giao (có chèn số liệu về dữ liệu thời sự cào mới và chỉ số mới), chạy thử slide thuyết trình và chuẩn bị bảo vệ.
@@ -72,17 +72,17 @@ Tổng tiến độ dự án kéo dài **7 tuần**, chia làm **4 Phase** chạ
 
 | Thành viên | Vai trò trong dự án | Phase 1 (Prep) | Phase 2 (Exp) | Phase 3 (Analysis) | Phase 4 (Writing) |
 |---|---|:---:|:---:|:---:|:---:|
-| **Đỗ Kiến Hưng** | PM / Agile Coordinator | **R** / **A** | **A** | **A** | **R** / **A** |
-| **Phan Trọng Quí** | Writing & Coordination / Joint Coordinator | **R** | **C** | **C** | **R** (Báo cáo) |
+| **Đỗ Kiến Hưng** | PM / Agile Coordinator (Writing & Coordination) | **R** / **A** | **A** | **A** | **R** / **A** |
+| **Phan Trọng Quí** | Joint Coordinator (Writing & Coordination) | **R** | **C** | **C** | **R** (Báo cáo) |
 | **Hồ Việt Anh** | Technical & Experiment | **R** (Cloud Setup) | **R** (Qwen3/Llama) | **C** | **C** |
-| **Phạm Minh Quân** | Tech Lead / Optimizer | **R** (CUDA setup) | **R** (Qwen3/Llama) | **C** | **C** |
-| **Trần Minh Khánh** | Tech runner | **C** | **R** (Mistral/Qwen2.5) | **C** | **C** |
-| **Nguyễn V. Q. Duy** | Writing & Coordination / Technical liaison | **C** (vLLM config) | **R** (Mistral/Qwen2.5/Debug) | **C** | **C** |
+| **Phạm Minh Quân** | Tech Lead / Optimizer (Technical & Experiment) | **R** (CUDA setup) | **R** (Qwen3/Llama) | **C** | **C** |
+| **Trần Minh Khánh** | Tech runner (Technical & Experiment) | **C** | **R** (Mistral/Qwen2.5) | **C** | **C** |
+| **Nguyễn V. Q. Duy** | Technical liaison (Writing & Coordination) | **C** (vLLM config) | **R** (Mistral/Qwen2.5/Debug) | **C** | **C** |
 | **Nguyễn Hồ Phát** | Data curator | **R** (NeMo Curator) | **A** | **R** | **C** |
 | **Huỳnh Hữu Huy** | Data / Prompts | **R** (Test suite) | **A** | **R** | **C** |
 | **Huỳnh Ngọc Thạch** | Metric plotting lead | **C** | **A** | **R** (Plotting) | **C** |
-| **N. Đăng Quốc Anh** | Research Owner / Idea lead | **R** (Đề cương) | **C** | **R** (Nhận xét) | **R** (Paper EN) |
-| **Phan Trọng Phú** | Writing & Coordination / Paper Writer & Review | **R** (References) | **C** | **C** | **R** (Paper EN) |
+| **N. Đăng Quốc Anh** | Research Owner / Idea lead (Research - Solo) | **R** (Đề cương) | **C** | **R** (Nhận xét) | **R** (Paper EN) |
+| **Phan Trọng Phú** | Paper Writer & Review (Writing & Coordination) | **R** (References) | **C** | **C** | **R** (Paper EN) |
 
 *Chú thích:* **R** (Responsible - Người thực hiện), **A** (Accountable - Người chịu trách nhiệm/PM), **C** (Consulted - Người hỗ trợ/Tham vấn), **I** (Informed - Người nhận thông tin).
 

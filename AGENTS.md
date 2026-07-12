@@ -27,11 +27,11 @@ This repository contains the official implementation, datasets, experimental con
 ## 2. Tech Stack & Environment
 *   **Language & Version:** Python 3.10
 *   **Core Libraries:** PyTorch, vLLM, llama.cpp, HQQ, NVIDIA NeMo Curator, `pynvml` (for GPU profiling), `pandas` (for analysis), `matplotlib`/`plotly` (for visualization).
-*   **Infrastructure:** RunPod / Vast.ai (RTX 3090/4090 or L4 GPUs with minimum 24GB VRAM).
+*   **Infrastructure:** RunPod / Vast.ai Cloud GPU (RTX 3090/4090/L4 for testing/preflight, A100 80GB for main benchmark grid and offline perplexity).
 *   **Local Setup:**
     ```bash
-    conda create -n dbml_project python=3.10 -y
-    conda activate dbml_project
+    conda create -n viet-llm python=3.10 -y
+    conda activate viet-llm
     pip install -r requirements.txt
     ```
 
@@ -53,17 +53,31 @@ This repository contains the official implementation, datasets, experimental con
 *   [paper/](paper) - LaTeX paper drafts and reference lists (`references.bib`).
 *   [results/](results) - CSV results and graphical reports.
     *   [template_log.csv](results/template_log.csv) - Uniform logging schema for execution records.
+    *   [template_log_real_run.csv](results/template_log_real_run.csv) - Raw benchmark results for Qwen3 and Qwen2.5.
+    *   [template_log_real_run_all.csv](results/template_log_real_run_all.csv) - Backfilled final results for Qwen3, Qwen2.5, Phi-4, and Gemma-3 (includes perplexity and quality warnings).
+    *   [template_log_real_run_extra.csv](results/template_log_real_run_extra.csv) - Raw benchmark results for Phi-4 and Gemma-3.
+    *   [template_log_real_run_mistral_final.csv](results/template_log_real_run_mistral_final.csv) - Raw benchmark results for Mistral 7B.
+    *   [template_log_real_run_mistral_final_all.csv](results/template_log_real_run_mistral_final_all.csv) - Backfilled final results for Mistral 7B.
     *   [plots/](results/plots) - Trade-off charts (latency vs context, Pareto frontiers, VRAM usage).
 *   [scripts/](scripts) - Core automated scripts and helper modules.
     *   [run_baseline.py](scripts/run_baseline.py) - Script to execute inference and measure performance.
-    *   [plot_results.py](scripts/plot_results.py) - Script to generate Pareto-optimal charts.
+    *   [plot_results.py](scripts/plot_results.py) - Script to generate Pareto-optimal charts and aggregate CSV results.
     *   [validate_testset.py](scripts/validate_testset.py) - Check json schema and length validations.
     *   [nemo_backend.py](scripts/nemo_backend.py) - NeMo Curator wrapper backend.
     *   [download_datasets.py](scripts/download_datasets.py) - HF downloader for VMLU & VTSNLP.
     *   [clean_with_nemo.py](scripts/clean_with_nemo.py) - Text cleaning script.
     *   [build_long_context_testset.py](scripts/build_long_context_testset.py) - Creates canonical JSONs.
     *   [run_mock_grid.py](scripts/run_mock_grid.py) - Mock baseline runner for quick validation.
-    *   [test/](scripts/test) - Actual execution files (`run_real_benchmark.py`, `run_real_grid.py`, `generate_real_analysis.py`).
+    *   [compute_all_ppl.py](scripts/compute_all_ppl.py) - Multi-model perplexity wrapper script.
+    *   [compute_ppl_offline.py](scripts/compute_ppl_offline.py) - Offline perplexity calculator for a single model.
+    *   [test/](scripts/test) - Actual execution files:
+        *   [run_real_grid.py](scripts/test/run_real_grid.py) - Standard models grid search orchestrator.
+        *   [run_real_benchmark.py](scripts/test/run_real_benchmark.py) - Single execution config runner.
+        *   [run_real_grid_extra.py](scripts/test/run_real_grid_extra.py) - Extra models (Phi-4, Gemma-3) grid search orchestrator.
+        *   [run_real_benchmark_extra.py](scripts/test/run_real_benchmark_extra.py) - Execution config runner for extra models.
+        *   [run_mistral_optimized.py](scripts/test/run_mistral_optimized.py) - Load-once optimized orchestrator for Mistral 7B.
+        *   [run_mistral_single_method.py](scripts/test/run_mistral_single_method.py) - Load-once single method worker for Mistral 7B.
+        *   [generate_real_analysis.py](scripts/test/generate_real_analysis.py) - Real results aggregator and analyzer.
 
 ---
 
@@ -104,9 +118,37 @@ This repository contains the official implementation, datasets, experimental con
     ```bash
     python scripts/run_mock_grid.py
     ```
+*   **Run Real GPU Grid Search (Standard Models - Qwen3, Llama 3.1, Mistral, Qwen2.5):**
+    ```bash
+    python scripts/test/run_real_grid.py --hf_token "your_hf_token"
+    ```
+*   **Run Real GPU Grid Search (Extra Models - Phi-4, Gemma-3):**
+    ```bash
+    python scripts/test/run_real_grid_extra.py --hf_token "your_hf_token"
+    ```
+*   **Run Load-Once Optimized Benchmark (Mistral 7B):**
+    ```bash
+    python scripts/test/run_mistral_optimized.py --hf_token "your_hf_token"
+    ```
+
+### Perplexity (PPL) Offline Calculation & Backfilling
+*   **Backfill PPL for Standard & Extra model logs:**
+    ```bash
+    python scripts/compute_all_ppl.py \
+      --input_csv results/template_log_real_run.csv \
+      --output_csv results/template_log_real_run_all.csv \
+      --hf_token "your_hf_token"
+    ```
+*   **Backfill PPL for Mistral logs:**
+    ```bash
+    python scripts/compute_all_ppl.py \
+      --input_csv results/template_log_real_run_mistral_final.csv \
+      --output_csv results/template_log_real_run_mistral_final_all.csv \
+      --hf_token "your_hf_token"
+    ```
 
 ### Visualization & Plots
-*   **Generate Pareto & latency graphs:**
+*   **Generate Pareto & latency graphs (compiles all files to all_results_compiled.csv & summary):**
     ```bash
     python scripts/plot_results.py
     ```

@@ -1,4 +1,4 @@
-﻿# Hướng dẫn Phát triển (Development Guidelines)
+# Hướng dẫn Phát triển (Development Guidelines)
 
 Tài liệu này đóng vai trò là cẩm nang phát triển và tài liệu onboarding kỹ thuật cho dự án **Vietnamese LLM KV Cache Benchmarking**. Nó chi tiết hóa việc thiết lập môi trường, chiến lược phân nhánh Git, các quy ước lập trình, quy trình kiểm thử và các tiêu chuẩn đảm bảo chất lượng.
 
@@ -9,8 +9,8 @@ Tài liệu này đóng vai trò là cẩm nang phát triển và tài liệu on
 Chúng tôi tập trung vào đánh giá các kỹ thuật nén KV Cache trên các mô hình ngôn ngữ lớn (LLM) tiếng Việt sử dụng cấu trúc công nghệ sau:
 *   **Core (Lõi)**: Python 3.10, PyTorch, vLLM, llama.cpp, HQQ.
 *   **Xử lý dữ liệu (Data Processing)**: NVIDIA NeMo Curator, Hugging Face `datasets` & `transformers`.
-*   **Hạ tầng (Infrastructure)**: RunPod / Vast.ai (Cần GPUs có bộ nhớ lớn $\ge$ 24GB VRAM như RTX 3090/4090 hoặc L4).
-*   **Giám sát & Phân tích (Monitoring & Analysis)**: `pynvml` (giám sát chỉ số GPU), `pandas` (tổng hợp dữ liệu thống kê), `matplotlib`/`plotly` (trực quan hóa kết quả).
+*   **Hạ tầng (Infrastructure)**: RunPod / Vast.ai Cloud GPU. Cụ thể nhóm sử dụng các máy chủ thuê cấu hình **RTX 3090/4090 (24GB VRAM)** để chạy thử nghiệm (smoke/preflight) và máy chủ cao cấp **A100 80GB VRAM** để thực hiện đợt chạy Grid Search chính thức và đo Perplexity offline.
+*   **Giám sát & Phân tích (Monitoring & Analysis)**: `pynvml` (giám sát chỉ số GPU qua background sampler `VRAMMonitor`), `pandas` (tổng hợp dữ liệu thống kê), `matplotlib`/`plotly` (trực quan hóa kết quả).
 
 Đối với các thành phần chi tiết của hệ thống, vui lòng tham khảo [Tài liệu Kiến trúc Hệ thống](docs/sys-arch.md).
 
@@ -30,22 +30,54 @@ Chúng tôi tập trung vào đánh giá các kỹ thuật nén KV Cache trên c
 git clone https://github.com/darktheDE/viet-llm-kvcache-benchmark.git
 cd viet-llm-kvcache-benchmark
 
-# Tạo môi trường Conda mới
-conda create -n dbml_project python=3.10 -y
-conda activate dbml_project
+# Tạo môi trường Conda mới với tên viet-llm
+conda create -n viet-llm python=3.10 -y
+conda activate viet-llm
 
 # Cài đặt các thư viện phụ thuộc của dự án
 pip install -r requirements.txt
 ```
 
-### 2.3 Docker Data Pipeline
-Pipeline tiền xử lý văn bản và xây dựng bộ kiểm thử (test-suite) được chạy bên trong môi trường Docker tương thích với CPU sử dụng NVIDIA NeMo Curator:
+### 2.3 Quy trình chạy trên Docker Local (Data Pipeline & Validation)
+Nhóm sử dụng Docker Local để chuẩn bị dữ liệu tiếng Việt thời sự, làm sạch và đóng gói testset mà không bắt buộc có GPU:
 ```bash
-# Build Docker image
+# 1. Build Docker image
 docker compose build
 
-# Khởi chạy một shell tương tác bên trong container data-pipeline
+# 2. Khởi chạy shell tương tác bên trong container data-pipeline
 docker compose run --rm data-pipeline bash
+
+# 3. Chạy toàn bộ pipeline chuẩn bị dữ liệu (Bên trong container)
+python scripts/download_datasets.py --max-records-per-source 5000
+python scripts/clean_with_nemo.py --input-dir data/raw --output data/processed/cleaned.jsonl --backend auto
+python scripts/build_long_context_testset.py --input data/processed/cleaned.jsonl --output datasets/test_set_small.json
+python scripts/validate_testset.py --input datasets/test_set_small.json --schema long_context
+python scripts/validate_testset.py --input datasets/test_set_tasks_small.json --schema task
+```
+
+### 2.4 Quy trình chạy thực tế trên Server thuê (RunPod / Vast.ai)
+Đối với việc thực thi grid search lớn và nén KV cache, nhóm thuê máy chủ **A100 80GB** (hoặc RTX 3090/4090 làm smoke test) trên RunPod/Vast.ai:
+```bash
+# Kích hoạt môi trường conda
+conda activate viet-llm
+
+# 1. Chạy Grid Search cho các model tiêu chuẩn (Qwen3, Qwen2.5, Mistral, Llama 3.1)
+python scripts/test/run_real_grid.py --hf_token "your_hf_token"
+
+# 2. Chạy Grid Search cho các model phụ/thử nghiệm (Phi-4, Gemma-3)
+python scripts/test/run_real_grid_extra.py --hf_token "your_hf_token"
+
+# 3. Chạy tối ưu hóa riêng cho Mistral 7B (Load model 1 lần duy nhất cho mỗi phương pháp nén)
+python scripts/test/run_mistral_optimized.py --hf_token "your_hf_token"
+
+# 4. Tính toán Perplexity offline và điền (backfill) kết quả
+python scripts/compute_all_ppl.py \
+  --input_csv results/template_log_real_run.csv \
+  --output_csv results/template_log_real_run_all.csv \
+  --hf_token "your_hf_token"
+
+# 5. Vẽ biểu đồ Pareto và tổng hợp kết quả cuối cùng
+python scripts/plot_results.py
 ```
 
 ---

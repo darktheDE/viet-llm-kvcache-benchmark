@@ -105,10 +105,14 @@ Experiments are conducted on standard, high-quality Vietnamese datasets designed
 *   [paper/](paper/) - LaTeX source code for the English research paper draft.
 *   [results/](results/) - Logged experiment outputs and visualization charts.
     *   [template_log.csv](results/template_log.csv) - Uniform logging template for execution records.
+    *   [template_log_real_run_all.csv](results/template_log_real_run_all.csv) - Compiled and backfilled real GPU benchmark results for Qwen3, Qwen2.5, Phi-4, Gemma-3.
+    *   [template_log_real_run_mistral_final_all.csv](results/template_log_real_run_mistral_final_all.csv) - Compiled and backfilled real GPU benchmark results for Mistral 7B.
     *   [plots/](results/plots/) - Trade-off charts (Memory vs. PPL, Latency vs. Context).
 *   [scripts/](scripts/) - Automated run scripts, instrumentation, and plotting tools.
     *   [run_baseline.py](scripts/run_baseline.py) - Script to execute inference and measure performance metrics.
-    *   [plot_results.py](scripts/plot_results.py) - Script to generate trade-off visualizations.
+    *   [plot_results.py](scripts/plot_results.py) - Script to generate trade-off visualizations and aggregate all results.
+    *   [compute_all_ppl.py](scripts/compute_all_ppl.py) - Automates perplexity backfilling using HF reference models.
+    *   [test/](scripts/test/) - GPU grid search orchestrators and benchmark runners (e.g., standard, extra, and optimized Mistral loading scripts).
 
 ---
 
@@ -123,8 +127,8 @@ cd viet-llm-kvcache-benchmark
 ### 2. Set Up Conda Environment
 Ensure you have a CUDA-enabled GPU (typically requiring 16-24 GB VRAM for local execution).
 ```bash
-conda create -n dbml_project python=3.10 -y
-conda activate dbml_project
+conda create -n viet-llm python=3.10 -y
+conda activate viet-llm
 ```
 
 ### 3. Install Requirements
@@ -250,6 +254,7 @@ If GPU-accelerated NeMo Curator text modules are needed, update `requirements.tx
 
 ## Quick Start
 
+### 1. Run a Local Baseline (CPU/GPU)
 To run a baseline measurement with uncompressed Full KV Cache on a selected model, execute:
 
 ```bash
@@ -266,6 +271,47 @@ The script will automatically measure and append the following fields to your lo
 *   `latency_ms_per_token`
 *   `throughput_tokens_per_s`
 *   `perplexity`
+
+### 2. Run Real GPU Grid Searches (Server Environment)
+To run the automated grid search benchmark across models, methods, and context lengths:
+
+*   **Standard models (Qwen3, Qwen2.5, Mistral, Llama 3.1):**
+    ```bash
+    python scripts/test/run_real_grid.py --hf_token "your_hf_token"
+    ```
+*   **Extra models (Phi-4, Gemma-3):**
+    ```bash
+    python scripts/test/run_real_grid_extra.py --hf_token "your_hf_token"
+    ```
+*   **Optimized Mistral 7B Grid Search (Load-Once per method):**
+    ```bash
+    python scripts/test/run_mistral_optimized.py --hf_token "your_hf_token"
+    ```
+
+### 3. Calculate and Backfill Perplexity Offline
+After the GPU benchmarks save generated outputs to JSONL files, compute the Perplexity using an uncompressed reference model:
+
+*   **Standard & Extra models:**
+    ```bash
+    python scripts/compute_all_ppl.py \
+      --input_csv results/template_log_real_run.csv \
+      --output_csv results/template_log_real_run_all.csv \
+      --hf_token "your_hf_token"
+    ```
+*   **Mistral 7B:**
+    ```bash
+    python scripts/compute_all_ppl.py \
+      --input_csv results/template_log_real_run_mistral_final.csv \
+      --output_csv results/template_log_real_run_mistral_final_all.csv \
+      --hf_token "your_hf_token"
+    ```
+
+### 4. Compile Results and Generate Plots
+To aggregate all CSV files in the `results` folder and generate Pareto frontier and trade-off visualizations:
+```bash
+python scripts/plot_results.py
+```
+This script will produce compiled CSV results and save plot images under the `results/plots/` directory.
 
 ---
 
@@ -315,7 +361,7 @@ This project is a collaborative effort by **Group 1**:
 | **Nguyen Ho Phat** | Data & Analysis | Dataset curator, NeMo Curator Preprocessing lead |
 | **Huynh Huu Huy** | Data & Analysis | Small test set curation, prompt formatting |
 | **Huynh Ngoc Thach** | Data & Analysis | Metric plotting script engineer |
-| **Nguyen Dang Quoc Anh** | Research & Scope | Literature review, theoretical framework definition, Project Owner |
+| **Nguyen Dang Quoc Anh** | Research | Literature review, theoretical framework definition, Project Owner|
 | **Phan Trong Phu** | Writing & Coordination | Reference indexing, paper drafting and review |
 
 ---

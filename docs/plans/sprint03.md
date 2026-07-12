@@ -29,7 +29,7 @@
 
 #### 5. Tiêu chuẩn hoàn thành (Definition of Done - DoD)
 *   [ ] 100% các mốc ngữ cảnh lớn được thử nghiệm tối đa, các mốc không thể chạy được đã được gắn nhãn "OOM" rõ ràng.
-*   [ ] Không còn hiện tượng script bị treo hoặc crash ngầm giữa chừng không rõ nguyên nhân trong quá trình benchmark.
+*   [x] Không còn hiện tượng script bị treo hoặc crash ngầm giữa chừng không rõ nguyên nhân trong quá trình benchmark.
 
 ---
 
@@ -63,8 +63,8 @@ Viết script Python tự động gom cụm tất cả các file CSV số liệu
 *   Tối thiểu 4 tệp tin đồ thị định dạng ảnh chất lượng cao (PNG hoặc PDF vector) trong thư mục `results/plots/`.
 
 #### 5. Tiêu chuẩn hoàn thành (Definition of Done - DoD)
-*   [ ] Script `plot_results.py` thực thi thành công không lỗi, tự động xuất ra toàn bộ các biểu đồ khi chạy.
-*   [ ] Các biểu đồ hiển thị rõ ràng, ghi chú đầy đủ nhãn trục (axis labels), đơn vị đo (MB, ms/token, tokens/s, PPL, %, tokens/s/MB) và các chú thích phân biệt rõ ràng giữa các phương pháp nén.
+*   [x] Script `plot_results.py` thực thi thành công không lỗi, tự động xuất ra toàn bộ các biểu đồ khi chạy.
+*   [x] Các biểu đồ hiển thị rõ ràng, ghi chú đầy đủ nhãn trục (axis labels), đơn vị đo (MB, ms/token, tokens/s, PPL, %, tokens/s/MB) và các chú thích phân biệt rõ ràng giữa các phương pháp nén.
 
 ---
 
@@ -73,7 +73,7 @@ Viết script Python tự động gom cụm tất cả các file CSV số liệu
 *   **Title:** `[RESEARCH] Biên soạn Báo cáo Phân tích Kết quả (Results & Discussion) & Nhận xét Mô hình`
 *   **Module:** Phase 3: Phân tích & xử lý số liệu
 *   **Sprint:** Sprint 3 (Week 5-6)
-*   **Team / Role:** Research & Scope (Nguyen Dang Quoc Anh - Lead) / Writing & Coordination (Phan Trong Phu - Results Writing Support)
+*   **Team / Role:** Research (Nguyen Dang Quoc Anh) / Writing & Coordination (Phan Trong Phu - Results Writing Support)
 *   **Priority:** High
 
 #### 1. Mô tả chi tiết Task (Description)
