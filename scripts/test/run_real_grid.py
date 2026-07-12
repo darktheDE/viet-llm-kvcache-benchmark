@@ -17,7 +17,6 @@ import os
 import sys
 
 MODELS = [
-    "gemma4:e4b-it-bf16",
     "qwen3:8b-fp16",
     "llama3.1:8b-instruct-fp16",
     "mistral:7b-instruct-v0.3-fp16",
@@ -80,11 +79,8 @@ def main():
                     "--output", OUTPUT_CSV,
                     "--num_samples", "5",
                     "--max_new_tokens", "128",
+                    "--dataset", os.path.join(SCRIPT_DIR, "../../datasets/test_set_small.json"),
                 ]
-<<<<<<< HEAD
-                hf_token = os.getenv("HF_TOKEN") or os.getenv("HUGGING_FACE_HUB_TOKEN")
-=======
->>>>>>> main
                 if hf_token:
                     cmd.extend(["--hf_token", hf_token])
 

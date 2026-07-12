@@ -50,7 +50,6 @@ except ImportError:
 # 2. Danh sách Model và Cấu hình
 # ============================================================
 SUPPORTED_MODELS = [
-    "gemma4:e4b-it-bf16",
     "qwen3:8b-fp16",
     "llama3.1:8b-instruct-fp16",
     "mistral:7b-instruct-v0.3-fp16",
@@ -58,7 +57,6 @@ SUPPORTED_MODELS = [
 ]
 
 OLLAMA_TO_HF_MODEL = {
-    "gemma4:e4b-it-bf16": "google/gemma-4-E4B-it",
     "qwen3:8b-fp16": "Qwen/Qwen3-8B",
     "llama3.1:8b-instruct-fp16": "meta-llama/Llama-3.1-8B-Instruct",
     "mistral:7b-instruct-v0.3-fp16": "mistralai/Mistral-7B-Instruct-v0.3",
@@ -113,9 +111,10 @@ def configure_model_access(model_name, hf_token=None, pull_ollama=False):
 KV_CACHE_DTYPE_MAP = {
     "FP16": "auto",
     "FP8": "fp8",
-    "HQQ": "hqq_4bit",
-    "PolarQuant": "polarquant_4bit",
-    "TurboQuant": "turboquant_4bit_nc",
+    "HQQ": "int4_per_token_head",       # hqq_4bit not in vLLM 0.25; closest alternative
+    "PolarQuant": "fp8",                 # polarquant_4bit not in vLLM 0.25; fallback to fp8
+    "TurboQuant": "turboquant_4bit_nc",  # Built-in TurboQuant with 4-bit, no compensation
+    "TurboQuant_3bit": "turboquant_3bit_nc",  # Extra: 3-bit TurboQuant variant
 }
 
 
@@ -129,8 +128,8 @@ def parse_args():
         choices=SUPPORTED_MODELS, help="Ten mo hinh can benchmark"
     )
     parser.add_argument(
-        "--dataset", type=str, default="../../datasets/test_set_small.json",
-        help="Duong dan den tap du lieu"
+        "--dataset", type=str, default=None,
+        help="Duong dan den tap du lieu (mac dinh: datasets/test_set_small.json tu goc project)"
     )
     parser.add_argument(
         "--context_length", type=int, default=8000,
@@ -155,15 +154,11 @@ def parse_args():
     )
     parser.add_argument(
         "--hf_token", type=str, default=None,
-<<<<<<< HEAD
         help="Hugging Face access token; mac dinh doc tu HF_TOKEN/HUGGING_FACE_HUB_TOKEN"
     )
     parser.add_argument(
-        "--pull_ollama", action="store_true",
-        help="Neu model la alias Ollama, chay `ollama pull` truoc khi benchmark"
-=======
-        help="HuggingFace access token cho model gated (hoac dat env HF_TOKEN)"
->>>>>>> main
+        "--pull_ollama", action="store_true", default=False,
+        help="Pull Ollama model before running (default: False, use HuggingFace)"
     )
     return parser.parse_args()
 
@@ -303,18 +298,41 @@ def run_real_benchmark(args):
 
     # --- Bước 1: Nạp Dataset ---
     print("[1/5] Nap du lieu tu dataset...")
+    # Resolve dataset path: absolute or relative to project root
+    if args.dataset is None:
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        args.dataset = os.path.join(script_dir, "../../datasets/test_set_small.json")
+    if not os.path.isabs(args.dataset):
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        args.dataset = os.path.join(script_dir, args.dataset)
+    print(f"  -> Dataset path: {args.dataset}")
     try:
-        with open(args.dataset, "r", encoding="utf-8") as f:
+        with open(args.dataset, "r", encoding="utf-8-sig") as f:
             data = json.load(f)
             
         if isinstance(data, dict) and "samples" in data:
-            samples = data["samples"]
+            all_samples = data["samples"]
         elif isinstance(data, list):
-            samples = data
+            all_samples = data
         else:
             raise ValueError("Invalid dataset format. Expected list or dict with 'samples' key.")
-            
-        prompts = [item["text"] for item in samples[:args.num_samples]]
+
+        # Filter samples by context_group matching requested context_length
+        context_group_map = {4000: "4k", 8000: "8k", 16000: "16k", 32000: "32k"}
+        target_group = context_group_map.get(args.context_length)
+        if target_group:
+            filtered = [s for s in all_samples if s.get("context_group") == target_group]
+            if filtered:
+                samples = filtered
+                print(f"  -> Filtered to {len(samples)} samples with context_group={target_group}")
+            else:
+                print(f"  -> Canh bao: Khong co sample cho context_group={target_group}, dung tat ca")
+                samples = all_samples
+        else:
+            samples = all_samples
+
+        samples = samples[:args.num_samples]
+        prompts = [item["text"] for item in samples]
         print(f"  -> Da nap {len(prompts)} mau van ban.")
     except FileNotFoundError:
         print(f"  LOI: Khong tim thay file {args.dataset}")
@@ -346,21 +364,20 @@ def run_real_benchmark(args):
         )
         print(f"  -> vLLM repo: {vllm_model}")
 
+        # max_model_len needs room for prompt tokens + generated tokens + buffer
+        # Sample actual_tokens may exceed target context_length due to tokenizer differences
+        max_len = args.context_length + args.max_new_tokens + 1024
+        print(f"  -> max_model_len={max_len} (ctx={args.context_length} + new={args.max_new_tokens} + buf=4096)")
         llm = LLM(
             model=vllm_model,
             kv_cache_dtype=kv_dtype,
-            max_model_len=args.context_length,
+            max_model_len=max_len,
             gpu_memory_utilization=0.98,
-            # max_num_batched_tokens phải >= max_model_len; nếu không vLLM sẽ lỗi
-            # khi xử lý các prompt dài ở mốc 8K/16K.
-            max_num_batched_tokens=max(args.context_length, 4096),
+            # max_num_batched_tokens phai >= max_model_len
+            max_num_batched_tokens=max(max_len, 4096),
             max_num_seqs=2,
             trust_remote_code=True,
-<<<<<<< HEAD
             hf_token=os.getenv("HF_TOKEN") or os.getenv("HUGGING_FACE_HUB_TOKEN"),
-=======
-            hf_token=hf_token,
->>>>>>> main
         )
         print(f"  -> Mo hinh da san sang tren GPU.")
     except Exception as e:
