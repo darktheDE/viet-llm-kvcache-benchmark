@@ -17,3 +17,7 @@ jupyter
 ipykernel
 packaging>=22.0
 nemo-curator[text-cpu]==1.2.0
+vllm
+pynvml
+torch
+psutil
