@@ -33,7 +33,7 @@ def parse_args() -> argparse.Namespace:
         description="Compute and backfill PPL for all models in a benchmark CSV."
     )
     parser.add_argument("--input_csv", required=True, help="Raw benchmark CSV to backfill.")
-    parser.add_argument("--input_jsonl", required=True, help="JSONL containing prompt/generated text.")
+    parser.add_argument("--input_jsonl", default=None, help="Optional fallback JSONL containing prompt/generated text.")
     parser.add_argument("--output_csv", required=True, help="Output CSV path.")
     parser.add_argument("--device", default="cuda", help="cuda, cpu, or auto.")
     parser.add_argument("--dtype", default="bf16", choices=["bf16", "fp16", "fp32"])
@@ -70,14 +70,10 @@ def write_csv_rows(path: str | Path, fieldnames: list[str], rows: list[dict[str,
 def main() -> None:
     args = parse_args()
     input_csv = Path(args.input_csv)
-    input_jsonl = Path(args.input_jsonl)
     output_csv = Path(args.output_csv)
 
     if not input_csv.exists():
         print(f"Error: Input CSV {input_csv} does not exist.")
-        sys.exit(1)
-    if not input_jsonl.exists():
-        print(f"Error: Input JSONL {input_jsonl} does not exist.")
         sys.exit(1)
 
     if output_csv.exists() and not args.overwrite:
@@ -110,6 +106,37 @@ def main() -> None:
                 print(f"Warning: No uncompressed reference model mapped for model '{model}'. Skipping.")
                 continue
 
+            # Resolve the JSONL path for this model group
+            model_jsonl = None
+            first_row = rows[0]
+            row_output_path = first_row.get("output_path", "")
+            
+            if row_output_path:
+                # Try relative to the input CSV directory first
+                resolved_path = (Path(args.input_csv).parent / row_output_path).resolve()
+                if not resolved_path.exists():
+                    # Try relative to the repository root
+                    resolved_path = (REPO_ROOT.parent / row_output_path).resolve()
+                
+                # Check absolute directly
+                if not resolved_path.exists() and Path(row_output_path).exists():
+                    resolved_path = Path(row_output_path).resolve()
+
+                if resolved_path.exists():
+                    model_jsonl = resolved_path
+                    print(f"  -> Detected JSONL from output_path column: {model_jsonl}")
+
+            if not model_jsonl:
+                if args.input_jsonl:
+                    fallback_path = Path(args.input_jsonl).resolve()
+                    if fallback_path.exists():
+                        model_jsonl = fallback_path
+                        print(f"  -> Using fallback CLI JSONL: {model_jsonl}")
+                
+            if not model_jsonl:
+                print(f"Warning: Could not resolve prompt/generation JSONL file for model '{model}' (no output_path in CSV or input_jsonl does not exist). Skipping.")
+                continue
+
             print(f"\nProcessing model '{model}' with reference model '{ref_model}'...")
 
             # Write temporary input CSV containing only this model's rows
@@ -130,7 +157,7 @@ def main() -> None:
                 sys.executable,
                 str(REPO_ROOT / "compute_ppl_offline.py"),
                 "--input_csv", temp_in.name,
-                "--input_jsonl", str(input_jsonl),
+                "--input_jsonl", str(model_jsonl),
                 "--output_csv", temp_out.name,
                 "--reference_model", ref_model,
                 "--device", args.device,
