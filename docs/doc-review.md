@@ -1,4 +1,4 @@
-# BÁO CÁO ĐÁNH GIÁ TÀI LIỆU DỰ ÁN & ĐỀ XUẤT QUY CHUẨN WORKFLOW
+﻿# BÁO CÁO ĐÁNH GIÁ TÀI LIỆU DỰ ÁN & ĐỀ XUẤT QUY CHUẨN WORKFLOW
 
 Dự án: **Benchmarking TurboQuant and KV Cache Compression Methods on Vietnamese LLMs**
 Môn học: **Big Data Applications: Machine Learning at Scale (DBML434077)**
@@ -10,13 +10,18 @@ Môn học: **Big Data Applications: Machine Learning at Scale (DBML434077)**
 Qua quá trình thực hiện tìm kiếm và kiểm chứng thông tin (Grounding Search) trên Google và arXiv, chúng tôi phát hiện và làm rõ một số điểm sau trong tài liệu hiện tại:
 
 ### A. Độ chính xác của các tài liệu tham khảo (References)
-*   **Sai sót trong mã arXiv:** Trong file [sprint01.md](file:///d:/HCMUTE/HCMUTE_HK6/BDML/final/viet-llm-kvcache-benchmark/docs/sprint01.md#L55), tài liệu trích dẫn `KV-CoRE: Benchmarking Data-Dependent Low-Rank Compressibility of KV-Caches in LLMs` được ghi là `arXiv:2602.04142`. 
+*   **Sai sót trong mã arXiv:** Trong file [sprint01.md](plans/sprint01.md#L55), tài liệu trích dẫn `KV-CoRE: Benchmarking Data-Dependent Low-Rank Compressibility of KV-Caches in LLMs` được ghi là `arXiv:2602.04142`. 
     *   *Thực tế kiểm chứng:* Mã `arXiv:2602.04142` thuộc về bài báo *"JSynFlow: Japanese Synthesised Flowchart Visual Question Answering Dataset built with Large Language Models"*.
     *   *Mã đúng:* Bài báo **`KV-CoRE`** có mã arXiv chính xác là **`arXiv:2602.05929`**. Cần cập nhật lại thông tin này để tránh lỗi trích dẫn học thuật trong bài báo tiếng Anh (Paper EN).
 *   **Tính xác thực của TurboQuant & PolarQuant:**
     *   **TurboQuant** (`arXiv:2504.19874`): Được phát triển bởi các nhà nghiên cứu từ Google Research và NYU, công bố tại ICLR 2026. Thuật toán kết hợp phép biến đổi cực (Polar Transformation) để phân phối tọa độ đồng đều và lượng tử hóa Lloyd-Max, cùng với việc sửa sai số bằng 1-bit QJL (Quantized Johnson-Lindenstrauss).
     *   **PolarQuant** (`arXiv:2502.02617`): Được KAIST, Google Research và Yale nghiên cứu, nén KV Cache thông qua việc chuyển đổi vector sang tọa độ cực giúp loại bỏ nhu cầu lưu trữ tham số chuẩn hóa (scale và zero-points) theo block.
     *   *Tính khả thi:* Cả hai phương pháp này đều là Post-Training Quantization (PTQ) rất mới (đầu năm 2025/2026), có mã nguồn mở và đang được tích hợp/thử nghiệm trên các framework suy luận lớn.
+*   **Trạng thái cập nhật (Đã hoàn thành):** 
+    *   Mã arXiv của `KV-CoRE` đã được sửa đổi thành công thành `arXiv:2602.05929` trong tất cả tài liệu (`README.md`, `docs/plans/sprint01.md`, `docs/related_works.md`).
+    *   Thông tin tác giả của `PolarQuant` và `TurboQuant` được cập nhật chính xác.
+    *   Tệp cơ sở dữ liệu trích dẫn `paper/references.bib` đã được khởi tạo để phục vụ cho bản thảo LaTeX.
+    *   Các liên kết tương đối bị hỏng trong `docs/README.md` đã được sửa và định hướng lại chính xác.
 
 ---
 
@@ -32,7 +37,7 @@ Qua quá trình thực hiện tìm kiếm và kiểm chứng thông tin (Groundi
     *   *Vấn đề:* TurboQuant và PolarQuant yêu cầu các nhân CUDA/Triton tùy biến để tích hợp vào vLLM. Phiên bản vLLM và CUDA trên RunPod/Vast.ai phải hoàn toàn tương thích với repo `turboquant-vllm`. Việc cài đặt bản build từ source của các kernel này rất dễ gặp lỗi xung đột compiler.
     *   *Giải pháp:* Cần yêu cầu team Kỹ thuật chạy thử nghiệm việc compile các kernel này ngay từ tuần đầu tiên trên môi trường Cloud GPU để tránh tắc nghẽn ở các tuần sau.
 2.  **Nguy cơ Out-Of-Memory (OOM) ở mốc ngữ cảnh lớn (16k - 32k tokens):**
-    *   *Vấn đề:* Với mô hình 7B/8B (như Llama-3.1-8B hoặc Qwen2.5-7B) chạy trên 1 GPU 24GB VRAM (như RTX 4090), khi context length tăng lên 32k, KV Cache sẽ phình to rất nhanh. Kể cả khi có nén, pha prefill cho prompt dài 32k vẫn tiêu tốn rất nhiều kích thước activation memory.
+    *   *Vấn đề:* Với mô hình 7B/8B (như qwen3:8b hoặc Qwen2.5-7B) chạy trên 1 GPU 24GB VRAM (như RTX 4090), khi context length tăng lên 32k, KV Cache sẽ phình to rất nhanh. Kể cả khi có nén, pha prefill cho prompt dài 32k vẫn tiêu tốn rất nhiều kích thước activation memory.
     *   *Giải pháp:* Team Tech cần cấu hình vLLM một cách phòng thủ (ví dụ: bật FlashAttention-2, giảm `max_num_seqs=1`, sử dụng `--gpu-memory-utilization 0.95` và chia block size phù hợp).
 3.  **Độ dài của Báo cáo tiếng Việt (>= 30 trang):**
     *   *Vấn đề:* Đề tài benchmark thường tập trung sâu vào số liệu thực nghiệm. Để viết được $\ge 30$ trang báo cáo tiếng Việt mà không bị loãng, nhóm cần bổ sung rất nhiều hình vẽ chi tiết, giải thích sâu về toán học lượng tử hóa vector, phân tích từng case study bị lỗi ( gibberish, repetition loops) và so sánh chi tiết giữa các mô hình.

@@ -1,0 +1,7 @@
+FROM qwen2.5:7b-instruct-fp16
+
+# Mở rộng context window lên 32K để đủ cho benchmark ở mốc 4k/8k/16k token
+# Qwen2.5 7B hỗ trợ native 128K nhưng Ollama cần khai báo tường minh
+PARAMETER num_ctx 32768
+
+SYSTEM ""

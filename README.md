@@ -65,11 +65,13 @@ The benchmark pipeline consists of three core stages:
 ## Benchmark Scope
 
 ### Models
-We evaluate the methods across **4 to 6 Vietnamese LLMs** (including foundational and instruction-tuned variants):
-*   `PhoGPT-7B` (or equivalent foundational Vietnamese models)
-*   `Qwen-VN` (Vietnamese adapted variants)
-*   `Llama-VN` (Vietnamese adapted variants)
-*   `URA-LLaMa-3-8B` (Vietnamese LLM developed by ura-hcmut)
+We evaluate the methods across **4 Vietnamese/multilingual LLMs** running via Ollama at full precision (FP16/BF16):
+*   `qwen3:8b-fp16` (Qwen3 8B FP16 — Alibaba, SOTA multilingual baseline)
+*   `llama3.1:8b-instruct-fp16` (Llama 3.1 8B Instruct FP16 — Meta AI, open-source baseline)
+*   `mistral:7b-instruct-v0.3-fp16` (Mistral 7B Instruct v0.3 FP16 — Mistral AI, GQA architecture baseline)
+*   `qwen2.5:7b-instruct-fp16` (Qwen2.5 7B Instruct FP16 — Alibaba, multilingual baseline)
+
+> **Scope note:** `gemma4:e4b-it-bf16` has been removed from the benchmark suite because the team determined it already ships with strong built-in optimization/compression behavior, making it a less fair comparison target for this study.
 
 ### Compression Methods
 *   **Baseline:** Full KV Cache (uncompressed, BF16/FP16)
@@ -95,21 +97,18 @@ Experiments are conducted on standard, high-quality Vietnamese datasets designed
 
 ## Project Structure
 
-```text
-.
-├── configs/                # Configuration files for models and compression frameworks
-├── datasets/               # Standardized datasets and small test suite (JSON/JSONL)
-│   ├── test_set_small.json # 10-20 sample test suite spanning 4k, 8k, 16k contexts
-│   └── dataset_brief.md    # Data definitions and guidelines for the technical team
-├── experiments/            # Hardware-specific execution configurations and environment logs
-├── paper/                  # LaTeX source code for the English research paper draft
-├── results/                # Logged experiment outputs and visualization charts
-│   ├── template_log.csv    # Uniform logging template for execution records
-│   └── plots/              # Trade-off charts (Memory vs. PPL, Latency vs. Context)
-└── scripts/                # Automated run scripts, instrumentation, and plotting tools
-    ├── run_baseline.py     # Script to execute inference and measure performance metrics
-    └── plot_results.py     # Script to generate trade-off visualizations
-```
+*   [configs/](configs/) - Model-specific & engine execution configurations.
+*   [datasets/](datasets/) - Standardized datasets and small test suite (JSON/JSONL).
+    *   [test_set_small.json](datasets/test_set_small.json) - 10-20 sample test suite spanning 4k, 8k, 16k contexts.
+    *   [dataset_brief.md](datasets/dataset_brief.md) - Data definitions and guidelines.
+*   [experiments/](experiments/) - Hardware-specific execution configurations and environment logs.
+*   [paper/](paper/) - LaTeX source code for the English research paper draft.
+*   [results/](results/) - Logged experiment outputs and visualization charts.
+    *   [template_log.csv](results/template_log.csv) - Uniform logging template for execution records.
+    *   [plots/](results/plots/) - Trade-off charts (Memory vs. PPL, Latency vs. Context).
+*   [scripts/](scripts/) - Automated run scripts, instrumentation, and plotting tools.
+    *   [run_baseline.py](scripts/run_baseline.py) - Script to execute inference and measure performance metrics.
+    *   [plot_results.py](scripts/plot_results.py) - Script to generate trade-off visualizations.
 
 ---
 
@@ -117,8 +116,8 @@ Experiments are conducted on standard, high-quality Vietnamese datasets designed
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/darktheDE/vietnamese-llm-benchmark.git
-cd vietnamese-llm-benchmark
+git clone https://github.com/darktheDE/viet-llm-kvcache-benchmark.git
+cd viet-llm-kvcache-benchmark
 ```
 
 ### 2. Set Up Conda Environment
@@ -130,7 +129,7 @@ conda activate dbml_project
 
 ### 3. Install Requirements
 ```bash
-pip install -r scripts/requirements.txt
+pip install -r requirements.txt
 # Install framework-specific packages (e.g., vllm, llama-cpp-python, hqq) as guided by local scripts
 ```
 > **Technical Note on Engine Support**: 
@@ -179,19 +178,39 @@ Main package versions:
 ### Run full pipeline
 
 ```bash
+# 1. Download raw records
 python scripts/download_datasets.py --max-records-per-source 5000
+
+# 2. Clean records using NeMo Curator
 python scripts/clean_with_nemo.py --input-dir data/raw --output data/processed/cleaned.jsonl --backend auto
+
+# 3. Build canonical long-context test suite
 python scripts/build_long_context_testset.py --input data/processed/cleaned.jsonl --output datasets/test_set_small.json
-python scripts/validate_testset.py --input datasets/test_set_small.json
+
+# 4. Validate canonical dataset
+python scripts/validate_testset.py --input datasets/test_set_small.json --schema long_context
+
+# 5. Validate task benchmark dataset
+python scripts/validate_testset.py --input datasets/test_set_tasks_small.json --schema task
 ```
 
 ### Run smoke test
 
 ```bash
+# 1. Download smoke records
 python scripts/download_datasets.py --max-records-per-source 200
+
+# 2. Clean smoke records
 python scripts/clean_with_nemo.py --input-dir data/raw --output data/processed/cleaned.jsonl --backend auto
-python scripts/build_long_context_testset.py --input data/processed/cleaned.jsonl --output datasets/test_set_small.json --allow-smoke-test
-python scripts/validate_testset.py --input datasets/test_set_small.json --allow-smoke-test
+
+# 3. Build canonical smoke test suite
+python scripts/build_long_context_testset.py --input data/processed/cleaned.jsonl --output datasets/test_set_smoke.json --allow-smoke-test
+
+# 4. Validate canonical smoke dataset
+python scripts/validate_testset.py --input datasets/test_set_smoke.json --schema long_context --allow-smoke-test
+
+# 5. Validate task smoke dataset
+python scripts/validate_testset.py --input datasets/test_set_tasks_smoke.json --schema task --allow-smoke-test
 ```
 
 ### Pipeline status
@@ -235,11 +254,11 @@ To run a baseline measurement with uncompressed Full KV Cache on a selected mode
 
 ```bash
 python scripts/run_baseline.py \
-    --model "VinAI/PhoGPT-7B-Instruct" \
+    --model "qwen3:8b-fp16" \
     --dataset "datasets/test_set_small.json" \
     --context_length 8000 \
     --max_new_tokens 128 \
-    --output "results/phogpt_baseline.csv"
+    --output "results/qwen3_baseline.csv"
 ```
 
 The script will automatically measure and append the following fields to your local results file:
@@ -289,15 +308,15 @@ This project is a collaborative effort by **Group 1**:
 |---|---|---|
 | **Do Kien Hung** | Writing & Coordination | Project Manager, Agile/Scrum Coordinator, Document Manager |
 | **Phan Trong Qui** | Writing & Coordination | Joint Coordinator, Documentation & Peer Review |
-| **Ho Viet Anh** | Technical & Experiment | Joint Coordination, Technical Setup, DataOps/DevOps Engineer |
+| **Ho Viet Anh** | Technical & Experiment | Technical Setup, DataOps/DevOps Engineer |
 | **Pham Minh Quan** | Technical & Experiment | Infrastructure Setup, Inference pipeline optimization |
 | **Tran Minh Khanh** | Technical & Experiment | Local GPU Environment, Baseline Runner |
-| **Nguyen Van Quang Duy** | Technical & Experiment | Quantization Setup (TurboQuant config & patching) |
+| **Nguyen Van Quang Duy** | Writing & Coordination | Technical documentation and cross-team technical liaison |
 | **Nguyen Ho Phat** | Data & Analysis | Dataset curator, NeMo Curator Preprocessing lead |
 | **Huynh Huu Huy** | Data & Analysis | Small test set curation, prompt formatting |
 | **Huynh Ngoc Thach** | Data & Analysis | Metric plotting script engineer |
 | **Nguyen Dang Quoc Anh** | Research & Scope | Literature review, theoretical framework definition, Project Owner |
-| **Phan Trong Phu** | Research & Scope | Reference indexing, paper draft structuring |
+| **Phan Trong Phu** | Writing & Coordination | Reference indexing, paper drafting and review |
 
 ---
 
@@ -317,10 +336,10 @@ This project is a collaborative effort by **Group 1**:
 3. Chambers, B., & Zaharia, M. (2018). *Spark: The Definitive Guide*, O'Reilly.
 4. James, G., et al. (2021). *An Introduction to Statistical Learning*, 2nd Edition, Springer.
 5. Zandieh, A., Daliri, M., Hadian, M., & Mirrokni, V. (2025). *TurboQuant: Online Vector Quantization with Near-optimal Distortion Rate*. arXiv preprint arXiv:2504.19874.
-6. Han, T., et al. (2025). *PolarQuant: Leveraging Polar Transformation for Efficient Key Cache Quantization and Decoding Acceleration*. NeurIPS 2025. arXiv preprint arXiv:2502.00527.
+6. Wu, S., et al. (2025). *PolarQuant: Leveraging Polar Transformation for Efficient Key Cache Quantization and Decoding Acceleration*. NeurIPS 2025. arXiv preprint arXiv:2502.00527.
 7. Kwon, W., Li, Z., Stoica, I., et al. (2023). *Efficient Memory Management for Large Language Model Serving with PagedAttention*. SOSP 2023. arXiv preprint arXiv:2309.06180.
 8. Micikevicius, P., et al. (2022). *FP8 Quantization for Deep Learning*. arXiv preprint arXiv:2209.05433.
 9. Badri, H., & Shaji, A. (2023-2024). *Half-Quadratic Quantization (HQQ)*. Mobius Labs. [github.com/mobiusml/hqq](https://github.com/mobiusml/hqq).
-10. *KV-CoRE: Benchmarking Data-Dependent Low-Rank Compressibility of KV-Caches in LLMs* (2026). arXiv preprint arXiv:2602.04142.
+10. *KV-CoRE: Benchmarking Data-Dependent Low-Rank Compressibility of KV-Caches in LLMs* (2026). arXiv preprint arXiv:2602.05929.
 
 ***

@@ -1,0 +1,7 @@
+FROM mistral:7b-instruct-v0.3-fp16
+
+# Mở rộng context window lên 32K để đủ cho benchmark ở mốc 4k/8k/16k token
+# Mistral 7B hỗ trợ native 32K context window
+PARAMETER num_ctx 32768
+
+SYSTEM ""

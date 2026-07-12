@@ -1,4 +1,4 @@
-# BẢN KẾ HOẠCH TỔNG THỂ (MASTER PLAN)
+﻿# BẢN KẾ HOẠCH TỔNG THỂ (MASTER PLAN)
 ## Dự án: Benchmarking TurboQuant and KV Cache Compression Methods on Vietnamese LLMs
 **Môn học:** Ứng dụng dữ liệu lớn: học máy ở quy mô lớn (DBML434077) - HCM-UTE  
 **Quản lý tiến độ:** Đỗ Kiến Hưng (Writing & Coordination Lead / Project Manager)
@@ -42,8 +42,8 @@ Tổng tiến độ dự án kéo dài **7 tuần**, chia làm **4 Phase** chạ
 *   **Mục tiêu:** Thu thập toàn bộ số liệu thực nghiệm trên 4 dòng mô hình mục tiêu đối với tất cả các mốc thuật toán nén trên Cloud GPU.
 *   **Nhiệm vụ chi tiết:**
     *   *Kỹ thuật & Thử nghiệm (Nhóm phân vai 1-2 mô hình/người):*
-        *   **Cặp 1 (Việt Anh, Minh Quân):** Chạy thực nghiệm trên mô hình `PhoGPT-7B5-Instruct`.
-        *   **Cặp 2 (Minh Khánh, Quang Duy):** Chạy thực nghiệm trên mô hình `Qwen2.5-7B-Instruct`.
+        *   **Cặp 1 (Việt Anh, Minh Quân):** Chạy thực nghiệm trên các mô hình `qwen3:8b-fp16` và `llama3.1:8b-instruct-fp16`.
+        *   **Cặp 2 (Minh Khánh, Quang Duy):** Chạy thực nghiệm trên các mô hình `mistral:7b-instruct-v0.3-fp16` và `qwen2.5:7b-instruct-fp16`.
         *   **Hỗ trợ chung (Duy - Infrastructure):** Đảm nhận vai trò xử lý lỗi (bug-fixing), tối ưu hóa bộ nhớ và giám sát việc chạy thử nghiệm các mốc nén KV cache: FP8, HQQ, PolarQuant, TurboQuant (mốc Full) và TurboQuant (mốc tắt QJL) trên Cloud GPU.
     *   *Đo đạc & Ghi kết quả (Toàn bộ team kỹ thuật):* Ghi nhận số liệu chính xác (gồm cả các metrics nâng cao) vào các file kết quả CSV riêng biệt của từng mô hình theo đúng template chuẩn.
 
@@ -73,16 +73,16 @@ Tổng tiến độ dự án kéo dài **7 tuần**, chia làm **4 Phase** chạ
 | Thành viên | Vai trò trong dự án | Phase 1 (Prep) | Phase 2 (Exp) | Phase 3 (Analysis) | Phase 4 (Writing) |
 |---|---|:---:|:---:|:---:|:---:|
 | **Đỗ Kiến Hưng** | PM / Agile Coordinator | **R** / **A** | **A** | **A** | **R** / **A** |
-| **Phan Trọng Quí** | Joint Coordinator / Writing | **R** | **C** | **C** | **R** (Báo cáo) |
-| **Hồ Việt Anh** | Technical & Experiment | **R** (Cloud Setup) | **R** (PhoGPT) | **C** | **C** |
-| **Phạm Minh Quân** | Tech Lead / Optimizer | **R** (CUDA setup) | **R** (PhoGPT) | **C** | **C** |
-| **Trần Minh Khánh** | Tech runner | **C** | **R** (Qwen) | **C** | **C** |
-| **Nguyễn V. Q. Duy** | Quantization / Patching | **C** (vLLM config) | **R** (Qwen/Debug) | **C** | **C** |
+| **Phan Trọng Quí** | Writing & Coordination / Joint Coordinator | **R** | **C** | **C** | **R** (Báo cáo) |
+| **Hồ Việt Anh** | Technical & Experiment | **R** (Cloud Setup) | **R** (Qwen3/Llama) | **C** | **C** |
+| **Phạm Minh Quân** | Tech Lead / Optimizer | **R** (CUDA setup) | **R** (Qwen3/Llama) | **C** | **C** |
+| **Trần Minh Khánh** | Tech runner | **C** | **R** (Mistral/Qwen2.5) | **C** | **C** |
+| **Nguyễn V. Q. Duy** | Writing & Coordination / Technical liaison | **C** (vLLM config) | **R** (Mistral/Qwen2.5/Debug) | **C** | **C** |
 | **Nguyễn Hồ Phát** | Data curator | **R** (NeMo Curator) | **A** | **R** | **C** |
 | **Huỳnh Hữu Huy** | Data / Prompts | **R** (Test suite) | **A** | **R** | **C** |
 | **Huỳnh Ngọc Thạch** | Metric plotting lead | **C** | **A** | **R** (Plotting) | **C** |
 | **N. Đăng Quốc Anh** | Research Owner / Idea lead | **R** (Đề cương) | **C** | **R** (Nhận xét) | **R** (Paper EN) |
-| **Phan Trọng Phú** | Paper Writer / Review | **R** (References) | **C** | **C** | **R** (Paper EN) |
+| **Phan Trọng Phú** | Writing & Coordination / Paper Writer & Review | **R** (References) | **C** | **C** | **R** (Paper EN) |
 
 *Chú thích:* **R** (Responsible - Người thực hiện), **A** (Accountable - Người chịu trách nhiệm/PM), **C** (Consulted - Người hỗ trợ/Tham vấn), **I** (Informed - Người nhận thông tin).
 
