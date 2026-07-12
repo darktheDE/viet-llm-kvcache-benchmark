@@ -24,6 +24,7 @@ import csv
 import time
 import os
 import sys
+import gc
 import math
 import subprocess
 import threading
@@ -36,9 +37,11 @@ try:
     from vllm import LLM, SamplingParams
     import pynvml
     import torch
+    import psutil
+    import signal
 except ImportError as e:
     print(f"LOI NGHIEM TRONG: Thieu thu vien bat buoc - {e}")
-    print("Hay cai dat: pip install vllm pynvml torch")
+    print("Hay cai dat: pip install vllm pynvml torch psutil")
     sys.exit(1)
 
 try:
@@ -366,13 +369,13 @@ def run_real_benchmark(args):
 
         # max_model_len needs room for prompt tokens + generated tokens + buffer
         # Sample actual_tokens may exceed target context_length due to tokenizer differences
-        max_len = args.context_length + args.max_new_tokens + 1024
+        max_len = args.context_length + args.max_new_tokens + 4096
         print(f"  -> max_model_len={max_len} (ctx={args.context_length} + new={args.max_new_tokens} + buf=4096)")
         llm = LLM(
             model=vllm_model,
             kv_cache_dtype=kv_dtype,
             max_model_len=max_len,
-            gpu_memory_utilization=0.98,
+            gpu_memory_utilization=0.85,
             # max_num_batched_tokens phai >= max_model_len
             max_num_batched_tokens=max(max_len, 4096),
             max_num_seqs=2,
@@ -518,9 +521,24 @@ def run_real_benchmark(args):
     log_result(args.output, result)
     print(f"\nKet qua da duoc ghi vao: {args.output}")
 
-    # Giải phóng bộ nhớ GPU
+    # Giải phóng bộ nhớ GPU - kill ALL VLLM EngineCore processes
+    print("Dang giai phong GPU...")
     del llm
+    gc.collect()
     torch.cuda.empty_cache()
+    torch.cuda.synchronize()
+    # Kill ALL VLLM engine processes system-wide (only our own from this benchmark)
+    for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+        try:
+            cmdline = ' '.join(proc.info['cmdline'] or [])
+            if 'VLLM::EngineCore' in cmdline or 'multiprocessing.spawn' in cmdline:
+                proc.kill()
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            pass
+    time.sleep(3)
+    gc.collect()
+    torch.cuda.empty_cache()
+    torch.cuda.synchronize()
     print("Da giai phong VRAM. San sang cho cau hinh tiep theo.\n")
 
 

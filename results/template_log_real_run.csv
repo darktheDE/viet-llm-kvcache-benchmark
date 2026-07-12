@@ -1,0 +1,136 @@
+model,kv_cache_type,context_length,peak_memory_mb,latency_ms_per_token,throughput_tokens_per_s,perplexity,status,sample_id,output_path
+qwen3:8b-fp16,FP16,4000,70170.12,8.66,115.52,,OK,qwen3:8b-fp16__FP16__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,FP16,8000,70244.12,11.41,87.68,,OK,qwen3:8b-fp16__FP16__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,FP16,16000,71322.12,18.85,53.06,,OK,qwen3:8b-fp16__FP16__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,FP8,4000,70604.12,8.78,113.88,,OK,qwen3:8b-fp16__FP8__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,FP8,8000,70870.12,11.43,87.5,,OK,qwen3:8b-fp16__FP8__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,FP8,16000,71756.12,18.8,53.19,,OK,qwen3:8b-fp16__FP8__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,HQQ,4000,70528.12,15.2,65.78,,OK,qwen3:8b-fp16__HQQ__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,HQQ,8000,71088.12,25.38,39.41,,OK,qwen3:8b-fp16__HQQ__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,HQQ,16000,72452.12,61.85,16.17,,OK,qwen3:8b-fp16__HQQ__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,PolarQuant,4000,70604.12,8.71,114.78,,OK,qwen3:8b-fp16__PolarQuant__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,PolarQuant,8000,70870.12,11.47,87.2,,OK,qwen3:8b-fp16__PolarQuant__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,PolarQuant,16000,71756.12,18.79,53.23,,OK,qwen3:8b-fp16__PolarQuant__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,TurboQuant,4000,69640.12,10.5,95.25,,OK,qwen3:8b-fp16__TurboQuant__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,TurboQuant,8000,70072.12,14.3,69.93,,OK,qwen3:8b-fp16__TurboQuant__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen3:8b-fp16,TurboQuant,16000,71406.12,24.17,41.37,,OK,qwen3:8b-fp16__TurboQuant__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+llama3.1:8b-instruct-fp16,FP16,4000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a5397b9-09443ee213d7daca116efb23;3885399d-c13a-4aa0-a7f3-6e64bdbcbb5a)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,FP16,8000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a5397c3-53962af16c748fa0725b998e;04b93202-12ca-4d95-a5a6-465db6ccdeb7)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,FP16,16000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a5397ce-535e8f1f1b3c7ea97a7a7a17;569a271c-c047-4d81-9ff4-29ff97bf3e89)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,FP8,4000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a5397d9-073a2eda39402b62417f5cc1;56c09e63-c414-478f-b68c-f0ed3011dc1a)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,FP8,8000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a5397e4-21dbd1ff7a4ed1e21192c34f;0d8b85ce-ee87-4d5c-906a-b4f1909084f9)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,FP8,16000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a5397ee-7eb35ecc1917db027db7230e;11f0fb04-8dbf-4f8a-81b2-1d244b417c6e)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,HQQ,4000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a5397f9-1aff21553d238a976af92d17;ec7ebad4-343a-40d3-9fc1-1037cc61df1d)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,HQQ,8000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a539805-160d1d4b73858b0925cd03b9;6e4f1ec5-483e-446b-993b-7ebee396081c)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,HQQ,16000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a53980f-496c044971c1a9f608039c23;c75fcb15-6752-4d46-bd4f-52fa188db574)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,PolarQuant,4000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a53981a-504381956e0196ea3f419335;43a24bed-37b3-49ce-8ba3-c8b890ba796c)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,PolarQuant,8000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a539825-0a80a92f14fdaa5b6d5bf651;03c2fa8d-1696-4ef1-9c11-6bddf8356ee0)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,PolarQuant,16000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a539830-1582632c6811f4b27a72ecd6;9a5c2a69-ae3c-41c5-9ba9-61b89fbd8e35)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,TurboQuant,4000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a53983b-72e0af5134a68dab0be875d2;71494438-5df6-4bd3-8bd9-02b560c8ea85)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,TurboQuant,8000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a539845-2ca2e3262dfe6aac14e15a02;1833a64f-854c-400a-8d41-bb6d4ba313a2)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+llama3.1:8b-instruct-fp16,TurboQuant,16000,ERROR,ERROR,ERROR,ERROR,"LOAD_ERROR: You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct.
+401 Client Error. (Request ID: Root=1-6a539850-41e7d1586c6786c96e079252;3604d8bc-692c-4c65-9030-12dda7a893c7)
+
+Cannot access gated repo for url https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct/resolve/main/config.json.
+Access to model meta-llama/Llama-3.1-8B-Instruct is restricted. You must have access to it and be authenticated to access it. Please log in.",,
+mistral:7b-instruct-v0.3-fp16,FP16,4000,,,,,"ERROR: This model's maximum context length is 8224 tokens. However, you requested 0 output tokens and your prompt contains at least 8225 input tokens, for a total of at least 8225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=8225)",,
+mistral:7b-instruct-v0.3-fp16,FP16,8000,,,,,"ERROR: This model's maximum context length is 12224 tokens. However, you requested 0 output tokens and your prompt contains at least 12225 input tokens, for a total of at least 12225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=12225)",,
+mistral:7b-instruct-v0.3-fp16,FP16,16000,,,,,"ERROR: This model's maximum context length is 20224 tokens. However, you requested 0 output tokens and your prompt contains at least 20225 input tokens, for a total of at least 20225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=20225)",,
+mistral:7b-instruct-v0.3-fp16,FP8,4000,,,,,"ERROR: This model's maximum context length is 8224 tokens. However, you requested 0 output tokens and your prompt contains at least 8225 input tokens, for a total of at least 8225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=8225)",,
+mistral:7b-instruct-v0.3-fp16,FP8,8000,,,,,"ERROR: This model's maximum context length is 12224 tokens. However, you requested 0 output tokens and your prompt contains at least 12225 input tokens, for a total of at least 12225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=12225)",,
+mistral:7b-instruct-v0.3-fp16,FP8,16000,,,,,"ERROR: This model's maximum context length is 20224 tokens. However, you requested 0 output tokens and your prompt contains at least 20225 input tokens, for a total of at least 20225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=20225)",,
+mistral:7b-instruct-v0.3-fp16,HQQ,4000,,,,,"ERROR: This model's maximum context length is 8224 tokens. However, you requested 0 output tokens and your prompt contains at least 8225 input tokens, for a total of at least 8225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=8225)",,
+mistral:7b-instruct-v0.3-fp16,HQQ,8000,,,,,"ERROR: This model's maximum context length is 12224 tokens. However, you requested 0 output tokens and your prompt contains at least 12225 input tokens, for a total of at least 12225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=12225)",,
+mistral:7b-instruct-v0.3-fp16,HQQ,16000,,,,,"ERROR: This model's maximum context length is 20224 tokens. However, you requested 0 output tokens and your prompt contains at least 20225 input tokens, for a total of at least 20225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=20225)",,
+mistral:7b-instruct-v0.3-fp16,PolarQuant,4000,,,,,"ERROR: This model's maximum context length is 8224 tokens. However, you requested 0 output tokens and your prompt contains at least 8225 input tokens, for a total of at least 8225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=8225)",,
+mistral:7b-instruct-v0.3-fp16,PolarQuant,8000,,,,,"ERROR: This model's maximum context length is 12224 tokens. However, you requested 0 output tokens and your prompt contains at least 12225 input tokens, for a total of at least 12225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=12225)",,
+mistral:7b-instruct-v0.3-fp16,PolarQuant,16000,,,,,"ERROR: This model's maximum context length is 20224 tokens. However, you requested 0 output tokens and your prompt contains at least 20225 input tokens, for a total of at least 20225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=20225)",,
+mistral:7b-instruct-v0.3-fp16,TurboQuant,4000,,,,,"ERROR: This model's maximum context length is 8224 tokens. However, you requested 0 output tokens and your prompt contains at least 8225 input tokens, for a total of at least 8225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=8225)",,
+mistral:7b-instruct-v0.3-fp16,TurboQuant,8000,,,,,"ERROR: This model's maximum context length is 12224 tokens. However, you requested 0 output tokens and your prompt contains at least 12225 input tokens, for a total of at least 12225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=12225)",,
+mistral:7b-instruct-v0.3-fp16,TurboQuant,16000,,,,,"ERROR: This model's maximum context length is 20224 tokens. However, you requested 0 output tokens and your prompt contains at least 20225 input tokens, for a total of at least 20225 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=20225)",,
+qwen2.5:7b-instruct-fp16,FP16,4000,70004.12,7.83,127.72,,OK,qwen2.5:7b-instruct-fp16__FP16__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,FP16,8000,70338.12,10.0,100.01,,OK,qwen2.5:7b-instruct-fp16__FP16__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,FP16,16000,71544.12,15.84,63.12,,OK,qwen2.5:7b-instruct-fp16__FP16__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,FP8,4000,70420.12,7.94,125.95,,OK,qwen2.5:7b-instruct-fp16__FP8__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,FP8,8000,70752.12,11.75,85.09,,OK,qwen2.5:7b-instruct-fp16__FP8__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,FP8,16000,71978.12,16.01,62.47,,OK,qwen2.5:7b-instruct-fp16__FP8__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,HQQ,4000,70188.12,12.92,77.38,,OK,qwen2.5:7b-instruct-fp16__HQQ__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,HQQ,8000,70688.12,20.89,47.86,,OK,qwen2.5:7b-instruct-fp16__HQQ__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,HQQ,16000,72090.12,50.03,19.99,,OK,qwen2.5:7b-instruct-fp16__HQQ__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,PolarQuant,4000,70532.12,8.04,124.45,,OK,qwen2.5:7b-instruct-fp16__PolarQuant__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,PolarQuant,8000,70808.12,10.16,98.42,,OK,qwen2.5:7b-instruct-fp16__PolarQuant__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,PolarQuant,16000,71978.12,16.0,62.5,,OK,qwen2.5:7b-instruct-fp16__PolarQuant__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,TurboQuant,4000,70040.12,9.15,109.3,,OK,qwen2.5:7b-instruct-fp16__TurboQuant__4000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,TurboQuant,8000,70356.12,12.19,82.05,,OK,qwen2.5:7b-instruct-fp16__TurboQuant__8000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
+qwen2.5:7b-instruct-fp16,TurboQuant,16000,71564.12,19.87,50.33,,OK,qwen2.5:7b-instruct-fp16__TurboQuant__16000,/workspace/viet-llm-kvcache-benchmark/scripts/test/../../results/template_log_real_run_generated.jsonl
