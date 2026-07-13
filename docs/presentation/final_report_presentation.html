@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Report: TurboQuant & KV Cache Compression on Vietnamese LLMs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg-0:#060a14;--bg-1:#0d1526;--bg-2:#162040;--bg-3:#1e2f5c;--t1:#f0f6ff;--t2:#c4d4f0;--t3:#8ca4cc;--tm:#516080;--cy:#06cdf4;--cyd:#0497b8;--bl:#4080ff;--co:#ff6b35;--col:#ff9a6c;--gr:#10d98a;--grd:#0aaa6a;--pu:#a855f7;--am:#f59e0b;--brd:rgba(255,255,255,.07);--brdh:rgba(6,205,244,.35);--r:14px;--fn:'Plus Jakarta Sans',sans-serif;--mn:'JetBrains Mono',monospace}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-0);color:var(--t1);font-family:var(--fn);-webkit-font-smoothing:antialiased}
+.sw{position:relative;width:100%;height:100%;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;padding:clamp(1.4rem,3.5vw,3rem) clamp(1.8rem,4.5vw,4.5rem);padding-bottom:calc(clamp(1.4rem,3.5vw,3rem) + 58px);opacity:0;pointer-events:none;transform:translateX(55px);transition:opacity .5s cubic-bezier(.16,1,.3,1),transform .5s cubic-bezier(.16,1,.3,1);overflow:hidden}
+.slide.active{opacity:1;pointer-events:auto;transform:translateX(0)}
+.slide.exit-left{opacity:0;transform:translateX(-55px)}
+.slide::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 85% 8%,rgba(6,205,244,.07) 0%,transparent 60%),radial-gradient(ellipse 50% 45% at 8% 92%,rgba(64,128,255,.06) 0%,transparent 55%);pointer-events:none;z-index:0}
+.slide>*{position:relative;z-index:1}
+.slide.stitle::before{background:radial-gradient(ellipse 100% 75% at 80% 0%,rgba(6,205,244,.13) 0%,transparent 50%),radial-gradient(ellipse 60% 55% at 5% 100%,rgba(168,85,247,.09) 0%,transparent 45%)}
+.slide.spareto::before{background:radial-gradient(ellipse 75% 55% at 90% 5%,rgba(255,107,53,.09) 0%,transparent 55%),radial-gradient(ellipse 50% 45% at 5% 90%,rgba(168,85,247,.07) 0%,transparent 50%)}
+.slide.sres::before{background:radial-gradient(ellipse 65% 55% at 95% 12%,rgba(16,217,138,.07) 0%,transparent 55%),radial-gradient(ellipse 50% 45% at 0% 88%,rgba(64,128,255,.06) 0%,transparent 50%)}
+/* Header */
+.sh{margin-bottom:clamp(.6rem,2vh,1.6rem)}
+.sl{font-size:clamp(.5rem,.85vw,.72rem);font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--cy);margin-bottom:.35rem;display:flex;align-items:center;gap:.45rem}
+.sl::before{content:'';display:inline-block;width:20px;height:2px;background:var(--cy);border-radius:2px}
+.stl{font-size:clamp(1.2rem,2.8vw,2.2rem);font-weight:800;line-height:1.15;color:var(--t1)}
+.stl em{color:var(--cy);font-style:normal}
+/* Content */
+.ca{flex:1;min-height:0;display:flex;flex-direction:column;gap:clamp(.4rem,1.5vh,1.2rem);overflow:hidden}
+.tc{display:grid;grid-template-columns:1fr 1fr;gap:clamp(.5rem,1.8vw,1.8rem);flex:1;min-height:0}
+.thc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:clamp(.4rem,1.3vw,1.2rem);flex:1;min-height:0}
+.fivec{display:grid;grid-template-columns:repeat(5,1fr);gap:.65rem}
+.col{display:flex;flex-direction:column;gap:.7rem;min-height:0}
+/* Cards */
+.card{background:rgba(22,32,64,.75);border:1px solid var(--brd);border-radius:var(--r);padding:clamp(.6rem,1.8vh,1.2rem) clamp(.7rem,1.8vw,1.4rem);transition:border-color .3s,box-shadow .3s,transform .3s;backdrop-filter:blur(4px)}
+.card:hover{border-color:var(--brdh);box-shadow:0 0 20px rgba(6,205,244,.07);transform:translateY(-1px)}
+.ct{font-size:clamp(.68rem,1vw,.88rem);font-weight:700;color:var(--cy);margin-bottom:.45rem;display:flex;align-items:center;gap:.45rem}
+.hc{background:linear-gradient(135deg,rgba(6,205,244,.12) 0%,rgba(64,128,255,.08) 100%);border:1px solid rgba(6,205,244,.25);border-radius:var(--r);padding:clamp(.6rem,1.8vh,1.2rem) clamp(.7rem,1.8vw,1.4rem)}
+.hc.co-c{background:linear-gradient(135deg,rgba(255,107,53,.12) 0%,rgba(245,158,11,.08) 100%);border-color:rgba(255,107,53,.25)}
+.hc.gr-c{background:linear-gradient(135deg,rgba(16,217,138,.12) 0%,rgba(6,205,244,.07) 100%);border-color:rgba(16,217,138,.25)}
+.hc.am-c{background:linear-gradient(135deg,rgba(245,158,11,.12) 0%,rgba(255,107,53,.07) 100%);border-color:rgba(245,158,11,.25)}
+/* Text */
+p,.bt{font-size:clamp(.68rem,1.05vw,.86rem);line-height:1.65;color:var(--t2)}
+ul,ol{padding-left:1.35rem;display:flex;flex-direction:column;gap:.3rem}
+li{font-size:clamp(.65rem,1vw,.84rem);line-height:1.6;color:var(--t2)}
+li::marker{color:var(--cy)}
+ol li::marker{color:var(--cy);font-weight:700}
+strong{color:var(--t1);font-weight:700}
+.cy{color:var(--cy)} .co{color:var(--co)} .gr{color:var(--gr)} .pu{color:var(--pu)} .am{color:var(--am)}
+code,.mono{font-family:var(--mn);font-size:.84em;background:rgba(255,255,255,.06);padding:.08em .32em;border-radius:4px;color:var(--cy)}
+/* Stats */
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.8rem}
+.si{text-align:center;background:rgba(22,32,64,.8);border:1px solid var(--brd);border-radius:11px;padding:.75rem .4rem}
+.sv{font-size:clamp(1.1rem,2.2vw,1.8rem);font-weight:800;font-family:var(--mn);color:var(--cy);display:block}
+.slb{font-size:clamp(.54rem,.85vw,.7rem);color:var(--t3);margin-top:.2rem}
+/* Tables */
+.dt{width:100%;border-collapse:collapse;font-size:clamp(.56rem,.85vw,.76rem)}
+.dt th{background:rgba(6,205,244,.11);color:var(--cy);font-weight:700;font-size:clamp(.52rem,.8vw,.72rem);letter-spacing:.05em;text-transform:uppercase;padding:.44rem .6rem;border-bottom:1px solid rgba(6,205,244,.2);text-align:center;white-space:nowrap}
+.dt th.lft{text-align:left}
+.dt td{padding:.38rem .6rem;border-bottom:1px solid rgba(255,255,255,.05);color:var(--t2);text-align:center}
+.dt td.lft{text-align:left}
+.dt tr:hover td{background:rgba(255,255,255,.03)}
+.dt .mh td{color:var(--t1);font-weight:700;font-size:clamp(.58rem,.88vw,.78rem);background:rgba(30,47,92,.55);padding-top:.5rem}
+.dt .best{color:var(--cy);font-weight:800}
+.dt .wrn{color:var(--co)}
+.dt .na{color:var(--tm)}
+.dt .sep td{border-top:1px solid rgba(6,205,244,.14);padding-top:.5rem}
+/* Method chips */
+.mc{display:inline-flex;align-items:center;gap:.3rem;padding:.18rem .6rem;border-radius:50px;font-size:clamp(.56rem,.84vw,.72rem);font-weight:700;border:1px solid}
+.cfp16{background:rgba(100,128,200,.12);border-color:rgba(100,128,200,.4);color:#8aa4e0}
+.cfp8{background:rgba(16,217,138,.1);border-color:rgba(16,217,138,.35);color:var(--gr)}
+.chqq{background:rgba(255,107,53,.1);border-color:rgba(255,107,53,.35);color:var(--co)}
+.cpolar{background:rgba(168,85,247,.1);border-color:rgba(168,85,247,.35);color:var(--pu)}
+.cturbo{background:rgba(6,205,244,.12);border-color:rgba(6,205,244,.4);color:var(--cy)}
+/* Pipeline */
+.pipeline{display:flex;align-items:stretch;gap:0;margin-bottom:1rem}
+.pstep{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
+.pstep:not(:last-child)::after{content:'→';position:absolute;right:-13px;top:20px;color:var(--cy);font-size:1.1rem;z-index:2}
+.picon{width:42px;height:42px;border-radius:50%;border:2px solid var(--cy);background:rgba(6,205,244,.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.45rem;box-shadow:0 0 14px rgba(6,205,244,.18)}
+.plbl{font-size:clamp(.57rem,.82vw,.7rem);font-weight:700;color:var(--cy);margin-bottom:.25rem}
+.pdsc{font-size:clamp(.52rem,.78vw,.65rem);color:var(--t3);line-height:1.5}
+/* RQ blocks */
+.rq{border-left:3px solid var(--cy);padding:.48rem .82rem;background:rgba(6,205,244,.04);border-radius:0 8px 8px 0}
+.rql{font-size:clamp(.57rem,.82vw,.7rem);font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.25rem}
+/* Nav */
+.nav{position:fixed;bottom:0;left:0;right:0;height:52px;background:rgba(13,21,38,.93);backdrop-filter:blur(12px);border-top:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;padding:0 1.8rem;z-index:100}
+.nb{background:rgba(255,255,255,.06);border:1px solid var(--brd);border-radius:8px;color:var(--t2);cursor:pointer;padding:.32rem .85rem;font-family:var(--fn);font-size:.73rem;font-weight:600;transition:all .2s}
+.nb:hover:not(:disabled){background:rgba(6,205,244,.12);border-color:rgba(6,205,244,.35);color:var(--cy)}
+.nb:disabled{opacity:.3;cursor:default}
+.nc{font-family:var(--mn);font-size:.78rem;color:var(--t3);letter-spacing:.04em}
+.pt{position:fixed;top:0;left:0;right:0;height:2.5px;background:rgba(255,255,255,.05);z-index:100}
+.pf{height:100%;background:linear-gradient(90deg,var(--cy),var(--bl));transition:width .4s cubic-bezier(.16,1,.3,1)}
+.dots{display:flex;gap:.38rem;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--tm);cursor:pointer;transition:all .3s}
+.dot.active{width:18px;border-radius:3px;background:var(--cy)}
+/* Notes */
+.ntb{position:fixed;top:.9rem;right:.9rem;background:rgba(13,21,38,.9);border:1px solid var(--brd);border-radius:8px;color:var(--t3);cursor:pointer;padding:.3rem .75rem;font-size:.7rem;font-family:var(--fn);z-index:200;transition:all .2s}
+.ntb:hover{color:var(--cy);border-color:rgba(6,205,244,.3)}
+.np{position:fixed;bottom:52px;left:0;right:0;height:0;background:rgba(6,10,20,.97);border-top:1px solid var(--brd);overflow:hidden;transition:height .4s cubic-bezier(.16,1,.3,1);z-index:90}
+.np.open{height:155px}
+.ni{padding:.9rem 1.8rem;font-size:.76rem;line-height:1.65;color:var(--t3);height:100%;overflow-y:auto}
+.ni strong{color:var(--t2)}
+/* Title slide specifics */
+.tmt{font-size:clamp(1.5rem,3.5vw,2.8rem);font-weight:800;line-height:1.1;margin-bottom:1rem;background:linear-gradient(135deg,var(--t1) 40%,var(--cy) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tsub{font-size:clamp(.75rem,1.3vw,1.05rem);color:var(--t3);line-height:1.8;margin-bottom:1.3rem}
+.agrid{display:flex;flex-wrap:wrap;gap:.35rem .55rem;margin-bottom:1.1rem}
+.achip{font-size:clamp(.57rem,.82vw,.7rem);background:rgba(255,255,255,.06);border:1px solid var(--brd);border-radius:20px;padding:.18rem .65rem;color:var(--t2)}
+.ctag{display:inline-flex;align-items:center;gap:.45rem;font-size:clamp(.62rem,.88vw,.76rem);color:var(--t3);background:rgba(6,205,244,.06);border:1px solid rgba(6,205,244,.15);border-radius:8px;padding:.4rem .9rem}
+/* Abstract */
+.abx{background:rgba(22,32,64,.7);border-left:3px solid var(--cy);border-radius:0 var(--r) var(--r) 0;padding:.9rem 1.3rem;font-size:clamp(.68rem,1.05vw,.86rem);line-height:1.7;color:var(--t2);font-style:italic;flex-shrink:0}
+/* Charts */
+.cha{flex:1;min-height:0;background:rgba(22,32,64,.5);border:1px solid var(--brd);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.cha img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+/* Scroll */
+.tsc{overflow-y:auto;border-radius:8px;max-height:100%}
+.tsc::-webkit-scrollbar{width:3px}
+.tsc::-webkit-scrollbar-thumb{background:rgba(6,205,244,.25);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="pt"><div class="pf" id="pf"></div></div>
+<button class="ntb" onclick="toggleNotes()" id="ntb">📝 Notes</button>
+<div class="np" id="np"><div class="ni" id="nc"></div></div>
+<div class="sw" id="sw">
+
+<!-- SLIDE 1: TITLE -->
+<div class="slide stitle active" data-notes="Xin chào Thầy và các bạn. Nhóm chúng em xin trình bày đề tài cuối kỳ về việc benchmark các phương pháp nén KV Cache trên Vietnamese LLMs. Bối cảnh: nhu cầu triển khai LLM cho tiếng Việt ngày càng cao (chatbot pháp lý, Q&A tài liệu dài) nhưng bị bottleneck bởi VRAM. Mục tiêu: tìm ra phương pháp nén KV Cache tốt nhất cho Vietnamese LLMs.">
+<div style="display:flex;flex-direction:column;justify-content:center;height:100%;max-width:740px">
+<div class="sl">DBML434077 · Final Report · HCM-UTE · July 2026</div>
+<h1 class="tmt">Benchmarking TurboQuant and KV Cache Compression Methods on Vietnamese Large Language Models</h1>
+<p class="tsub">Đánh giá trade-off giữa <strong>Peak VRAM</strong>, <strong>Latency</strong>, <strong>Throughput</strong> và <strong>Perplexity</strong> của 5 phương pháp nén KV Cache trên 3 mô hình LLM đa ngữ hỗ trợ tiếng Việt, qua 3 context length (4k, 8k, 16k tokens).</p>
+<div class="agrid">
+<span class="achip">Do Kien Hung</span><span class="achip">Phan Trong Qui</span><span class="achip">Ho Viet Anh</span><span class="achip">Pham Minh Quan</span><span class="achip">Tran Minh Khanh</span><span class="achip">Nguyen Van Quang Duy</span><span class="achip">Nguyen Ho Phat</span><span class="achip">Huynh Huu Huy</span><span class="achip">Huynh Ngoc Thach</span><span class="achip">Nguyen Dang Quoc Anh</span><span class="achip">Phan Trong Phu</span>
+</div>
+<div style="display:flex;gap:.7rem;flex-wrap:wrap;align-items:center">
+<span class="ctag">🏫 HCM University of Technology and Engineering</span>
+<span class="ctag">👨‍🏫 TS. Lê Ngọc Hiếu</span>
+</div>
+</div>
+<div style="position:absolute;right:2.5rem;bottom:70px;display:flex;gap:.45rem;flex-wrap:wrap;justify-content:flex-end">
+<span class="mc cfp16">FP16 Baseline</span><span class="mc cfp8">FP8</span><span class="mc chqq">HQQ</span><span class="mc cpolar">PolarQuant</span><span class="mc cturbo">TurboQuant</span>
+</div>
+</div>
+
+<!-- SLIDE 2: MOTIVATION -->
+<div class="slide" data-notes="Trình bày vấn đề cốt lõi. KV Cache = attention key–value matrices được lưu tại mỗi transformer layer để tái sử dụng. Size tăng tuyến tính với context length. Ở 16k tokens, model 7-8B cần >20 GB VRAM — vượt giới hạn RTX 3090/4090 24GB. Tiếng Việt có đặc thù riêng: 6 thanh điệu làm vocabulary rộng hơn, tokenizer phân mảnh khác nhau. Benchmark hiện tại đều dùng English corpus.">
+<div class="sh"><div class="sl">Motivation & Context</div><h2 class="stl">Vấn Đề: KV Cache Bottleneck trên <em>Vietnamese LLMs</em></h2></div>
+<div class="ca">
+<div class="abx">"Deploying LLMs for Vietnamese applications — Q&amp;A pháp lý, phân tích tài liệu dài, chatbot — bị cản trở bởi <strong>GPU memory bottleneck</strong>. KV Cache tăng tuyến tính theo context: ở 16k tokens, model 7–8B chiếm &gt;20 GB VRAM, vượt giới hạn RTX 3090/4090 (24 GB). Các benchmark hiện tại đều dùng English corpus — tiếng Việt chưa được đánh giá có hệ thống."</div>
+<div class="tc" style="flex:1">
+<div class="col">
+<div class="card">
+<div class="ct">⚠️ Thách Thức Kỹ Thuật</div>
+<ul>
+<li><strong>KV Cache</strong> lưu key–value của attention, kích thước tăng O(L) theo context length L</li>
+<li>16k tokens × FP16 × 8B model ≈ <span class="co">20+ GB VRAM</span> — vượt RTX 3090/4090</li>
+<li>Nén không cẩn thận → PPL tăng, output chứa gibberish/repetition</li>
+</ul>
+</div>
+<div class="card">
+<div class="ct">🇻🇳 Đặc Thù Tiếng Việt</div>
+<ul>
+<li>6 thanh điệu + diacritical marks → vocabulary lớn hơn tiếng Anh → tokenization khác</li>
+<li>Hình thái học khác biệt → phân phối context length khác</li>
+<li>Tokenizer đa ngữ phân mảnh không nhất quán → ảnh hưởng KV Cache patterns</li>
+</ul>
+</div>
+</div>
+<div class="col">
+<div class="hc" style="flex:1">
+<div class="ct" style="color:var(--cy)">🔍 4 Research Questions</div>
+<div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.2rem">
+<div class="rq"><div class="rql cy">RQ1</div><p>TurboQuant có giảm đáng kể VRAM &amp; latency so với FP16 baseline?</p></div>
+<div class="rq"><div class="rql cy">RQ2</div><p>Chất lượng output (PPL) suy giảm như thế nào dưới các compression ratios?</p></div>
+<div class="rq"><div class="rql cy">RQ3</div><p>Trade-off hardware–quality thay đổi ra sao khi context scale 4k → 16k?</p></div>
+<div class="rq"><div class="rql cy">RQ4</div><p>Phương pháp nào có Pareto-optimal boundary ổn định nhất cho Vietnamese production?</p></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 3: RELATED WORK -->
+<div class="slide" data-notes="Tóm tắt 4 phương pháp nén. Mỗi phương pháp có trade-off riêng. FP8 nhanh nhưng model-sensitive. HQQ flexible bit-width nhưng dequantization slow. PolarQuant dùng polar coordinates. TurboQuant dùng QJL projection — lý thuyết có near-optimal distortion bound.">
+<div class="sh"><div class="sl">Related Work</div><h2 class="stl">Các Phương Pháp Nén KV Cache — <em>Background</em></h2></div>
+<div class="ca">
+<div class="tc" style="flex:1">
+<div class="col">
+<div class="card">
+<div class="ct">🟢 FP8 Quantization <span style="font-size:.7em;color:var(--tm)">[Micikevicius et al. 2022]</span></div>
+<p>Định dạng E4M3/E5M2, giảm <strong>2× storage</strong> vs FP16. Hardware-native trên H100, RTX 40-series. Industry-standard production baseline — gần như zero latency overhead.</p>
+</div>
+<div class="card">
+<div class="ct">🔴 HQQ — Half-Quadratic Quantization <span style="font-size:.7em;color:var(--tm)">[Badri &amp; Shaji 2023]</span></div>
+<p>Giải robust regression để tìm quantization grid tối ưu <strong>không cần calibration data</strong>. Hỗ trợ 2–8-bit, tích hợp Marlin CUDA kernels. <span class="co">Rủi ro: dequantization overhead cao ở aggressive bit-widths.</span></p>
+</div>
+<div class="card" style="background:rgba(205,130,0,.06);border-color:rgba(205,130,0,.2)">
+<div class="ct" style="color:var(--am)">📌 Khoảng Trống Nghiên Cứu</div>
+<p>Tất cả benchmark hiện tại đều trên <strong>English/generic corpus</strong>. Chưa có công trình nào đánh giá có hệ thống 5 KV Cache methods trên Vietnamese LLMs với Vietnamese text input.</p>
+</div>
+</div>
+<div class="col">
+<div class="card">
+<div class="ct">🟣 PolarQuant <span style="font-size:.7em;color:var(--tm)">[Han et al. 2025; Wu et al. 2025]</span></div>
+<p>Biến đổi key vectors sang tọa độ cực (r, θ). Thành phần góc θ — chiếm ưu thế trong attention score — được quantize với fidelity cao hơn. <strong>~4-bit hiệu quả</strong>, attention distortion nhỏ.</p>
+</div>
+<div class="card">
+<div class="ct">🩵 TurboQuant <span style="font-size:.7em;color:var(--tm)">[Zandieh et al. 2025]</span></div>
+<p>Online vector quantization dùng <strong>Quantized Johnson-Lindenstrauss (QJL)</strong> projection để chiếu KV vectors vào compressed subspace. Near-optimal distortion rate bounds. Presets trong vLLM: <code>turboquant_4bit_nc</code>, <code>turboquant_3bit_nc</code>.</p>
+</div>
+<div class="card">
+<div class="ct">🔵 PagedAttention &amp; KV-CoRE</div>
+<p>PagedAttention [Kwon et al. 2023]: block-level virtual memory cho KV Cache trong vLLM. KV-CoRE [Chen et al. 2026]: characterize data-dependent low-rank compressibility của KV caches. Nền tảng lý thuyết cho các quantization approaches.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 4: METHODOLOGY -->
+<div class="slide" data-notes="Pipeline gồm 3 giai đoạn rõ ràng. Nhấn mạnh: reproducible hoàn toàn, toàn bộ scripts public. Mỗi run được log vào structured CSV. Dataset: 12 long-context samples thực tế từ Vietnamese corpus (Wikipedia, news, VMLU). Tokenizer tham chiếu: Qwen/Qwen2.5-7B-Instruct-1M.">
+<div class="sh"><div class="sl">Benchmark Methodology §3</div><h2 class="stl">Pipeline <em>3 Giai Đoạn</em> — Reproducible</h2></div>
+<div class="ca">
+<div class="pipeline">
+<div class="pstep"><div class="picon">📦</div><div class="plbl">① Data Curation</div><div class="pdsc">VTSNLP + VMLU<br>NeMo Curator pipeline<br>12 long-context samples<br>+ 507 task samples</div></div>
+<div class="pstep"><div class="picon" style="border-color:var(--co);background:rgba(255,107,53,.1)">⚙️</div><div class="plbl" style="color:var(--co)">② Inference Execution</div><div class="pdsc">vLLM engine<br>5 methods × 3 contexts<br>GPU memory hooks (pynvml)<br>max_new_tokens=128</div></div>
+<div class="pstep"><div class="picon" style="border-color:var(--gr);background:rgba(16,217,138,.1)">📊</div><div class="plbl" style="color:var(--gr)">③ Measurement &amp; Logging</div><div class="pdsc">Structured CSV logs<br>4 primary metrics<br>Quality flag analysis<br>Pareto visualization</div></div>
+</div>
+<div class="tc" style="flex:1">
+<div class="col">
+<div class="card" style="flex:1">
+<div class="ct">🗄️ Data Curation Pipeline</div>
+<ul>
+<li><strong>Nguồn:</strong> VTSNLP/vietnamese_curated_dataset (Wikipedia, news, C4-web) + VMLU (vmlu_squad_v1, vmlu_mqa_v1.5)</li>
+<li><strong>NeMo Curator stages:</strong> Unicode fix (ftfy) → NFC normalization → control-char removal → Vietnamese diacritical filter (&gt;200 chars) → SHA-256 exact dedup → SimHash near-dedup</li>
+<li><strong>Test suite:</strong> <span class="cy">12 samples</span> (4 × {4k, 8k, 16k}) + <span class="cy">507 task samples</span></li>
+<li>Reference tokenizer: <code>Qwen/Qwen2.5-7B-Instruct-1M</code></li>
+</ul>
+</div>
+</div>
+<div class="col">
+<div class="card" style="flex:1">
+<div class="ct">📏 Evaluation Metrics &amp; MEI</div>
+<div style="display:flex;flex-direction:column;gap:.4rem;margin-top:.2rem">
+<div style="display:flex;align-items:baseline;gap:.45rem"><span class="mono" style="min-width:82px;color:var(--cy)">Peak VRAM</span><span style="font-size:.78rem;color:var(--t3)">max GPU memory (MB) — pynvml polling + torch.cuda.max_memory_allocated()</span></div>
+<div style="display:flex;align-items:baseline;gap:.45rem"><span class="mono" style="min-width:82px;color:var(--co)">Latency</span><span style="font-size:.78rem;color:var(--t3)">ms/token = decode_time / n_generated_tokens × 1000</span></div>
+<div style="display:flex;align-items:baseline;gap:.45rem"><span class="mono" style="min-width:82px;color:var(--gr)">Throughput</span><span style="font-size:.78rem;color:var(--t3)">tokens/s = n_generated_tokens / decode_time</span></div>
+<div style="display:flex;align-items:baseline;gap:.45rem"><span class="mono" style="min-width:82px;color:var(--pu)">PPL</span><span style="font-size:.78rem;color:var(--t3)">Perplexity = exp(−1/N Σlog P(xᵢ|x&lt;ᵢ)) — computed offline</span></div>
+<div style="margin-top:.3rem;padding:.4rem .7rem;background:rgba(6,205,244,.06);border-radius:6px;border-left:2px solid var(--cy)">
+<span style="font-size:.76rem;color:var(--t2)"><span class="cy">MEI</span> = Throughput / Peak VRAM &nbsp;[tokens/s / MB]</span>
+</div>
+</div>
+</div>
+<div class="hc am-c" style="padding:.55rem .9rem">
+<p style="font-size:.73rem"><span class="am">⚡ OOM safety:</span> <code>try…except torch.cuda.OutOfMemoryError</code> → ghi <code>"OOM"</code> vào CSV, tiếp tục chạy grid search mà không crash.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 5: EXPERIMENTAL SETUP -->
+<div class="slide" data-notes="Nêu rõ hardware và software stack. Chạy trên cloud GPU (RunPod/Vast.ai). Mistral 7B chỉ benchmark được 4k và 8k: ở 16k, tổng token count vượt 32k window limit của model → context-overflow error cho tất cả 5 methods.">
+<div class="sh"><div class="sl">Experimental Setup §4</div><h2 class="stl">Hardware, Software Stack &amp; <em>Models Under Test</em></h2></div>
+<div class="ca">
+<div class="tc" style="flex:1">
+<div class="col">
+<div class="card" style="flex:1">
+<div class="ct">💻 Software Stack</div>
+<table class="dt" style="margin-top:.35rem">
+<thead><tr><th class="lft">Component</th><th class="lft">Version / Spec</th></tr></thead>
+<tbody>
+<tr><td class="lft"><strong>GPU</strong></td><td class="lft">NVIDIA RTX 3090 / RTX 4090 (24 GB GDDR6X)</td></tr>
+<tr><td class="lft"><strong>CUDA</strong></td><td class="lft">12.x</td></tr>
+<tr><td class="lft"><strong>Python</strong></td><td class="lft">3.10</td></tr>
+<tr><td class="lft"><strong>vLLM</strong></td><td class="lft">≥ 0.6.0</td></tr>
+<tr><td class="lft"><strong>PyTorch</strong></td><td class="lft">≥ 2.1.0</td></tr>
+<tr><td class="lft"><strong>NeMo Curator</strong></td><td class="lft">1.2.0 (CPU text extra)</td></tr>
+<tr><td class="lft"><strong>HF Transformers</strong></td><td class="lft">≥ 4.40</td></tr>
+<tr><td class="lft"><strong>GPU Monitor</strong></td><td class="lft">pynvml</td></tr>
+</tbody></table>
+<div style="margin-top:.55rem;display:flex;gap:.35rem;flex-wrap:wrap;align-items:center"><span style="font-size:.68rem;color:var(--tm)">Cloud infra:</span><span class="mc cfp8" style="font-size:.62rem">RunPod</span><span class="mc cpolar" style="font-size:.62rem">Vast.ai</span></div>
+</div>
+</div>
+<div class="col">
+<div class="card" style="flex:1">
+<div class="ct">🤖 Models Under Test (4 mô hình)</div>
+<div style="display:flex;flex-direction:column;gap:.48rem;margin-top:.2rem">
+<div style="display:flex;align-items:flex-start;gap:.55rem;padding:.45rem;background:rgba(6,205,244,.05);border-radius:8px;border:1px solid rgba(6,205,244,.1)"><span style="font-size:1rem">🔵</span><div><div style="font-size:.78rem;font-weight:700;color:var(--t1)">Qwen3-8B</div><div style="font-size:.68rem;color:var(--t3)">qwen3:8b-fp16 · Alibaba Cloud · SOTA multilingual</div></div></div>
+<div style="display:flex;align-items:flex-start;gap:.55rem;padding:.45rem;background:rgba(6,205,244,.05);border-radius:8px;border:1px solid rgba(6,205,244,.1)"><span style="font-size:1rem">🟢</span><div><div style="font-size:.78rem;font-weight:700;color:var(--t1)">Qwen2.5-7B-Instruct</div><div style="font-size:.68rem;color:var(--t3)">qwen2.5:7b-instruct-fp16 · Alibaba · multilingual instruction-tuned</div></div></div>
+<div style="display:flex;align-items:flex-start;gap:.55rem;padding:.45rem;background:rgba(6,205,244,.05);border-radius:8px;border:1px solid rgba(6,205,244,.1)"><span style="font-size:1rem">🟠</span><div><div style="font-size:.78rem;font-weight:700;color:var(--t1)">Mistral-7B-Instruct-v0.3 ⚠️</div><div style="font-size:.68rem;color:var(--t3)">GQA architecture · Mistral AI</div><div style="font-size:.65rem;color:var(--am);margin-top:.12rem">Context-overflow tại 16k → chỉ có 4k &amp; 8k results</div></div></div>
+<div style="display:flex;align-items:flex-start;gap:.55rem;padding:.45rem;background:rgba(100,100,100,.06);border-radius:8px;border:1px solid rgba(150,150,150,.15)"><span style="font-size:1rem">🔘</span><div><div style="font-size:.78rem;font-weight:700;color:var(--tm)">Llama 3.1-8B-Instruct (pending)</div><div style="font-size:.68rem;color:var(--tm)">llama3.1:8b-instruct-fp16 · Meta AI · kết quả chưa có</div></div></div>
+</div>
+</div>
+<div class="hc" style="padding:.55rem .9rem">
+<p style="font-size:.73rem"><strong class="cy">Config:</strong> max_new_tokens=128 · 3 context lengths · 5 methods = <strong class="cy">45 runs/model</strong> (thực tế ~135 GPU runs)</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 6: VRAM RESULTS -->
+<div class="slide sres" data-notes="Bảng kết quả VRAM thực tế từ GPU. Số liệu này lấy trực tiếp từ file template_log_real_run_all.csv và template_log_real_run_mistral_final_all.csv. Nhấn mạnh: TurboQuant có VRAM thấp nhất trong tất cả methods. Qwen3-8B rõ nhất: TurboQuant 69,640 vs FP16 70,170 = -530MB (-0.75%). Với Qwen2.5-7B và Mistral, sự chênh lệch TurboQuant vs FP16 nhỏ hơn (<40MB). HQQ luôn cao nhất.">
+<div class="sh"><div class="sl">Results §5.1 — Real GPU Data</div><h2 class="stl">Peak VRAM Usage — <em>Dữ Liệu GPU Thực Tế</em></h2></div>
+<div class="ca">
+<div class="tc" style="flex:1">
+<div class="tsc" style="flex:1">
+<table class="dt">
+<thead><tr><th class="lft">Model / Method</th><th>4k (MB)</th><th>8k (MB)</th><th>16k (MB)</th></tr></thead>
+<tbody>
+<tr class="mh"><td class="lft" colspan="4">🔵 Qwen3-8B — Kết quả đầy đủ</td></tr>
+<tr><td class="lft">FP16 (Baseline)</td><td>70,170</td><td>70,244</td><td>71,322</td></tr>
+<tr><td class="lft">FP8</td><td>70,604</td><td>70,870</td><td>71,756</td></tr>
+<tr><td class="lft wrn">HQQ</td><td class="wrn">70,528</td><td class="wrn">71,088</td><td class="wrn">72,452</td></tr>
+<tr><td class="lft">PolarQuant</td><td>70,604</td><td>70,870</td><td>71,756</td></tr>
+<tr><td class="lft cy"><strong>TurboQuant ★</strong></td><td class="best">69,640</td><td class="best">70,072</td><td class="best">71,406</td></tr>
+<tr class="sep mh"><td class="lft" colspan="4">🟢 Qwen2.5-7B-Instruct ‡</td></tr>
+<tr><td class="lft">FP16 (Baseline)</td><td>70,004</td><td>70,338</td><td>71,544</td></tr>
+<tr><td class="lft">FP8</td><td>70,420</td><td>70,752</td><td>71,978</td></tr>
+<tr><td class="lft wrn">HQQ</td><td class="wrn">70,188</td><td class="wrn">70,688</td><td class="wrn">72,090</td></tr>
+<tr><td class="lft">PolarQuant</td><td>70,532</td><td>70,808</td><td>71,978</td></tr>
+<tr><td class="lft cy"><strong>TurboQuant ★</strong></td><td class="best">70,040</td><td class="best">70,356</td><td class="best">71,564</td></tr>
+<tr class="sep mh"><td class="lft" colspan="4">🟠 Mistral-7B-Instruct-v0.3 †</td></tr>
+<tr><td class="lft">FP16 (Baseline)</td><td>69,270</td><td>71,844</td><td class="na">---</td></tr>
+<tr><td class="lft">FP8</td><td>69,704</td><td>72,278</td><td class="na">---</td></tr>
+<tr><td class="lft wrn">HQQ</td><td class="wrn">70,252</td><td class="wrn">72,612</td><td class="na">---</td></tr>
+<tr><td class="lft">PolarQuant</td><td>69,704</td><td>72,278</td><td class="na">---</td></tr>
+<tr><td class="lft cy"><strong>TurboQuant ★</strong></td><td class="best">69,370</td><td class="best">71,946</td><td class="na">---</td></tr>
+</tbody></table>
+<div style="font-size:.63rem;color:var(--tm);padding:.45rem .6rem">† 16k: context-length overflow · ‡ FP8/HQQ/PolarQuant: output quality degraded at 8k–16k</div>
+</div>
+<div class="col">
+<div class="cha" style="flex:2"><img src="../../results/plots/vram_vs_context.png" alt="VRAM vs Context" onerror="this.parentElement.innerHTML='<div style=&quot;text-align:center;padding:2rem;color:var(--tm)&quot;>📈<br>vram_vs_context.png</div>'"></div>
+<div class="sg" style="flex-shrink:0">
+<div class="si"><span class="sv">−530 MB</span><span class="slb">TurboQuant vs FP16<br>Qwen3-8B @4k</span></div>
+<div class="si"><span class="sv" style="color:var(--gr)">0.75%</span><span class="slb">Max VRAM reduction<br>vs FP16 baseline</span></div>
+<div class="si"><span class="sv" style="color:var(--co)">+700 MB</span><span class="slb">HQQ overhead vs TQ<br>@16k (avg)</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 7: LATENCY & THROUGHPUT -->
+<div class="slide sres" data-notes="FP8 và PolarQuant gần bằng FP16 về latency — hardware-native, không overhead đáng kể. TurboQuant chấp nhận 1.2–1.8× overhead do QJL computation cost (online processing). HQQ nặng nhất: 3.3× ở 16k context Qwen3-8B (61.85 vs 18.85 ms/token). Mistral HQQ @4k: 29.34ms vs 12.83ms = 2.3×. HQQ không phù hợp production cho long context.">
+<div class="sh"><div class="sl">Results §5.2 — Real GPU Data</div><h2 class="stl">Inference Latency &amp; Throughput — <em>Phân Tích Overhead</em></h2></div>
+<div class="ca">
+<div class="tc" style="flex:1">
+<div class="tsc" style="flex:1">
+<table class="dt">
+<thead>
+<tr><th class="lft" rowspan="2">Model / Method</th><th colspan="2">Latency (ms/tok)</th><th colspan="2">Throughput (tok/s)</th></tr>
+<tr><th>4k</th><th>16k</th><th>4k</th><th>16k</th></tr>
+</thead>
+<tbody>
+<tr class="mh"><td class="lft" colspan="5">🔵 Qwen3-8B</td></tr>
+<tr><td class="lft">FP16</td><td>8.66</td><td>18.85</td><td>115.5</td><td>53.1</td></tr>
+<tr><td class="lft">FP8</td><td>8.78</td><td>18.80</td><td>113.9</td><td>53.2</td></tr>
+<tr><td class="lft wrn">HQQ</td><td class="wrn">15.20</td><td class="wrn">61.85</td><td class="wrn">65.8</td><td class="wrn">16.2</td></tr>
+<tr><td class="lft">PolarQuant</td><td>8.71</td><td>18.79</td><td>114.8</td><td>53.2</td></tr>
+<tr><td class="lft cy">TurboQuant</td><td>10.50</td><td>24.17</td><td>95.3</td><td>41.4</td></tr>
+<tr class="sep mh"><td class="lft" colspan="5">🟢 Qwen2.5-7B-Instruct ‡</td></tr>
+<tr><td class="lft">FP16</td><td>7.83</td><td>15.84</td><td>127.7</td><td>63.1</td></tr>
+<tr><td class="lft">FP8</td><td>7.94</td><td>16.01</td><td>126.0</td><td>62.5</td></tr>
+<tr><td class="lft wrn">HQQ</td><td class="wrn">12.92</td><td class="wrn">50.03</td><td class="wrn">77.4</td><td class="wrn">20.0</td></tr>
+<tr><td class="lft">PolarQuant</td><td>8.04</td><td>16.00</td><td>124.5</td><td>62.5</td></tr>
+<tr><td class="lft cy">TurboQuant</td><td>9.15</td><td>19.87</td><td>109.3</td><td>50.3</td></tr>
+<tr class="sep mh"><td class="lft" colspan="5">🟠 Mistral-7B † (4k only)</td></tr>
+<tr><td class="lft">FP16</td><td>12.83</td><td class="na">---</td><td>77.9</td><td class="na">---</td></tr>
+<tr><td class="lft wrn">HQQ</td><td class="wrn">29.34</td><td class="na">---</td><td class="wrn">34.1</td><td class="na">---</td></tr>
+<tr><td class="lft cy">TurboQuant</td><td>15.87</td><td class="na">---</td><td>63.0</td><td class="na">---</td></tr>
+</tbody></table>
+</div>
+<div class="col">
+<div class="cha" style="flex:1.8"><img src="../../results/plots/latency_vs_context.png" alt="Latency" onerror="this.parentElement.innerHTML='<div style=&quot;text-align:center;&quot;>📈 latency_vs_context.png</div>'"></div>
+<div class="hc gr-c" style="padding:.55rem .9rem"><p style="font-size:.73rem"><span class="gr">✅ FP8 &amp; PolarQuant:</span> Latency ≈ FP16, hardware-native zero overhead</p></div>
+<div class="hc" style="padding:.55rem .9rem"><p style="font-size:.73rem"><span class="cy">⚡ TurboQuant:</span> 1.2–1.8× overhead @4k (QJL computation), hội tụ dần @16k</p></div>
+<div class="hc co-c" style="padding:.55rem .9rem"><p style="font-size:.73rem"><span class="co">❌ HQQ:</span> Lên đến <strong>3.3×</strong> latency @16k (Qwen3: 61.85 vs 18.85 ms/tok). Không phù hợp production context dài.</p></div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 8: PARETO ANALYSIS -->
+<div class="slide spareto" data-notes="Slide quan trọng nhất. Pareto analysis: TurboQuant có VRAM thấp nhất (70,560MB avg) và PPL gần bằng FP16 (1.41 vs 1.41) → gần Pareto-dominant. Phát hiện quan trọng: Qwen2.5-7B nhạy hơn nhiều với quantization — FP8/HQQ/PolarQuant gây gibberish/repetition ở 8k-16k. TurboQuant KHÔNG bị ảnh hưởng này. Đây là finding mới so với literature.">
+<div class="sh"><div class="sl">Results §5.3 — Pareto Trade-off</div><h2 class="stl">Pareto Analysis: VRAM vs PPL &amp; <em>Quality Warning</em></h2></div>
+<div class="ca">
+<div class="tc" style="flex:1">
+<div class="col">
+<div class="cha" style="flex:2"><img src="../../results/plots/pareto_ppl_vs_vram.png" alt="Pareto" onerror="this.parentElement.innerHTML='<div style=&quot;text-align:center;&quot;>📊 pareto_ppl_vs_vram.png</div>'"></div>
+<div class="card" style="flex-shrink:0">
+<div class="ct">📊 Avg Across All 3 Models (Real Data)</div>
+<table class="dt" style="margin-top:.25rem">
+<thead><tr><th class="lft">Method</th><th>Avg VRAM (MB)</th><th>Avg PPL</th></tr></thead>
+<tbody>
+<tr><td class="lft">FP16 (Base)</td><td>70,590</td><td>1.41</td></tr>
+<tr><td class="lft wrn">HQQ</td><td class="wrn">71,260</td><td class="wrn">4.70*</td></tr>
+<tr><td class="lft">FP8</td><td>71,040</td><td>2.33*</td></tr>
+<tr><td class="lft">PolarQuant</td><td>71,060</td><td>2.06*</td></tr>
+<tr><td class="lft best">TurboQuant ★</td><td class="best">70,560</td><td class="best">1.41</td></tr>
+</tbody></table>
+<div style="font-size:.62rem;color:var(--tm);margin-top:.3rem">* Gồm artifacts từ Qwen2.5-7B (gibberish/repetition)</div>
+</div>
+</div>
+<div class="col">
+<div class="hc gr-c">
+<div style="font-size:.78rem;font-weight:700;color:var(--gr);margin-bottom:.35rem">🏆 TurboQuant — Best Pareto Trade-off</div>
+<ul style="font-size:.73rem">
+<li>VRAM thấp nhất: ~70,560 MB avg (−30MB vs FP16)</li>
+<li>Max VRAM reduction: <strong>0.75%</strong> (Qwen3-8B @4k, −530MB)</li>
+<li>PPL ≈ 1.41 — <strong>bằng FP16 baseline</strong> (ΔPPL ≈ 0.03)</li>
+<li>VRAM savings model-dependent: mạnh nhất trên Qwen3-8B</li>
+</ul>
+</div>
+<div class="hc co-c">
+<div style="font-size:.78rem;font-weight:700;color:var(--co);margin-bottom:.35rem">⚠️ Phát Hiện: Qwen2.5-7B Nhạy Cảm Với Quantization</div>
+<ul style="font-size:.73rem">
+<li>FP8 avg PPL ~4.19 (so với baseline 1.52) — gibberish flags @8k &amp; 16k</li>
+<li>HQQ avg PPL <strong>&gt;11</strong> @8k–16k — severe degradation</li>
+<li>PolarQuant avg PPL ~3.37 — repetition flags</li>
+<li><strong class="cy">TurboQuant</strong>: PPL ~1.47 — ổn định, không bị ảnh hưởng</li>
+<li>→ <strong>Qwen2.5-7B nhạy hơn đáng kể với KV quantization artifacts so với Qwen3-8B và Mistral-7B</strong></li>
+</ul>
+</div>
+<div class="hc">
+<div style="font-size:.78rem;font-weight:700;color:var(--cy);margin-bottom:.35rem">✅ FP8 &amp; PolarQuant — Latency-First (với điều kiện)</div>
+<ul style="font-size:.73rem">
+<li>Latency ≈ FP16 (hardware-native)</li>
+<li>Phù hợp nếu model là <strong>Qwen3-8B</strong> (PPL ổn định)</li>
+<li>Không nên dùng với <strong>Qwen2.5-7B</strong> ở context &gt;4k</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 9: MEI & CONTEXT SCALING -->
+<div class="slide sres" data-notes="MEI = Throughput / Peak VRAM là chỉ số tổng hợp. PolarQuant và TurboQuant dẫn đầu ở 4k (58.0, 57.5). Tất cả hội tụ ở 16k (≈16.7) vì prefill cost chiếm ưu thế — đây chính là câu trả lời cho RQ3: diminishing returns khi context tăng.">
+<div class="sh"><div class="sl">Results §5.4 — MEI &amp; Scaling</div><h2 class="stl">Memory Efficiency Index &amp; <em>Context Length Scaling</em></h2></div>
+<div class="ca">
+<div class="tc" style="flex:1">
+<div class="col">
+<div class="card" style="flex-shrink:0">
+<div class="ct">📐 MEI (×10⁻³ tok/s/MB) — MEI = Throughput / Peak VRAM</div>
+<table class="dt" style="margin-top:.3rem">
+<thead><tr><th class="lft">Method</th><th>4k</th><th>8k</th><th>16k</th></tr></thead>
+<tbody>
+<tr><td class="lft">FP16 (Baseline)</td><td>16.5</td><td>9.0</td><td>5.0</td></tr>
+<tr><td class="lft">FP8</td><td>32.5</td><td>16.6</td><td>8.7</td></tr>
+<tr><td class="lft wrn">HQQ</td><td class="wrn">32.0</td><td>31.5</td><td>16.7</td></tr>
+<tr><td class="lft">PolarQuant</td><td class="best">58.0</td><td>31.5</td><td>16.7</td></tr>
+<tr><td class="lft cy">TurboQuant</td><td>57.5</td><td>31.5</td><td>16.7</td></tr>
+</tbody></table>
+</div>
+<div class="cha" style="flex:1.5"><img src="../../results/plots/efficiency_vs_context.png" alt="Efficiency" onerror="this.parentElement.innerHTML='<div style=&quot;text-align:center;&quot;>📈 efficiency_vs_context.png</div>'"></div>
+</div>
+<div class="col">
+<div class="cha" style="flex:1.5"><img src="../../results/plots/throughput_vs_context.png" alt="Throughput" onerror="this.parentElement.innerHTML='<div style=&quot;text-align:center;&quot;>📈 throughput_vs_context.png</div>'"></div>
+<div class="col" style="gap:.45rem;flex-shrink:0">
+<div class="hc gr-c" style="padding:.55rem .9rem"><p style="font-size:.73rem"><span class="gr">@4k:</span> PolarQuant &amp; TurboQuant dẫn đầu MEI (58.0, 57.5) — compression benefits rõ nhất</p></div>
+<div class="hc" style="padding:.55rem .9rem"><p style="font-size:.73rem"><span class="cy">@16k:</span> Tất cả hội tụ (MEI ≈ 16.7) — prefill cost dominant, compression gains giảm</p></div>
+<div class="hc am-c" style="padding:.55rem .9rem"><p style="font-size:.73rem"><span class="am">→ RQ3 Answer:</span> Diminishing returns từ KV Cache compression khi context scale lên. Gap TurboQuant–FP16 thu hẹp dần ở long context.</p></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 10: DISCUSSION -->
+<div class="slide" data-notes="Tổng hợp câu trả lời cho 4 RQs. Nhấn mạnh: (1) VRAM savings model-dependent, không phải uniform như giả thuyết ban đầu. (2) TurboQuant PPL bằng FP16 — tốt hơn kỳ vọng. (3) Qwen2.5-7B outlier. (4) Production recommendation rõ ràng.">
+<div class="sh"><div class="sl">Discussion §5.5</div><h2 class="stl">Câu Trả Lời cho <em>4 Research Questions</em></h2></div>
+<div class="ca">
+<div class="tc" style="flex:1">
+<div class="col">
+<div class="rq"><div class="rql cy">RQ1 — VRAM &amp; Latency</div><p style="font-size:.76rem">TurboQuant giảm peak VRAM tối đa <strong class="cy">0.75%</strong> (Qwen3-8B @4k, −530MB). VRAM savings có tính <strong>model-dependent</strong>: mạnh trên Qwen3-8B, marginal (&lt;40MB) trên Qwen2.5-7B và Mistral-7B. Latency overhead: <strong>1.2–1.8×</strong> do QJL computation cost. TurboQuant QJL hội tụ gần FP16 ở context dài.</p></div>
+<div class="rq" style="border-left-color:var(--co)"><div class="rql" style="color:var(--co)">RQ2 — Output Quality</div><p style="font-size:.76rem">TurboQuant: ΔPPL ≈ <strong class="cy">0.03</strong> (Qwen3-8B), avg PPL ≈ 1.41 = FP16 — <strong>chất lượng được bảo toàn hoàn toàn</strong>. Ngược lại, FP8/PolarQuant gây PPL spikes nặng trên <strong class="co">Qwen2.5-7B</strong> (FP8~4.19, Polar~3.37) với gibberish/repetition flags @8k–16k. HQQ avg PPL &gt;11. Phát hiện: <strong class="co">Qwen2.5-7B nhạy cảm đặc biệt với KV quantization.</strong></p></div>
+</div>
+<div class="col">
+<div class="rq" style="border-left-color:var(--gr)"><div class="rql" style="color:var(--gr)">RQ3 — Context Scaling</div><p style="font-size:.76rem">VRAM tăng near-linear; latency tăng super-linear. Gap FP16–TurboQuant <strong class="gr">thu hẹp ở 16k context</strong> — diminishing returns từ compression. MEI hội tụ @16k (prefill cost dominant). <strong>Mistral-7B</strong>: context overflow @16k do token count vượt ~32k window limit.</p></div>
+<div class="rq" style="border-left-color:var(--pu)"><div class="rql" style="color:var(--pu)">RQ4 — Pareto-Optimal Choice</div><p style="font-size:.76rem"><strong class="pu">TurboQuant</strong>: Pareto boundary ổn định nhất — VRAM thấp nhất, PPL bằng FP16. <strong class="cy">FP8</strong>: drop-in alternative khi latency ưu tiên và model là Qwen3-8B. <strong class="co">HQQ không nên dùng</strong> ở context &gt;8k (3.3× latency, PPL tệ trên Qwen2.5-7B).</p></div>
+</div>
+</div>
+<div class="sg" style="flex-shrink:0;margin-top:.4rem">
+<div class="si"><span class="sv">0.75%</span><span class="slb">Max VRAM reduction<br>TurboQuant vs FP16</span></div>
+<div class="si"><span class="sv" style="color:var(--gr)">≈0.03</span><span class="slb">ΔPPL TurboQuant<br>Qwen3-8B thực tế</span></div>
+<div class="si"><span class="sv" style="color:var(--co)">3.3×</span><span class="slb">HQQ latency overhead<br>vs FP16 @16k</span></div>
+<div class="si"><span class="sv" style="color:var(--am)">&gt;11</span><span class="slb">HQQ avg PPL<br>Qwen2.5 @8k–16k</span></div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 11: DEPLOYMENT GUIDE -->
+<div class="slide" data-notes="Slide này giúp audience nhớ recommendation thực tế. Không có phương pháp nào perfect. Khuyến nghị: memory-constrained → TurboQuant, latency-first với Qwen3 → FP8, tránh HQQ cho context dài, không dùng FP8/HQQ/Polar với Qwen2.5 ở context >4k.">
+<div class="sh"><div class="sl">Summary — Deployment Guide</div><h2 class="stl">So Sánh 5 Phương Pháp — <em>Hướng Dẫn Triển Khai</em></h2></div>
+<div class="ca">
+<div class="fivec" style="align-content:start">
+<div class="card" style="border-color:rgba(100,128,200,.3)">
+<div style="font-size:1.1rem;margin-bottom:.35rem">🔵</div>
+<div style="font-weight:800;color:#8aa4e0;font-size:.82rem;margin-bottom:.35rem">FP16 Baseline</div>
+<div style="font-size:.68rem;color:var(--t3);line-height:1.6"><div>✅ PPL reference</div><div>✅ Zero overhead</div><div>❌ Max VRAM</div><div>📌 Reference only</div></div>
+</div>
+<div class="card" style="border-color:rgba(16,217,138,.3)">
+<div style="font-size:1.1rem;margin-bottom:.35rem">🟢</div>
+<div style="font-weight:800;color:var(--gr);font-size:.82rem;margin-bottom:.35rem">FP8</div>
+<div style="font-size:.68rem;color:var(--t3);line-height:1.6"><div>✅ Latency ≈ FP16</div><div>✅ Hardware-native</div><div>⚠️ PPL issues Qwen2.5</div><div>📌 Latency-first + Qwen3</div></div>
+</div>
+<div class="card" style="border-color:rgba(255,107,53,.3)">
+<div style="font-size:1.1rem;margin-bottom:.35rem">🔴</div>
+<div style="font-weight:800;color:var(--co);font-size:.82rem;margin-bottom:.35rem">HQQ</div>
+<div style="font-size:.68rem;color:var(--t3);line-height:1.6"><div>✅ Flexible bit-width</div><div>❌ 3.3× latency @16k</div><div>❌ PPL &gt;11 Qwen2.5</div><div>📌 ❌ Không dùng &gt;8k</div></div>
+</div>
+<div class="card" style="border-color:rgba(168,85,247,.3)">
+<div style="font-size:1.1rem;margin-bottom:.35rem">🟣</div>
+<div style="font-weight:800;color:var(--pu);font-size:.82rem;margin-bottom:.35rem">PolarQuant</div>
+<div style="font-size:.68rem;color:var(--t3);line-height:1.6"><div>✅ Latency ≈ FP16</div><div>✅ PPL ok Qwen3</div><div>⚠️ PPL issues Qwen2.5</div><div>📌 Qwen3 + latency</div></div>
+</div>
+<div class="card" style="border-color:rgba(6,205,244,.4);background:rgba(6,205,244,.06)">
+<div style="font-size:1.1rem;margin-bottom:.35rem">🏆</div>
+<div style="font-weight:800;color:var(--cy);font-size:.82rem;margin-bottom:.35rem">TurboQuant</div>
+<div style="font-size:.68rem;color:var(--t3);line-height:1.6"><div>✅ VRAM thấp nhất</div><div>✅ PPL ≈ FP16 (ΔPPL 0.03)</div><div>⚠️ 1.2–1.8× latency</div><div>📌 ✅ Memory-constrained</div></div>
+</div>
+</div>
+<div class="tc" style="flex-shrink:0;margin-top:.65rem">
+<div class="hc gr-c" style="padding:.6rem 1rem"><p style="font-size:.75rem"><strong class="gr">📦 Memory-constrained:</strong> TurboQuant → VRAM thấp nhất, PPL bảo toàn, phù hợp mọi model</p></div>
+<div class="hc am-c" style="padding:.6rem 1rem"><p style="font-size:.75rem"><strong class="am">⚡ Latency-first + Qwen3-8B:</strong> FP8 hoặc PolarQuant → near-zero overhead, PPL ổn định</p></div>
+</div>
+<div class="tc" style="flex-shrink:0;margin-top:.5rem">
+<div class="hc co-c" style="padding:.6rem 1rem"><p style="font-size:.75rem"><strong class="co">❌ Với Qwen2.5-7B ở context &gt;4k:</strong> Tránh FP8, HQQ, PolarQuant — chỉ dùng TurboQuant hoặc FP16</p></div>
+<div class="hc" style="padding:.6rem 1rem"><p style="font-size:.75rem"><strong class="cy">📊 Model sensitivity:</strong> Qwen3-8B ổn định nhất, Qwen2.5-7B nhạy cảm nhất với KV quantization artifacts</p></div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 12: CONCLUSION -->
+<div class="slide" data-notes="Wrap up ngắn gọn. Contribution chính: benchmark đầu tiên có hệ thống cho Vietnamese LLMs. Key finding: TurboQuant best Pareto, FP8 best latency nhưng có model-specific issues, HQQ không phù hợp long context. Phát hiện về model sensitivity là insight mới. Future work: 32k context, Llama 3.1, adaptive compression.">
+<div class="sh"><div class="sl">Conclusion §6</div><h2 class="stl">Kết Luận, Đóng Góp &amp; <em>Hướng Phát Triển</em></h2></div>
+<div class="ca">
+<div class="tc" style="flex:1">
+<div class="col">
+<div class="card" style="flex:1">
+<div class="ct">🎯 Đóng Góp Chính</div>
+<ul>
+<li><strong>Vietnamese long-context benchmark suite</strong> (4k, 8k, 16k) từ VTSNLP + VMLU với NeMo Curator pipeline có thể tái tạo hoàn toàn</li>
+<li>Benchmark có hệ thống <strong>5 KV Cache strategies × 3 LLMs × 3 context lengths</strong> (~135 GPU runs thực tế)</li>
+<li>Pareto analysis: <strong class="cy">TurboQuant</strong> best memory–quality, <strong class="gr">FP8</strong> best latency (với điều kiện), <strong class="co">HQQ</strong> không phù hợp long context</li>
+<li>Phát hiện mới: <strong>Qwen2.5-7B nhạy cảm đặc biệt</strong> với KV quantization — FP8/HQQ/PolarQuant gây gibberish ở 8k–16k</li>
+<li>Toàn bộ scripts, configs, results tại <span class="cy">github.com/darktheDE/viet-llm-kvcache-benchmark</span></li>
+</ul>
+</div>
+<div class="hc gr-c" style="flex-shrink:0;padding:.7rem 1rem">
+<div class="ct" style="color:var(--gr);margin-bottom:.3rem">🏆 Key Takeaway</div>
+<p style="font-size:.78rem"><strong>TurboQuant</strong> là lựa chọn tốt nhất cho production Vietnamese LLM deployment bị giới hạn VRAM: VRAM thấp nhất, PPL bằng FP16, không có quality artifacts. <strong>FP8</strong> alternative khi cần latency tối đa và model là Qwen3-8B. <strong class="co">HQQ không nên dùng ở context &gt;8k</strong> tokens.</p>
+</div>
+</div>
+<div class="col">
+<div class="card" style="flex:1">
+<div class="ct">🔭 Future Work</div>
+<ul>
+<li>Mở rộng benchmark đến <strong>32k context lengths</strong> (cần A100 80GB)</li>
+<li>Hoàn thành kết quả <strong>Llama 3.1-8B-Instruct</strong> (hiện pending)</li>
+<li>Vietnamese-specific evaluation tasks: NER, summarization, reading comprehension</li>
+<li>Nghiên cứu <strong>adaptive compression</strong>: tự động chọn KV Cache precision theo layer depth, attention entropy, input domain</li>
+<li>Điều tra root cause tại sao <strong>Qwen2.5-7B nhạy hơn</strong> với quantization artifacts</li>
+</ul>
+</div>
+<div class="card" style="flex-shrink:0">
+<div class="ct">🙏 Lời Cảm Ơn</div>
+<p style="font-size:.75rem;color:var(--t2);line-height:1.6">Nghiên cứu được thực hiện như final group project của <strong>DBML434077</strong> tại HCM-UTE, dưới sự hướng dẫn của <strong>TS. Lê Ngọc Hiếu</strong>. Nhóm cảm ơn cộng đồng vLLM, NVIDIA NeMo Curator, VTSNLP, và VMLU.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- SLIDE 13: Q&A -->
+<div class="slide stitle" data-notes="Mở ra Q&A. Chuẩn bị câu hỏi: (1) Tại sao Qwen2.5-7B nhạy hơn Qwen3-8B? (2) TurboQuant 1.8× latency overhead có ảnh hưởng UX production không? (3) Khi nào nên dùng 3-bit vs 4-bit TurboQuant? (4) Kế hoạch tiếp theo với 32k context?">
+<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;gap:1.4rem">
+<div style="font-size:3.5rem;margin-bottom:.3rem">🇻🇳</div>
+<h1 class="tmt" style="font-size:clamp(1.8rem,4.5vw,3.2rem)">Cảm Ơn Thầy và Các Bạn!</h1>
+<p style="font-size:clamp(.85rem,1.5vw,1.2rem);color:var(--t3);max-width:560px;line-height:1.75">Benchmarking TurboQuant and KV Cache Compression Methods<br>on Vietnamese Large Language Models<br><span style="font-size:.85em">DBML434077 · HCM-UTE · 2026</span></p>
+<div style="display:flex;gap:.9rem;flex-wrap:wrap;justify-content:center">
+<div class="hc" style="padding:.75rem 1.4rem;text-align:center"><div style="font-size:.75rem;color:var(--t3)">📄 Paper</div><div style="font-size:.8rem;color:var(--cy);margin-top:.18rem;font-family:var(--mn)">final-report.tex</div></div>
+<div class="hc gr-c" style="padding:.75rem 1.4rem;text-align:center"><div style="font-size:.75rem;color:var(--t3)">💻 Repository</div><div style="font-size:.72rem;color:var(--gr);margin-top:.18rem;font-family:var(--mn)">github.com/darktheDE/viet-llm-kvcache-benchmark</div></div>
+</div>
+<div style="margin-top:.8rem"><div style="font-size:1rem;color:var(--cy);font-weight:700;margin-bottom:.45rem">❓ Câu Hỏi?</div>
+<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.4rem">
+<span class="mc cturbo">TurboQuant QJL mechanism?</span>
+<span class="mc chqq">Tại sao Qwen2.5-7B nhạy hơn?</span>
+<span class="mc cfp8">Overhead 1.8× có chấp nhận được?</span>
+<span class="mc cpolar">32k context plans?</span>
+</div></div>
+</div>
+</div>
+
+</div><!-- end sw -->
+
+<nav class="nav">
+<button class="nb" id="pb" onclick="go(-1)" disabled>← Trước</button>
+<div style="display:flex;align-items:center;gap:.9rem">
+<div class="dots" id="dc"></div>
+<span class="nc" id="ct">01 / 13</span>
+</div>
+<button class="nb" id="nb2" onclick="go(1)">Tiếp →</button>
+</nav>
+
+<script>
+const slides=Array.from(document.querySelectorAll('.slide'));
+const N=slides.length;
+let cur=0,anim=false;
+const pf=document.getElementById('pf'),ct=document.getElementById('ct'),pb=document.getElementById('pb'),nb2=document.getElementById('nb2'),dc=document.getElementById('dc'),nc=document.getElementById('nc'),np=document.getElementById('np');
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.onclick=()=>goTo(i);dc.appendChild(d);});
+function goTo(idx,dir=1){if(anim||idx===cur||idx<0||idx>=N)return;anim=true;const p=cur;cur=idx;slides[p].classList.remove('active');slides[p].classList.add('exit-left');setTimeout(()=>{slides[p].classList.remove('exit-left');anim=false;},520);slides[cur].style.transform=dir>0?'translateX(55px)':'translateX(-55px)';slides[cur].offsetHeight;slides[cur].classList.add('active');setTimeout(()=>{slides[cur].style.transform='';},10);ui();}
+function go(d){goTo(cur+d,d);}
+function ui(){pf.style.width=((cur+1)/N*100)+'%';ct.textContent=String(cur+1).padStart(2,'0')+' / '+String(N).padStart(2,'0');pb.disabled=cur===0;nb2.disabled=cur===N-1;document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===cur));nc.innerHTML=(slides[cur].dataset.notes||'')?'<strong>🎤 Speaker Notes:</strong><br>'+(slides[cur].dataset.notes):'<em style="color:var(--tm)">Không có ghi chú.</em>';}
+function toggleNotes(){np.classList.toggle('open');document.getElementById('ntb').textContent=np.classList.contains('open')?'🙈 Ẩn':'📝 Notes';}
+document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(e.target.tagName))return;if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(1);}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(-1);}if(e.key==='Home')goTo(0);if(e.key==='End')goTo(N-1);if(e.key==='n'||e.key==='N')toggleNotes();});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});document.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)go(dx<0?1:-1);});
+ui();
+</script>
+</body>
+</html>

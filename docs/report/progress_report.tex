@@ -1,0 +1,104 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{array}
+
+\geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+
+\title{\textbf{Báo Cáo Tiến Độ Dự Án \\ Benchmarking TurboQuant and KV Cache Compression Methods on Vietnamese LLMs}}
+\author{\textbf{Nhóm 1} \\ Môn học: Ứng dụng Dữ liệu lớn: Học máy ở quy mô lớn (DBML434077)}
+\date{Ngày 29 tháng 06 năm 2026}
+
+\begin{document}
+
+\maketitle
+
+\hrule
+\vspace{0.5cm}
+
+\section{Tóm Tắt Trạng Thái Dự Án}
+Dự án nghiên cứu đánh giá hiệu năng của thuật toán \textbf{TurboQuant} và các phương pháp nén Key-Value (KV) Cache khác trên các mô hình ngôn ngữ lớn (LLM) hỗ trợ tiếng Việt đang đi đúng hướng theo lộ trình tổng thể. Nhóm đã thiết lập thành công hạ tầng kỹ thuật, làm sạch và đóng gói dữ liệu kiểm thử tiếng Việt, chạy thành công mốc baseline thực tế đầu tiên của mô hình PhoGPT-7B5 và xây dựng các script vẽ biểu đồ Pareto tự động.
+
+\section{Tiến Độ Thực Hiện Hiện Tại}
+Tiến độ dự án được tính toán dựa trên khối lượng công việc của 19 nhiệm vụ (tasks) được chia đều trong 4 giai đoạn Sprint (từ Sprint 1 đến Sprint 4):
+\begin{itemize}
+    \item \textbf{Sprint 1 (Weeks 1-2):} Hoàn thành 100\% (7/7 nhiệm vụ).
+    \item \textbf{Sprint 2 (Weeks 3-4):} Hoàn thành 75\% (2.5/4 nhiệm vụ). Thiết lập xong hệ thống benchmark GPU thật và LaTeX paper trên Overleaf. Chạy xong benchmark GPU thật cho mô hình PhoGPT-7B5.
+    \item \textbf{Sprint 3 (Weeks 5-6):} Hoàn thành 22.5\% (0.9/4 nhiệm vụ). Xây dựng xong script vẽ đồ thị Pareto và khởi động viết báo cáo.
+    \item \textbf{Sprint 4 (Week 7):} Chưa thực hiện (0/4 nhiệm vụ).
+\end{itemize}
+
+Dựa trên trọng số công việc, tổng tiến độ thực tế của dự án hiện đạt khoảng:
+\begin{equation*}
+    \text{Tiến độ tổng thể} \approx \mathbf{57\%} \text{ trên } 100\%
+\end{equation*}
+
+---
+
+\section{Chi Tiết Các Nhiệm Vụ Đã Hoàn Thành}
+
+\subsection{Sprint 1 (Giai đoạn Khởi động \& Chuẩn bị Dữ liệu)}
+\begin{itemize}[label=\checkmark]
+    \item \textbf{Task 1 (Management):} Thiết lập không gian làm việc chung (Shared Drive, GitHub, Plane.so Kanban) và tài liệu kickoff.
+    \item \textbf{Task 2 (Research):} Nghiên cứu cơ sở lý thuyết của TurboQuant so với PolarQuant và định nghĩa toán học nén KV Cache.
+    \item \textbf{Task 3 (Data):} Xây dựng pipeline tiền xử lý bằng NVIDIA NeMo Curator và đóng gói bộ test-set \texttt{test\_set\_small.json}.
+    \item \textbf{Task 4 (Tech):} Khởi tạo môi trường GPU Cloud, cài đặt vLLM, pynvml, PyTorch và chạy kiểm thử baseline BF16.
+    \item \textbf{Task 5 (Data - Bổ sung):} Cào và xử lý dữ liệu sách, báo chí thời sự nóng bằng NeMo Curator để trộn vào tập test-set.
+    \item \textbf{Task 6 (Tech - Bổ sung):} Cấu hình và biên dịch thành công các nhân CUDA/Triton cho TurboQuant và PolarQuant trên GPU.
+    \item \textbf{Task 7 (Management):} Hoàn thành và nộp báo cáo tiến độ Sprint 1 cho giảng viên hướng dẫn (ngày 24/06).
+\end{itemize}
+
+\subsection{Sprint 2 (Giai đoạn Xây dựng Pipeline \& Chạy Baseline)}
+\begin{itemize}[label=\checkmark]
+    \item \textbf{Task 1 (Tech):} Hoàn thiện script đo đạc tự động \texttt{run\_baseline.py} và bộ đo GPU thật \texttt{run\_real\_benchmark.py} hỗ trợ tự động ghi nhận Peak VRAM qua luồng chạy nền \texttt{pynvml} và tính toán Perplexity (PPL).
+    \item \textbf{Task 4 (Research):} Thiết lập dự án Overleaf LaTeX chuẩn IEEE và hoàn thành việc soạn thảo phần \textit{Methodology \& Experimental Setup}.
+    \item \textbf{Task 2 \& 3 (Tech \& Data - Hoàn thành một nửa):}
+    \begin{itemize}
+        \item Đã thực thi đo đạc GPU thật và tính toán PPL/EM/F1 cho mô hình \textbf{VinAI/PhoGPT-7B5-Instruct} thành công. Dữ liệu thực nghiệm của PhoGPT-7B5 đạt 2537 dòng kết quả ghi nhận đầy đủ tại \texttt{results/compiled\_results.csv}.
+    \end{itemize}
+\end{itemize}
+
+---
+
+\section{Kế Hoạch Thực Hiện Trong Tuần Này (29/06 - 05/07)}
+Nhóm đặt mục tiêu hoàn thành toàn bộ phần đo đạc thực tế của 4 mô hình còn lại và vẽ biểu đồ Pareto để chuẩn bị bước vào Sprint cuối cùng (hoàn thiện báo cáo, slide và paper).
+
+\begin{table}[h!]
+\centering
+\caption{Kế hoạch phân bổ công việc tuần này}
+\vspace{0.2cm}
+\begin{tabular}{p{3.5cm}p{3cm}p{8cm}}
+\toprule
+\textbf{Nhiệm vụ} & \textbf{Người phụ trách} & \textbf{Tiêu chí hoàn thành (DoD)} \\
+\midrule
+Chạy GPU benchmark thực tế cho 4 mô hình còn lại & Việt Anh, Quân, Khánh, Duy & Hoàn thành chạy quét lưới (Grid Search) trên 4 mô hình: Qwen2.5-7B, Llama-3.1-8B, URA-LLaMa-3-8B, Vistral-7B-Chat; lưu kết quả vào CSV. \\
+\midrule
+Tối ưu hóa VRAM \& Giải quyết lỗi OOM & Duy, Việt Anh & Cấu hình giảm \texttt{max\_num\_seqs} hoặc \texttt{block\_size} để các mốc mô hình lớn chạy thành công ở context 16K hoặc đánh dấu nhãn OOM chính xác. \\
+\midrule
+Tổng hợp kết quả \& Vẽ biểu đồ Pareto thật & Thạch, Phát, Huy & Compile toàn bộ CSV kết quả thật, chạy script \texttt{plot\_results.py} để kết xuất các biểu đồ so sánh Peak VRAM, Latency, Throughput và Pareto Quality. \\
+\midrule
+Hoàn thiện chương Phân tích \& Luận giải & Quốc Anh, Phú & Viết chương \textit{Results \& Discussion} và \textit{Conclusion} trên Overleaf dựa trên biểu đồ kết quả thật. \\
+\midrule
+Tổng hợp Bản thảo Báo cáo tiếng Việt v1 & Hưng, Quí & Gom nội dung từ các nhóm để hoàn thành bản thảo đầu tiên của Báo cáo cuối kỳ tiếng Việt ($\ge$ 20 trang). \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+---
+
+\section{Các Điểm Cần Làm Rõ}
+Để phối hợp tốt nhất với các nhóm chuyên môn, PM cần xác nhận và làm rõ 3 vấn đề sau:
+\begin{enumerate}
+    \item \textbf{Tài nguyên Cloud GPU:} Xác nhận trạng thái thuê hoặc khả dụng của server GPU RTX 3090/4090/L4 để phục vụ chạy benchmark liên tục cho 4 mô hình còn lại (ước tính thời gian chạy khoảng 5-10 tiếng).
+    \item \textbf{Cơ chế xử lý khi OOM:} Thống nhất việc đánh dấu nhãn \texttt{"OOM"} cho các cấu hình ngữ cảnh quá dài (như Qwen2.5-7B ở 16K context) thay vì bỏ trống hoặc dừng tiến trình.
+    \item \textbf{Liên kết tài liệu:} Các nhóm trưởng cung cấp link Overleaf chung và tài liệu Word chung để PM hỗ trợ đồng bộ hóa nội dung báo cáo.
+\end{enumerate}
+
+\end{document}
