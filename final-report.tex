@@ -30,23 +30,23 @@
 
 % ===== Authors =====
 \author{
-  Do Kien Hung,~
-  Phan Trong Qui,~
-  Ho Viet Anh,~
-  Pham Minh Quan,~
-  Tran Minh Khanh,\\
-  Nguyen Van Quang Duy,~
-  Nguyen Ho Phat~
-  Huynh Huu Huy,~
-  Huynh Ngoc Thach,\\
-  Nguyen Dang Quoc Anh,~
-  Phan Trong Phu
+  Nguyen Dang Quoc Anh\thanks{First Contributor},~
+  Do Kien Hung\thanks{Equal contribution},~
+  Phan Trong Qui\footnotemark[2],~
+  Ho Viet Anh\footnotemark[2],\\
+  Pham Minh Quan\footnotemark[2],~
+  Tran Minh Khanh\footnotemark[2],~
+  Nguyen Van Quang Duy\footnotemark[2],~
+  Nguyen Ho Phat\footnotemark[2],\\
+  Huynh Huu Huy\footnotemark[2],~
+  Huynh Ngoc Thach\footnotemark[2],~
+  Phan Trong Phu\footnotemark[2]
   \\[4pt]
   \small
   Ho Chi Minh City University of Technology and Engineering,
   Ho Chi Minh City, Vietnam\\[2pt]
   \small
-  Instructor: PhD..~Le Ngoc Hieu
+  Instructor: PhD.~Le Ngoc Hieu
 }
 
 \date{}
@@ -211,6 +211,18 @@ KV-CoRE~\cite{chen2026kvcore} further characterizes the
 data-dependent low-rank compressibility of KV caches,
 providing theoretical grounding for subsequent quantization approaches.
 
+Beyond virtual memory optimizations, several token eviction and pruning techniques
+have been proposed to reduce the spatial footprint of KV caches. For instance,
+Scissorhands~\cite{Liu2023Scissorhands} exploits the "persistence of importance"
+hypothesis, retaining only a small fraction of key-value tokens that are historically
+influential in self-attention scores.
+Similarly, SnapKV~\cite{Li2024SnapKV} and Ge et al.~\cite{Ge2023Model} utilize
+data-dependent heuristics to dynamically select and cluster essential historical tokens,
+significantly reducing the active KV Cache size with minimal quality loss.
+Furthermore, streaming-focused methods such as Attention Sinks~\cite{Xiao2023Efficient}
+demonstrate that retaining the initial tokens (the "sinks") and a local sliding window of
+recent tokens is sufficient to prevent perplexity explosion in infinite-length text generation.
+
 \subsection{Quantization of KV Cache}
 
 \noindent\textbf{FP8 Quantization}~\cite{micikevicius2022fp8}:
@@ -243,16 +255,37 @@ It achieves near-optimal distortion rate bounds and supports
 sub-4-bit precision targets (\texttt{turboquant\_4bit\_nc}
 and \texttt{turboquant\_3bit\_nc}).
 
+Other SOTA low-bit compression schemes focus on structural modifications
+or hardware-specific optimizations.
+For example, WKVQuant~\cite{Yue2024WKVQuant} co-quantizes model weights
+and the key-value cache to 4-bit, balancing mathematical error against execution speed.
+To push limits further, coupled channel-wise schemes like 1-Bit KV Cache~\cite{Zhang2024KV}
+couple key and value quantization parameters, achieving extreme compression ratios.
+Depth-wise compression is investigated in MiniCache~\cite{Liu2024MiniCache}, which compresses
+KV cache along the layer-dimension by exploiting token redundancy across adjacent blocks.
+At the systems level, GPU-Accelerated INT8 Quantization~\cite{Taneja2026GPUAccelerated}
+deploys highly vectorized CUDA kernels to accelerate dequantization routines, while
+FireQ~\cite{Baek2025FireQ} integrates INT4-FP8 mixed precision with RoPE-aware outlier smoothing.
+Finally, frameworks like GEAR~\cite{Kang2024GEAR} utilize low-rank matrix decomposition
+and quantization residual accumulation to achieve near-lossless 3-bit KV cache serving.
+
 \subsection{Vietnamese LLM Evaluation}
 
-VMLU~\cite{bui-etal-2025-vmlu} provides a comprehensive benchmark
-toolkit for evaluating Vietnamese LLMs across academic and general
-domains, including multiple-choice QA, reading comprehension,
-and factual retrieval tasks.
-However, VMLU focuses on task accuracy rather than hardware-efficiency
+Standardized evaluation of Vietnamese language models relies on multi-task
+benchmarks and specialized pre-trained models.
+PhoBERT~\cite{Nguyen2020PhoBERT} introduced the first high-performance
+bidirectional transformer model pre-trained specifically for Vietnamese,
+setting the baseline for lexical and syntactic parsing.
+Subsequently, multi-task benchmarks like VLUE~\cite{NguyenThuan2024VLUE}
+and ViGLUE~\cite{Tran2024ViGLUE} were introduced to evaluate model generalizability
+across a variety of Natural Language Understanding (NLU) tasks including QA,
+relation extraction, and sentiment analysis.
+More recently, VMLU~\cite{bui-etal-2025-vmlu} established a comprehensive
+evaluation benchmark suite specifically for Vietnamese Large Language Models.
+However, these benchmarks focus primarily on task accuracy rather than hardware-efficiency
 metrics.
-Our work complements VMLU by measuring perplexity and inference
-efficiency alongside task performance.
+Our work complements these evaluation suites by analyzing perplexity and
+inference-efficiency trade-offs under severe memory constraints.
 
 
 %========================
@@ -552,20 +585,10 @@ at 16k context---driven by weight dequantization in the attention path.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.45\textwidth]{results/plots/latency_vs_context.png}
-\caption{Inference latency (ms/token) vs.\ context length.
-HQQ degrades sharply at 16k tokens, whereas FP16, FP8, and PolarQuant
-remain nearly identical.}
-\label{fig:latency_ctx}
-\end{figure}
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.45\textwidth]{results/plots/throughput_vs_context.png}
-\caption{Decoding throughput (tokens/s) vs.\ context length.
-All methods show monotonically decreasing throughput as context grows;
-TurboQuant achieves an intermediate position between FP16 and HQQ.}
-\label{fig:throughput_ctx}
+\includegraphics[width=0.45\textwidth]{results/plots/performance_vs_context.png}
+\caption{Combined view: decoding throughput (left) and inter-token
+latency (right) for all five KV Cache methods across 4k, 8k, and 16k tokens.}
+\label{fig:perf_ctx}
 \end{figure}
 
 \subsection{Pareto Trade-off Analysis}
@@ -578,7 +601,7 @@ Points closer to the lower-left corner are preferable
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.45\textwidth]{results/plots/pareto_ppl_vs_vram.png}
+\includegraphics[width=0.45\textwidth]{results/plots/perplexity_vs_vram_pareto.png}
 \caption{Pareto trade-off: Average Perplexity vs.\ Average Peak VRAM
 across all models and context lengths.
 TurboQuant occupies the lower-left Pareto-dominant region.}
@@ -639,13 +662,7 @@ PolarQuant and TurboQuant maintain $\approx25\%$ of FP16 KV memory usage.}
 \label{fig:eff_ctx}
 \end{figure}
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.45\textwidth]{results/plots/performance_vs_context.png}
-\caption{Combined view: decoding throughput (left) and inter-token
-latency (right) for all five KV Cache methods across 4k, 8k, and 16k tokens.}
-\label{fig:perf_ctx}
-\end{figure}
+
 
 \subsection{Discussion}
 
